@@ -40,6 +40,8 @@ python -m grove examples/fatorial.cj --ast      # só a AST
 python -m unittest                              # testes
 ```
 
+Sem instalar nada: [colab/grove.py](colab/grove.py) e [colab/exemplo_grove.py](colab/exemplo_grove.py) são o mesmo front-end (léxico + sintático) em arquivo único. Cole um em cada célula do [Google Colab](https://colab.research.google.com/) e rode: sai a tabela de tokens e a AST desenhada em árvore.
+
 ## Falas do jogo
 
 Ao rodar, o Grove toca um clipe do jogo: "MISSION PASSED" quando dá certo, "WASTED" em erro léxico, Big Smoke ("follow the damn train, CJ!") em erro sintático, CJ ("Ah shit, here we go again") em erro de execução. Os `.wav` não vêm no repositório; veja [assets/README.md](assets/README.md) para os nomes. Sem arquivo, fica em silêncio.
