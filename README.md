@@ -40,7 +40,9 @@ python -m grove examples/fatorial.cj --ast      # só a AST
 python -m unittest                              # testes
 ```
 
-Sem instalar nada: [colab/grove.py](colab/grove.py) e [colab/exemplo_grove.py](colab/exemplo_grove.py) são o mesmo front-end (léxico + sintático) em arquivo único. Cole um em cada célula do [Google Colab](https://colab.research.google.com/) e rode: sai a tabela de tokens e a AST desenhada em árvore.
+Sem instalar nada, direto no navegador: [![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/fernandomcrsilva/grove-language/blob/main/colab/grove.ipynb)
+
+O notebook tem o front-end (léxico + sintático) em duas células: a primeira é o compilador, a segunda roda um exemplo e mostra a tabela de tokens e a AST em árvore. É gerado a partir de [colab/grove.py](colab/grove.py) e [colab/exemplo_grove.py](colab/exemplo_grove.py).
 
 ## Falas do jogo
 
@@ -59,6 +61,6 @@ grove/__main__.py  linha de comando
 assets/            clipes .wav (não versionados)
 docs/              entregáveis: tabela de tokens, gramática, semântica, storyboard do pitch
 examples/          programas de exemplo (.cj)
-colab/             mesmo front-end em arquivo único (grove.py + exemplo_grove.py), para colar no Colab
+colab/             front-end em arquivo único + notebook do Colab (grove.ipynb, gerado por gerar_notebook.py)
 tests/             unittest
 ```
