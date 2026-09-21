@@ -11,8 +11,8 @@ class ParseError(Exception):
 
 
 NOMES = {  # como descrever cada token numa mensagem de erro
-    T.SEMI: "× (fim de instrução)", T.LBRACE: "△ (abre bloco)", T.RBRACE: "○ (fecha bloco)",
-    T.LPAREN: "L1", T.RPAREN: "R1", T.IDENT: "identificador", T.ASSIGN: "=",
+    T.SEMI: "; (fim de instrução)", T.LBRACE: "{ (abre bloco)", T.RBRACE: "} (fecha bloco)",
+    T.LPAREN: "(", T.RPAREN: ")", T.IDENT: "identificador", T.ASSIGN: "=",
 }
 
 

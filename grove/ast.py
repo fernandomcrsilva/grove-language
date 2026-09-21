@@ -20,14 +20,14 @@ class Var(Node):
 
 @dataclass
 class Unary(Node):
-    op: str        # "□" ou "-"
+    op: str        # "!" ou "-"
     operand: Node
 
 
 @dataclass
 class Binary(Node):
     left: Node
-    op: str        # "+", "-", "*", "/", "%", "==", "!=", "<", ">", "<=", ">=", "L2", "R2"
+    op: str        # "+", "-", "*", "/", "%", "==", "!=", "<", ">", "<=", ">=", "&&", "||"
     right: Node
 
 

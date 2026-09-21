@@ -5,13 +5,13 @@ from grove.tokens import TokenType as T
 
 FATORIAL = """\
 # fatorial de 5
-HESOYAM n = 5 ×
-HESOYAM r = 1 ×
-KANGAROO L1 n > 1 R1 △
-    r = r * n ×
-    n = n - 1 ×
-○
-HELLOLADIES r ×
+HESOYAM n = 5;
+HESOYAM r = 1;
+KANGAROO (n > 1) {
+    r = r * n;
+    n = n - 1;
+}
+HELLOLADIES r;
 """
 
 
@@ -39,26 +39,26 @@ class LexerTest(unittest.TestCase):
         self.assertEqual((toks[10].lexeme, toks[10].line, toks[10].col), ("KANGAROO", 4, 1))
 
     def test_literais(self):
-        toks = tokenize('HESOYAM s = "oi mundo" × HESOYAM b = FULLCLIP ×')
+        toks = tokenize('HESOYAM s = "oi mundo"; HESOYAM b = FULLCLIP;')
         self.assertEqual(toks[3].type, T.STRING)
         self.assertEqual(toks[3].value, "oi mundo")
         self.assertEqual(toks[8].type, T.TRUE)
         self.assertEqual(tokenize("42")[0].value, 42)
 
     def test_operadores_de_dois_caracteres(self):
-        self.assertEqual(self.types("== != <= >= L2 R2 □ %")[:-1],
+        self.assertEqual(self.types("== != <= >= && || ! %")[:-1],
                          [T.EQ, T.NE, T.LE, T.GE, T.AND, T.OR, T.NOT, T.MOD])
 
-    def test_alias_ascii(self):
-        self.assertEqual(self.types("{ } ; ! != x")[:-1],
-                         [T.LBRACE, T.RBRACE, T.SEMI, T.NOT, T.NE, T.IDENT])
+    def test_pontuacao(self):
+        self.assertEqual(self.types("{ } ; ( ) ! != x")[:-1],
+                         [T.LBRACE, T.RBRACE, T.SEMI, T.LPAREN, T.RPAREN, T.NOT, T.NE, T.IDENT])
 
     def test_comentario_e_ignorado(self):
         self.assertEqual(self.types("# so comentario\n"), [T.EOF])
 
     def test_caractere_invalido(self):
         with self.assertRaises(LexError) as cm:
-            tokenize("HESOYAM x = $ ×")
+            tokenize("HESOYAM x = $;")
         self.assertIn("linha 1", str(cm.exception))
         self.assertIn("'$'", str(cm.exception))
 

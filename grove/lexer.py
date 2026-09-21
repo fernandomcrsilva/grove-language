@@ -1,5 +1,5 @@
 """Análise léxica: texto-fonte → lista de Token."""
-from .tokens import BUTTONS, OPERATORS, WORDS, Token, TokenType
+from .tokens import OPERATORS, WORDS, Token, TokenType
 
 
 class LexError(Exception):
@@ -28,13 +28,9 @@ def tokenize(src: str) -> list[Token]:
         start_col = col
 
         two = src[i:i + 2]
-        if two in OPERATORS:  # antes dos botões: "!=" não é "!" + "="
+        if two in OPERATORS:  # antes dos de um: "!=" não é "!" + "="
             tokens.append(Token(OPERATORS[two], two, line, start_col))
             i, col = i + 2, col + 2
-            continue
-        if c in BUTTONS:
-            tokens.append(Token(BUTTONS[c], c, line, start_col))
-            i, col = i + 1, col + 1
             continue
         if c in OPERATORS:
             tokens.append(Token(OPERATORS[c], c, line, start_col))

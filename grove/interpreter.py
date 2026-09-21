@@ -124,18 +124,18 @@ class Interpreter:
 
     def eval_Unary(self, node):
         v = self.eval(node.operand)
-        if node.op == "□":
-            return not _bool(v, "□")
+        if node.op == "!":
+            return not _bool(v, "!")
         _int(v, 0, "-")
         return -v
 
     def eval_Binary(self, node):
         op = node.op
         # curto-circuito: só avalia a direita se precisar
-        if op == "L2":
-            return _bool(self.eval(node.left), "L2") and _bool(self.eval(node.right), "L2")
-        if op == "R2":
-            return _bool(self.eval(node.left), "R2") or _bool(self.eval(node.right), "R2")
+        if op == "&&":
+            return _bool(self.eval(node.left), "&&") and _bool(self.eval(node.right), "&&")
+        if op == "||":
+            return _bool(self.eval(node.left), "||") or _bool(self.eval(node.right), "||")
 
         a, b = self.eval(node.left), self.eval(node.right)
         if op == "==":

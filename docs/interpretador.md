@@ -8,26 +8,26 @@
 |---|---|---|
 | inteiro | `42`, `-3` | `+ - * / %`, comparações; `/` é divisão inteira |
 | string | `"texto"` | `+` (concatena), `==` `!=` |
-| booleano | `FULLCLIP`, `GHOSTTOWN` | `L2` `R2` `□`, `==` `!=` |
+| booleano | `FULLCLIP`, `GHOSTTOWN` | `!` `&&` `\|\|`, `==` `!=` |
 
 Não há conversão implícita. `1 + "a"` é erro. `HELLOLADIES` imprime booleanos como `FULLCLIP` / `GHOSTTOWN`.
 
 ## Escopo
 
-Cada `△ … ○` cria um escopo novo, encadeado ao pai. `HESOYAM` declara no escopo atual; atribuição sem `HESOYAM` procura a variável do escopo atual para fora e altera a primeira que encontrar. Ao sair do bloco o escopo é descartado.
+Cada `{ … }` cria um escopo novo, encadeado ao pai. `HESOYAM` declara no escopo atual; atribuição sem `HESOYAM` procura a variável do escopo atual para fora e altera a primeira que encontrar. Ao sair do bloco o escopo é descartado.
 
 ```
-HESOYAM x = 1 ×
-△ HESOYAM x = 2 × HELLOLADIES x × ○   # 2 (sombra)
-HELLOLADIES x ×                        # 1
-△ x = 9 × ○
-HELLOLADIES x ×                        # 9
+HESOYAM x = 1;
+{ HESOYAM x = 2; HELLOLADIES x; }   # 2 (sombra)
+HELLOLADIES x;                      # 1
+{ x = 9; }
+HELLOLADIES x;                      # 9
 ```
 
 ## Controle de fluxo
 
 - `TURNUPTHEHEAT` / `KANGAROO` exigem condição booleana; inteiro na condição é erro.
-- `L2` e `R2` fazem curto-circuito: o lado direito só é avaliado se necessário.
+- `&&` e `||` fazem curto-circuito: o lado direito só é avaliado se necessário.
 - `GOODBYECRUELWORLD` sai do `KANGAROO` mais interno. Implementado com uma exceção interna (`BreakSignal`) capturada pelo laço.
 
 ## Erros de execução

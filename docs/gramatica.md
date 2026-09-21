@@ -6,7 +6,7 @@ Notação EBNF. `{ x }` = zero ou mais, `[ x ]` = opcional, `|` = alternativa. T
 programa     = { declaracao } EOF ;
 
 declaracao   = varDecl | instrucao ;
-varDecl      = "HESOYAM" IDENT "=" expressao "×" ;
+varDecl      = "HESOYAM" IDENT "=" expressao ";" ;
 
 instrucao    = seStmt
              | enquantoStmt
@@ -15,43 +15,43 @@ instrucao    = seStmt
              | bloco
              | atribuicao ;
 
-seStmt       = "TURNUPTHEHEAT" "L1" expressao "R1" bloco
-             [ "BRINGITON" "L1" expressao "R1" bloco { "BRINGITON" "L1" expressao "R1" bloco } ]
+seStmt       = "TURNUPTHEHEAT" "(" expressao ")" bloco
+             [ "BRINGITON" "(" expressao ")" bloco { "BRINGITON" "(" expressao ")" bloco } ]
              [ "TURNDOWNTHEHEAT" bloco ] ;
-enquantoStmt = "KANGAROO" "L1" expressao "R1" bloco ;
-printStmt    = "HELLOLADIES" expressao "×" ;
-breakStmt    = "GOODBYECRUELWORLD" "×" ;
-bloco        = "△" { declaracao } "○" ;
-atribuicao   = IDENT "=" expressao "×" ;
+enquantoStmt = "KANGAROO" "(" expressao ")" bloco ;
+printStmt    = "HELLOLADIES" expressao ";" ;
+breakStmt    = "GOODBYECRUELWORLD" ";" ;
+bloco        = "{" { declaracao } "}" ;
+atribuicao   = IDENT "=" expressao ";" ;
 
 (* expressões, da menor para a maior precedência; todas associativas à esquerda *)
 expressao    = ou ;
-ou           = e { "R2" e } ;
-e            = igualdade { "L2" igualdade } ;
+ou           = e { "||" e } ;
+e            = igualdade { "&&" igualdade } ;
 igualdade    = comparacao { ( "==" | "!=" ) comparacao } ;
 comparacao   = termo { ( "<" | ">" | "<=" | ">=" ) termo } ;
 termo        = fator { ( "+" | "-" ) fator } ;
 fator        = unario { ( "*" | "/" | "%" ) unario } ;
-unario       = ( "□" | "-" ) unario | primario ;
+unario       = ( "!" | "-" ) unario | primario ;
 primario     = NUMBER | STRING | "FULLCLIP" | "GHOSTTOWN" | IDENT
-             | "L1" expressao "R1" ;
+             | "(" expressao ")" ;
 ```
 
 ## Precedência (da mais alta para a mais baixa)
 
-1. `L1 … R1` (agrupamento), literais, identificadores
-2. `□` `-` (unários, prefixo)
+1. `(…)` (agrupamento), literais, identificadores
+2. `!` `-` (unários, prefixo)
 3. `*` `/` `%`
 4. `+` `-`
 5. `<` `>` `<=` `>=`
 6. `==` `!=`
-7. `L2` (e)
-8. `R2` (ou)
+7. `&&` (e)
+8. `||` (ou)
 
 ## Propriedades
 
 - **LL(1)**: cada regra decide a alternativa olhando só o próximo token. O parser (`grove/parser.py`) é uma descida recursiva direta: um método por regra.
-- **Sem ambiguidade de else**: o bloco do `TURNUPTHEHEAT` é sempre delimitado por `△ … ○`, então o `TURNDOWNTHEHEAT` sempre pertence ao `TURNUPTHEHEAT` imediatamente anterior.
+- **Sem ambiguidade de else**: o bloco do `TURNUPTHEHEAT` é sempre delimitado por `{ … }`, então o `TURNDOWNTHEHEAT` sempre pertence ao `TURNUPTHEHEAT` imediatamente anterior.
 - **`BRINGITON` é açúcar**: `A BRINGITON B` gera a mesma AST que `A TURNDOWNTHEHEAT TURNUPTHEHEAT B` (um `If` aninhado em `orelse`). As duas formas são aceitas.
 - **Declaração vs. atribuição**: `HESOYAM x = …` cria a variável; `x = …` sem `HESOYAM` só atribui. A verificação de "variável já declarada" é semântica e fica para a próxima etapa.
 
@@ -79,7 +79,7 @@ Definidos em `grove/ast.py` como `dataclass`es:
 `ParseError` com linha, coluna, o que era esperado e o que foi encontrado:
 
 ```
-erro: linha 2, coluna 1: esperado × (fim de instrução), encontrado 'HELLOLADIES'
+erro: linha 2, coluna 1: esperado ; (fim de instrução), encontrado 'HELLOLADIES'
 ```
 
 ## Exemplo de AST
@@ -87,10 +87,10 @@ erro: linha 2, coluna 1: esperado × (fim de instrução), encontrado 'HELLOLADI
 Entrada:
 
 ```
-HESOYAM n = 5 ×
-KANGAROO L1 n > 1 R1 △
-    n = n - 1 ×
-○
+HESOYAM n = 5;
+KANGAROO (n > 1) {
+    n = n - 1;
+}
 ```
 
 Saída de `python -m grove arquivo.cj --ast`:
