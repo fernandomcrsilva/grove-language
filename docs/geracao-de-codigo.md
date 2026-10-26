@@ -116,29 +116,7 @@ while True:
 print("fim: ")
 ```
 
-### Montagem
-
-```
-GPIO 2 ──[ resistor 220 Ω ]──▶|── GND
-                         LED vermelho
-                     (perna longa no resistor)
-```
-
-Muitas placas ESP32 DevKit já têm um LED ligado ao GPIO 2. Para testar sem montar nada, basta não ligar o LED externo. Para outro pino, `--pino N`.
-
-### Gravar na placa
-
-Com o [MicroPython](https://micropython.org/download/ESP32_GENERIC/) já gravado no ESP32:
-
-```bash
-python -m grove examples/procurado.cj --esp32 > main.py
-pip install mpremote
-mpremote cp main.py :main.py     # copia para a placa
-mpremote reset                   # reinicia: main.py roda sozinho
-mpremote repl                    # (opcional) ver o HELLOLADIES na serial
-```
-
-No Thonny: abrir `main.py`, *Arquivo → Salvar como → Dispositivo MicroPython*, com o nome `main.py`.
+Montagem, lista de compras, gravação na placa, simulação no Wokwi e problemas comuns: [esp32.md](esp32.md).
 
 ### Como foi testado
 
