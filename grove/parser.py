@@ -10,6 +10,12 @@ class ParseError(Exception):
     pass
 
 
+def at(node, tok: Token):
+    """Grava no nó a posição do token; a análise semântica usa nas mensagens."""
+    node.line, node.col = tok.line, tok.col
+    return node
+
+
 NOMES = {  # como descrever cada token numa mensagem de erro
     T.SEMI: "; (fim de instrução)", T.LBRACE: "{ (abre bloco)", T.RBRACE: "} (fecha bloco)",
     T.LPAREN: "(", T.RPAREN: ")", T.IDENT: "identificador", T.ASSIGN: "=",
@@ -55,55 +61,56 @@ class Parser:
 
     def declaration(self):
         if self.match(T.VAR):
-            name = self.expect(T.IDENT).lexeme
+            name = self.expect(T.IDENT)
             self.expect(T.ASSIGN)
             value = self.expression()
             self.expect(T.SEMI)
-            return VarDecl(name, value)
+            return at(VarDecl(name.lexeme, value), name)
         return self.statement()
 
     def statement(self):
-        if self.match(T.IF):
-            return self.if_stmt()
-        if self.match(T.WHILE):
+        if (kw := self.match(T.IF)):
+            return self.if_stmt(kw)
+        if (kw := self.match(T.WHILE)):
             self.expect(T.LPAREN)
             cond = self.expression()
             self.expect(T.RPAREN)
-            return While(cond, self.block())
-        if self.match(T.PRINT):
+            return at(While(cond, self.block()), kw)
+        if (kw := self.match(T.PRINT)):
             value = self.expression()
             self.expect(T.SEMI)
-            return Print(value)
-        if self.match(T.BREAK):
+            return at(Print(value), kw)
+        if (kw := self.match(T.BREAK)):
             self.expect(T.SEMI)
-            return Break()
+            return at(Break(), kw)
         if self.check(T.LBRACE):
             return self.block()
-        name = self.expect(T.IDENT).lexeme
+        name = self.expect(T.IDENT)
         self.expect(T.ASSIGN)
         value = self.expression()
         self.expect(T.SEMI)
-        return Assign(name, value)
+        return at(Assign(name.lexeme, value), name)
 
-    def if_stmt(self) -> If:
+    def if_stmt(self, kw: Token) -> If:
         self.expect(T.LPAREN)
         cond = self.expression()
         self.expect(T.RPAREN)
         then = self.block()
         orelse = None
-        if self.match(T.ELIF):
-            orelse = self.if_stmt()
+        if (elif_ := self.match(T.ELIF)):
+            orelse = self.if_stmt(elif_)
         elif self.match(T.ELSE):
-            orelse = self.if_stmt() if self.match(T.IF) else self.block()
-        return If(cond, then, orelse)
+            if_ = self.match(T.IF)
+            orelse = self.if_stmt(if_) if if_ else self.block()
+        return at(If(cond, then, orelse), kw)
 
     def block(self) -> Block:
-        self.expect(T.LBRACE)
+        brace = self.expect(T.LBRACE)
         stmts = []
         while not self.check(T.RBRACE, T.EOF):
             stmts.append(self.declaration())
         self.expect(T.RBRACE)
-        return Block(stmts)
+        return at(Block(stmts), brace)
 
     # ---- expressões, da menor para a maior precedência ----
     def expression(self):
@@ -128,24 +135,24 @@ class Parser:
         """Regra genérica `operand { op operand }`, associativa à esquerda."""
         left = operand()
         while (op := self.match(*ops)):
-            left = Binary(left, op.lexeme, operand())
+            left = at(Binary(left, op.lexeme, operand()), op)
         return left
 
     def unary(self):
         if (op := self.match(T.NOT, T.MINUS)):
-            return Unary(op.lexeme, self.unary())
+            return at(Unary(op.lexeme, self.unary()), op)
         return self.primary()
 
     def primary(self):
         tok = self.advance()
         if tok.type is T.NUMBER or tok.type is T.STRING:
-            return Literal(tok.value)
+            return at(Literal(tok.value), tok)
         if tok.type is T.TRUE:
-            return Literal(True)
+            return at(Literal(True), tok)
         if tok.type is T.FALSE:
-            return Literal(False)
+            return at(Literal(False), tok)
         if tok.type is T.IDENT:
-            return Var(tok.lexeme)
+            return at(Var(tok.lexeme), tok)
         if tok.type is T.LPAREN:
             expr = self.expression()
             self.expect(T.RPAREN)
