@@ -45,7 +45,7 @@ def _procurado(n):
     time.sleep_ms(1500)  # tempo para ver cada nível
 
 """
-RESERVADOS_ESP32 = RESERVADOS | {"Pin", "Timer", "time", "_led", "_timer", "_procurado"}
+RESERVADOS_ESP32 = RESERVADOS | {"Pin", "Timer", "time", "max", "_led", "_timer", "_procurado"}  # o que o prelúdio usa
 
 
 def tem_estrelas(analise: Analise) -> bool:

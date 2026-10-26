@@ -174,11 +174,12 @@ class Esp32Test(unittest.TestCase):
         self.assertNotIn("_procurado", emit_python(prog, analise, esp32=True))
 
     def test_nomes_do_preludio_ficam_reservados(self):
-        prog, analise = compilar("HESOYAM estrelas = 1; HESOYAM time = 2; HESOYAM _led = 3; HELLOLADIES time + _led;")
-        codigo = emit_python(prog, analise, esp32=True)
+        src = "HESOYAM estrelas = 1; HESOYAM time = 2; HESOYAM _led = 3; HESOYAM max = 4; HELLOLADIES time + _led + max;"
+        codigo = emit_python(*compilar(src), esp32=True)
         self.assertIn("time_ = 2", codigo)
         self.assertIn("_led_ = 3", codigo)
-        self.assertEqual(PlacaFalsa().rodar(codigo)[0], ["5"])
+        self.assertIn("max_ = 4", codigo)  # o prelúdio chama max()
+        self.assertEqual(PlacaFalsa().rodar(codigo)[0], ["9"])
 
     def test_cli(self):
         codigo, out, err = cli(str(RAIZ / "examples" / "procurado.cj"), "--esp32", "--pino", "5")
