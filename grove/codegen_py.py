@@ -1,4 +1,4 @@
-"""Back-end: AST anotada → código Python.
+"""Back-end: AST anotada → código Python ou MicroPython (ESP32).
 
 Tradução em docs/geracao-de-codigo.md. Parte da AST, não da TAC: Python não tem
 goto, e código estruturado sai legível. Um método `gen_<Nó>` por instrução,
@@ -8,7 +8,7 @@ para pôr só os parênteses necessários.
 import keyword
 
 from .ast import If, Literal, Node, Program, Unary, Var
-from .semantic import BOOLEANO, Analise
+from .semantic import BOOLEANO, INTEIRO, Analise
 
 PY_OP = {"&&": "and", "||": "or", "/": "//"}  # os outros operadores são iguais em Python
 
@@ -25,6 +25,32 @@ ATOMO = 8
 # nomes que uma variável não pode ter no código gerado
 RESERVADOS = set(keyword.kwlist) | {"print"}
 
+# ESP32: a variável inteira `estrelas` comanda o LED, como o nível de procurado no jogo
+ESTRELAS = "estrelas"
+PRELUDIO_ESP32 = """\
+from machine import Pin, Timer
+import time
+
+_led = Pin({pino}, Pin.OUT)
+_timer = Timer(0)
+
+
+def _procurado(n):
+    # 0 estrelas: LED apagado; cada estrela a mais, pisca mais rápido
+    _timer.deinit()
+    _led.value(0)
+    if n > 0:
+        _timer.init(period=max(50, 600 // n), mode=Timer.PERIODIC,
+                    callback=lambda t: _led.value(not _led.value()))
+    time.sleep_ms(1500)  # tempo para ver cada nível
+
+"""
+RESERVADOS_ESP32 = RESERVADOS | {"Pin", "Timer", "time", "_led", "_timer", "_procurado"}
+
+
+def tem_estrelas(analise: Analise) -> bool:
+    return any(s.nome == ESTRELAS and s.tipo == INTEIRO for s in analise.simbolos)
+
 
 def _nomes_python(analise: Analise, reservados: set[str]) -> dict[str, str]:
     """nome único → nome em Python; quem colide com um reservado ganha _ no fim."""
@@ -40,8 +66,9 @@ def _nomes_python(analise: Analise, reservados: set[str]) -> dict[str, str]:
 
 
 class PythonGen:
-    def __init__(self, analise: Analise, reservados=RESERVADOS):
-        self.nomes = _nomes_python(analise, reservados)
+    def __init__(self, analise: Analise, esp32=False):
+        self.nomes = _nomes_python(analise, RESERVADOS_ESP32 if esp32 else RESERVADOS)
+        self.led = esp32 and tem_estrelas(analise)
         self.linhas: list[str] = []
         self.nivel = 0
 
@@ -76,6 +103,8 @@ class PythonGen:
 
     def gen_VarDecl(self, node):
         self.linha(f"{self.nome(node)} = {self.expr(node.value)[0]}")
+        if self.led and node.simbolo.nome == ESTRELAS and node.simbolo.tipo == INTEIRO:
+            self.linha(f"_procurado({self.nome(node)})")
 
     gen_Assign = gen_VarDecl
 
@@ -129,9 +158,17 @@ class PythonGen:
         return f"({texto})" if p < minima else texto
 
 
-def emit_python(program: Program, analise: Analise, origem: str | None = None) -> str:
-    """Traduz a AST já conferida por check() para um programa Python."""
-    g = PythonGen(analise)
-    g.linha(f"# gerado pela Grove a partir de {origem}" if origem else "# gerado pela Grove")
+def emit_python(program: Program, analise: Analise, origem: str | None = None, esp32=False, pino=2) -> str:
+    """Traduz a AST já conferida por check() para Python.
+
+    Com esp32=True sai MicroPython: se o programa tem uma variável inteira
+    `estrelas`, cada valor novo dela muda o pisca-pisca do LED no GPIO `pino`.
+    """
+    g = PythonGen(analise, esp32)
+    cabecalho = f"# gerado pela Grove a partir de {origem}" if origem else "# gerado pela Grove"
+    if g.led:
+        cabecalho += f"\n# MicroPython para ESP32: '{ESTRELAS}' pisca o LED no GPIO {pino}\n"
+        cabecalho += PRELUDIO_ESP32.format(pino=pino)
+    g.linhas.append(cabecalho)
     g.gen(program)
     return "\n".join(g.linhas)

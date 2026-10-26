@@ -1,4 +1,4 @@
-"""Uso: python -m grove arquivo.cj [--tokens] [--ast] [--simbolos] [--ir] [--python]
+"""Uso: python -m grove arquivo.cj [--tokens] [--ast] [--simbolos] [--ir] [--python] [--esp32 [--pino N]]
 
 Sem flags confere e executa o programa. Com flags só mostra essas etapas.
 Sai com código 1 em erro léxico, sintático, semântico ou de execução.
@@ -8,9 +8,10 @@ import sys
 
 from . import (LexError, ParseError, RuntimeError_, SemanticError, check, dump, emit_ir, emit_python, format_ir,
                format_symbols, parse, run, tokenize)
+from .codegen_py import ESTRELAS, tem_estrelas
 from .sounds import play
 
-ETAPAS = {"tokens": 0, "ast": 1, "simbolos": 2, "ir": 2, "python": 2}  # flag → etapa do pipeline que ela precisa
+ETAPAS = {"tokens": 0, "ast": 1, "simbolos": 2, "ir": 2, "python": 2, "esp32": 2}  # flag → etapa que ela precisa
 SONS = {LexError: "lex_error", ParseError: "parse_error", SemanticError: "semantic_error"}
 
 
@@ -22,6 +23,9 @@ def main(argv=None):
     ap.add_argument("--simbolos", action="store_true", help="imprime a tabela de símbolos em vez de executar")
     ap.add_argument("--ir", action="store_true", help="imprime o código de três endereços em vez de executar")
     ap.add_argument("--python", action="store_true", help="imprime o programa traduzido para Python em vez de executar")
+    ap.add_argument("--esp32", action="store_true",
+                    help=f"imprime MicroPython para o ESP32: a variável '{ESTRELAS}' pisca o LED")
+    ap.add_argument("--pino", type=int, default=2, metavar="N", help="GPIO do LED no --esp32 (padrão: 2)")
     args = ap.parse_args(argv)
 
     with open(args.arquivo, encoding="utf-8") as f:
@@ -56,6 +60,10 @@ def main(argv=None):
                 mostrar(format_ir(emit_ir(program, analise)))
             if args.python:
                 mostrar(emit_python(program, analise, origem=args.arquivo))
+            if args.esp32:
+                if not tem_estrelas(analise):
+                    print(f"aviso: nenhuma variável inteira '{ESTRELAS}': o programa não mexe no LED", file=sys.stderr)
+                mostrar(emit_python(program, analise, origem=args.arquivo, esp32=True, pino=args.pino))
         if executar:
             run(program)
     except (LexError, ParseError, SemanticError, RuntimeError_) as e:
