@@ -53,7 +53,7 @@ primario     = NUMBER | STRING | "FULLCLIP" | "GHOSTTOWN" | IDENT
 - **LL(1)**: cada regra decide a alternativa olhando só o próximo token. O parser (`grove/parser.py`) é uma descida recursiva direta: um método por regra.
 - **Sem ambiguidade de else**: o bloco do `TURNUPTHEHEAT` é sempre delimitado por `{ … }`, então o `TURNDOWNTHEHEAT` sempre pertence ao `TURNUPTHEHEAT` imediatamente anterior.
 - **`BRINGITON` é açúcar**: `A BRINGITON B` gera a mesma AST que `A TURNDOWNTHEHEAT TURNUPTHEHEAT B` (um `If` aninhado em `orelse`). As duas formas são aceitas.
-- **Declaração vs. atribuição**: `HESOYAM x = …` cria a variável; `x = …` sem `HESOYAM` só atribui. A verificação de "variável já declarada" é semântica e fica para a próxima etapa.
+- **Declaração vs. atribuição**: `HESOYAM x = …` cria a variável; `x = …` sem `HESOYAM` só atribui. As verificações de "variável já declarada", "não declarada" e de tipos não são da gramática: ficam na análise semântica ([semantica.md](semantica.md)).
 
 ## Nós da AST
 
