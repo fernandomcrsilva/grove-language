@@ -1,4 +1,4 @@
-"""Uso: python -m grove arquivo.cj [--tokens] [--ast] [--simbolos] [--ir]
+"""Uso: python -m grove arquivo.cj [--tokens] [--ast] [--simbolos] [--ir] [--python]
 
 Sem flags confere e executa o programa. Com flags só mostra essas etapas.
 Sai com código 1 em erro léxico, sintático, semântico ou de execução.
@@ -6,11 +6,11 @@ Sai com código 1 em erro léxico, sintático, semântico ou de execução.
 import argparse
 import sys
 
-from . import (LexError, ParseError, RuntimeError_, SemanticError, check, dump, emit_ir, format_ir, format_symbols,
-               parse, run, tokenize)
+from . import (LexError, ParseError, RuntimeError_, SemanticError, check, dump, emit_ir, emit_python, format_ir,
+               format_symbols, parse, run, tokenize)
 from .sounds import play
 
-ETAPAS = {"tokens": 0, "ast": 1, "simbolos": 2, "ir": 2}  # flag → etapa do pipeline que ela precisa
+ETAPAS = {"tokens": 0, "ast": 1, "simbolos": 2, "ir": 2, "python": 2}  # flag → etapa do pipeline que ela precisa
 SONS = {LexError: "lex_error", ParseError: "parse_error", SemanticError: "semantic_error"}
 
 
@@ -21,6 +21,7 @@ def main(argv=None):
     ap.add_argument("--ast", action="store_true", help="imprime a AST em vez de executar")
     ap.add_argument("--simbolos", action="store_true", help="imprime a tabela de símbolos em vez de executar")
     ap.add_argument("--ir", action="store_true", help="imprime o código de três endereços em vez de executar")
+    ap.add_argument("--python", action="store_true", help="imprime o programa traduzido para Python em vez de executar")
     args = ap.parse_args(argv)
 
     with open(args.arquivo, encoding="utf-8") as f:
@@ -53,6 +54,8 @@ def main(argv=None):
                 mostrar(format_symbols(analise))
             if args.ir:
                 mostrar(format_ir(emit_ir(program, analise)))
+            if args.python:
+                mostrar(emit_python(program, analise, origem=args.arquivo))
         if executar:
             run(program)
     except (LexError, ParseError, SemanticError, RuntimeError_) as e:
