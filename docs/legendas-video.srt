@@ -1,0 +1,145 @@
+1
+00:00:00,000 --> 00:00:03,000
+{grove}
+
+2
+00:00:03,000 --> 00:00:07,000
+Uma linguagem com os cheats de GTA San Andreas
+
+3
+00:00:07,000 --> 00:00:12,000
+Projeto de Compiladores
+Gabriel Lacerda, Gabriel Mendonça e Fernando Mendonça
+
+4
+00:00:12,000 --> 00:00:16,000
+9 palavras reservadas, todas cheats do jogo
+
+5
+00:00:16,000 --> 00:00:21,000
+HESOYAM declara variável (no jogo, dá vida e $250.000)
+
+6
+00:00:21,000 --> 00:00:26,000
+KANGAROO é o laço (no jogo, o pulo gigante)
+
+7
+00:00:26,000 --> 00:00:30,000
+HELLOLADIES imprime na tela
+
+8
+00:00:30,000 --> 00:00:36,000
+O resto é sintaxe de C: { } delimita bloco, ; termina instrução
+
+9
+00:00:36,000 --> 00:00:44,000
+Este programa calcula o fatorial de 5
+
+10
+00:00:44,000 --> 00:00:50,000
+Só precisa de Python 3.10 ou mais novo, sem instalar nada
+
+11
+00:00:50,000 --> 00:00:56,000
+python -m grove executa o programa
+
+12
+00:00:56,000 --> 00:01:04,000
+Saída: 120, o fatorial de 5
+
+13
+00:01:04,000 --> 00:01:09,000
+O compilador pode parar em cada etapa
+
+14
+00:01:09,000 --> 00:01:20,000
+1. Léxico (--tokens): o texto vira tokens, com tipo, linha e coluna
+
+15
+00:01:20,000 --> 00:01:32,000
+2. Sintático (--ast): os tokens viram a árvore do programa
+
+16
+00:01:32,000 --> 00:01:48,000
+3. Semântico (--simbolos): cada variável, o tipo dela e onde foi declarada
+
+17
+00:01:48,000 --> 00:01:54,000
+Este arquivo tem 4 erros
+
+18
+00:01:54,000 --> 00:02:02,000
+A análise semântica acha os 4 de uma vez, antes de executar
+
+19
+00:02:02,000 --> 00:02:10,000
+Cada erro vem com linha e coluna
+
+20
+00:02:10,000 --> 00:02:18,000
+String em variável inteira
+condição inteira · variável inexistente · break fora de laço
+
+21
+00:02:18,000 --> 00:02:25,000
+Código intermediário de três endereços (--ir)
+
+22
+00:02:25,000 --> 00:02:33,000
+No máximo uma operação por instrução
+
+23
+00:02:33,000 --> 00:02:44,000
+O KANGAROO virou rótulo + teste + goto
+
+24
+00:02:44,000 --> 00:02:51,000
+A Grove também vira Python (--python)
+
+25
+00:02:51,000 --> 00:02:58,000
+E o Python gerado roda direto: 120 de novo
+
+26
+00:02:58,000 --> 00:03:10,000
+Interpretador, TAC e Python: a mesma saída em 15.000 programas aleatórios
+
+27
+00:03:10,000 --> 00:03:16,000
+Tudo isso também roda no navegador, sem instalar nada
+
+28
+00:03:16,000 --> 00:03:26,000
+Todas as etapas lado a lado: tokens, AST, símbolos, TAC e Python
+
+29
+00:03:26,000 --> 00:03:36,000
+Os erros aparecem enquanto você digita; um clique leva até a linha
+
+30
+00:03:36,000 --> 00:03:52,000
+Laço infinito? Depois de 5 segundos o programa para, e a página continua funcionando
+
+31
+00:03:52,000 --> 00:03:58,000
+E numa placa ESP32
+
+32
+00:03:58,000 --> 00:04:05,000
+--esp32 gera MicroPython para a placa
+
+33
+00:04:05,000 --> 00:04:14,000
+A variável estrelas comanda o LED: mais estrelas, pisca mais rápido
+
+34
+00:04:14,000 --> 00:04:22,000
+O mesmo procurado.cj, sem mudar uma linha
+
+35
+00:04:22,000 --> 00:04:28,000
+62 testes automáticos · Python puro, sem dependências
+
+36
+00:04:28,000 --> 00:04:36,000
+github.com/fernandomcrsilva/grove-language · MISSION PASSED

@@ -45,7 +45,7 @@ texto ─léxico─▶ tokens ─sintático─▶ AST ─semântico─▶ AST an
 | código de três endereços | [docs/codigo-intermediario.md](docs/codigo-intermediario.md) |
 | Python e MicroPython (ESP32) | [docs/geracao-de-codigo.md](docs/geracao-de-codigo.md) |
 | ESP32 na bancada: compras, montagem, gravação, Wokwi | [docs/esp32.md](docs/esp32.md) |
-| vídeo tutorial: roteiro cena a cena | [docs/roteiro-video.md](docs/roteiro-video.md) |
+| vídeo tutorial (mudo): roteiro cena a cena e legendas | [docs/roteiro-video.md](docs/roteiro-video.md) · [docs/legendas-video.srt](docs/legendas-video.srt) |
 
 ## Rodar
 
