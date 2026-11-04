@@ -44,7 +44,7 @@ let seq = 0, idCompilacao = 0, idExecucao = 0, relogio = null, espera = null;
 let compilado = null;   // o que o worker devolveu da última compilação
 let execucao = null;    // { saida, erro, fim, fonte, rodando } da última execução
 let carregando = { pct: 0, texto: "" };
-let alvoPython = "python", nome = "main.cj", dinheiro = 0, estrelas = -1, ultimaMissao = "";
+let alvoPython = "python", tacOtimizada = false, nome = "main.cj", dinheiro = 0, estrelas = -1, ultimaMissao = "";
 let somLigado = (() => { try { return localStorage.getItem(PREF_SOM) !== "desligado"; } catch (_) { return true; } })();
 const sons = {};  // evento → Audio; null quando o arquivo não existe
 let avisouSemSom = false;
@@ -160,8 +160,7 @@ function mostrar() {
   $("#aba-ast").innerHTML = d.ast ? `<pre class="codigo">${esc(d.ast)}</pre>` : vazio(parou);
   $("#aba-simbolos").innerHTML = d.simbolos === undefined ? vazio(parou)
     : d.simbolos.includes("\n") ? tabela(d.simbolos) : vazio("O programa não declara variáveis.");
-  $("#aba-ir").innerHTML = d.ir === undefined ? vazio(parou)
-    : d.ir ? `<pre class="codigo">${tac(d.ir)}</pre>` : vazio("Programa vazio.");
+  $("#aba-ir").innerHTML = d.ir === undefined ? vazio(parou) : d.ir ? tacComOtimizacao(d) : vazio("Programa vazio.");
   $("#aba-python").innerHTML = d.python === undefined ? vazio(parou) : python(d);
   desenharConsole();
 }
@@ -263,6 +262,16 @@ function tac(texto) {
     const corpo = /^L\d+:$/.test(m[3]) ? `<span class="rotulo">${esc(m[3])}</span>` : esc(m[3]);
     return `<span class="num">${m[1]}</span>${m[2]}${corpo}`;
   }).join("\n");
+}
+
+function tacComOtimizacao(d) {
+  const botoes = [[false, "Original"], [true, "Otimizada"]]
+    .map(([v, n]) => `<button type="button" data-otimizada="${v}" aria-pressed="${tacOtimizada === v}">${n}</button>`).join("");
+  const nota = tacOtimizada
+    ? `${esc(d.ir_resumo)}. Na CLI: <code>python -m grove arquivo.cj --otimizar</code>.`
+    : `O código de três endereços gerado da AST. Na CLI: <code>python -m grove arquivo.cj --ir</code>.`;
+  return `<div class="alternar" role="group" aria-label="Versão da TAC">${botoes}</div><p class="nota">${nota}</p>
+    <pre class="codigo">${tac(tacOtimizada ? d.ir_otimizado : d.ir) || esc("(nenhuma instrução)")}</pre>`;
 }
 
 function python(d) {
@@ -457,6 +466,12 @@ document.addEventListener("keydown", (e) => {
 $("#aba-console").addEventListener("click", (e) => {
   const b = e.target.closest(".diag");
   if (b?.dataset.linha) editor.irPara(Number(b.dataset.linha), Number(b.dataset.coluna));
+});
+$("#aba-ir").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-otimizada]");
+  if (!b) return;
+  tacOtimizada = b.dataset.otimizada === "true";
+  mostrar();
 });
 $("#aba-python").addEventListener("click", (e) => {
   const b = e.target.closest("button[data-alvo]");

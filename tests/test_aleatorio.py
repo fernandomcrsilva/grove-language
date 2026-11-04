@@ -1,4 +1,4 @@
-"""Teste diferencial com programas aleatórios: interpretador, TAC e Python têm que dar a mesma saída.
+"""Teste diferencial com programas aleatórios: interpretador, TAC, TAC otimizada e Python têm que dar a mesma saída.
 
 Gera expressões bem tipadas (inteiros, booleanos, todos os operadores, divisão por
 zero incluída) e confere os três executores. Roda 300 programas por padrão;
@@ -13,6 +13,7 @@ from contextlib import redirect_stdout
 from grove.codegen_py import emit_python
 from grove.interpreter import RuntimeError_, run
 from grove.ir import emit_ir, execute
+from grove.otimizador import otimizar
 
 from tests.test_ir import compilar
 
@@ -88,10 +89,13 @@ class AleatorioTest(unittest.TestCase):
             src = g.programa()
             prog, analise = compilar(src)
             interpretador = rodar(lambda out: run(prog, out=out))
-            tac = rodar(lambda out: execute(emit_ir(prog, analise), out))
+            code = emit_ir(prog, analise)
+            tac = rodar(lambda out: execute(code, out))
+            tac_otimizada = rodar(lambda out: execute(otimizar(code, analise)[0], out))
             python = rodar(lambda out: rodar_python(emit_python(prog, analise), out))
             with self.subTest(i=i, src=src):
                 self.assertEqual(tac, interpretador)
+                self.assertEqual(tac_otimizada, interpretador)
                 self.assertEqual(python, interpretador)
 
 

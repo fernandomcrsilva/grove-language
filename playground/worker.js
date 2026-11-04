@@ -5,14 +5,14 @@ const CDN = "https://cdn.jsdelivr.net/npm/pyodide@314.0.7/";
 const local = new URLSearchParams(self.location.search).get("pyodide");
 const alvo = local && new URL(local.endsWith("/") ? local : local + "/", self.location.href);
 const PYODIDE = alvo && alvo.origin === self.location.origin ? alvo.href : CDN;
-const MODULOS = ["__init__", "ast", "tokens", "lexer", "parser", "semantic", "interpreter", "ir", "codegen_py"];
+const MODULOS = ["__init__", "ast", "tokens", "lexer", "parser", "semantic", "sugestao", "interpreter", "ir", "otimizador", "codegen_py"];
 
 const GLUE = `
 import json
 import re
 
 from grove import (LexError, ParseError, RuntimeError_, SemanticError, check, dump, emit_ir, emit_python,
-                   format_ir, format_symbols, parse, run, tokenize)
+                   format_ir, format_symbols, otimizar, parse, resumo, run, tokenize)
 
 LIMITE = 5000  # linhas de saída
 _programa = None
@@ -45,7 +45,11 @@ def compilar(src):
         analise = check(programa)
         r["avisos"] = [_diagnostico(str(a), "aviso") for a in analise.avisos]
         r["simbolos"] = format_symbols(analise)
-        r["ir"] = format_ir(emit_ir(programa, analise))
+        codigo = emit_ir(programa, analise)
+        otimizado, conta = otimizar(codigo, analise)
+        r["ir"] = format_ir(codigo)
+        r["ir_otimizado"] = format_ir(otimizado)
+        r["ir_resumo"] = resumo(codigo, otimizado, conta)
         r["python"] = emit_python(programa, analise)
         r["esp32"] = emit_python(programa, analise, esp32=True)
         r["etapas"]["semantico"] = "ok"
