@@ -106,19 +106,19 @@ Interpretador, TAC e Python: a mesma saída em 15.000 programas aleatórios
 
 27
 00:03:10,000 --> 00:03:16,000
-Tudo isso também roda no navegador, sem instalar nada
+Grove Online: o compilador no navegador, sem instalar nada
 
 28
 00:03:16,000 --> 00:03:26,000
-Todas as etapas lado a lado: tokens, AST, símbolos, TAC e Python
+Escreva, aperte Executar e veja a saída; os cheats ficam na lateral
 
 29
 00:03:26,000 --> 00:03:36,000
-Os erros aparecem enquanto você digita; um clique leva até a linha
+Cada erro acende uma estrela de procurado; um clique leva até a linha
 
 30
 00:03:36,000 --> 00:03:52,000
-Laço infinito? Depois de 5 segundos o programa para, e a página continua funcionando
+Por dentro: tokens, AST, símbolos, TAC e Python. E um link compartilha o código
 
 31
 00:03:52,000 --> 00:03:58,000

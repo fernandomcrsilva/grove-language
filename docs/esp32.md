@@ -26,7 +26,7 @@ O [Wokwi](https://wokwi.com) simula ESP32 com MicroPython no navegador, com LED 
    ```bash
    python -m grove examples/procurado.cj --esp32
    ```
-   (ou copie da aba **Python → MicroPython · ESP32** do playground)
+   (ou copie da aba **Python → MicroPython · ESP32** do Grove Online)
 3. Na aba `diagram.json`, **mantenha a placa como o template criou** e acrescente o LED e o resistor. Em `"parts"`:
    ```json
    { "type": "wokwi-resistor", "id": "r1", "top": 20, "left": 180, "attrs": { "value": "220" } },

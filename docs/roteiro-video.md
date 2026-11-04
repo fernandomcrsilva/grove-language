@@ -2,7 +2,7 @@
 
 Roteiro do vídeo tutorial da Grove, cena a cena. O vídeo é **mudo**: a informação está nas telas gravadas e nas legendas. São cerca de 4 min 36 s. Os comandos e as saídas são os reais do repositório. As legendas, já cronometradas, também estão em [legendas-video.srt](legendas-video.srt), pronto para importar no editor (CapCut, DaVinci Resolve, Premiere, Clipchamp).
 
-> **Para o grupo:** as telas precisam ser gravações de verdade (terminal, playground e a placa). Um gerador de vídeo inventaria a interface e os resultados. Use o Gemini para montar a edição, ajustar as legendas ou sugerir cortes, não para "imaginar" as telas.
+> **Para o grupo:** as telas precisam ser gravações de verdade (terminal, Grove Online e a placa). Um gerador de vídeo inventaria a interface e os resultados. Use o Gemini para montar a edição, ajustar as legendas ou sugerir cortes, não para "imaginar" as telas.
 
 ---
 
@@ -20,7 +20,7 @@ Você vai ajudar a editar um vídeo tutorial mudo de cerca de 4 min 36 s sobre a
 - Grove é uma linguagem de programação em que as 9 palavras reservadas são cheats de GTA San Andreas. O resto da sintaxe é de C (`{ }`, `;`, `( )`, `! && ||`). Extensão `.cj`, de Carl Johnson, o protagonista.
 - `HESOYAM` declara variável · `TURNUPTHEHEAT` é if · `BRINGITON` é else if · `TURNDOWNTHEHEAT` é else · `KANGAROO` é while · `GOODBYECRUELWORLD` é break · `HELLOLADIES` imprime · `FULLCLIP` é verdadeiro · `GHOSTTOWN` é falso.
 - O compilador é Python puro, sem dependências (Python 3.10+). Etapas: análise léxica → sintática (descida recursiva) → semântica (tabela de símbolos e tipos) → código de três endereços (TAC) → Python. Três formas de executar: interpretador, TAC e Python gerado.
-- Playground web: o compilador inteiro no navegador, com abas Saída, Tokens, AST, Símbolos, TAC e Python.
+- Grove Online, o app: um compilador online no estilo do Programiz, com o tema de GTA San Andreas. Editor com realce, painel de cheats, console, abas Tokens, AST, Símbolos, TAC e Python. No canto, como o HUD do jogo: uma estrela de procurado por erro e $250.000 por missão cumprida. Cada execução termina com "Mission passed!", "Wasted", "Busted" ou "Mission failed!".
 - ESP32: o compilador gera MicroPython; a variável `estrelas` faz um LED vermelho piscar mais rápido quanto maior o nível de procurado (0 a 6 estrelas).
 - 62 testes automatizados; interpretador, TAC e Python deram a mesma saída em 15.000 programas aleatórios.
 - Grupo: Gabriel Lacerda, Gabriel Mendonça e Fernando Mendonça. Repositório: github.com/fernandomcrsilva/grove-language
@@ -190,19 +190,20 @@ python -m grove examples/fatorial.cj --python | python3
 - `2:51–2:58` E o Python gerado roda direto: 120 de novo
 - `2:58–3:10` Interpretador, TAC e Python: a mesma saída em 15.000 programas aleatórios
 
-## Cena 8 — Playground · 3:10–3:52
+## Cena 8 — Grove Online, o app · 3:10–3:52
 
 **Na tela:** o navegador abrindo `fernandomcrsilva.github.io/grove-language/playground/`. Mostrar, nesta ordem:
-1. O fatorial já rodado: "MISSION PASSED! Respect +" e `120`.
-2. As abas Tokens, AST, Símbolos, TAC e Python, uma por uma.
-3. No menu Exemplos, `erro_semantico.cj`: os 4 erros, as linhas marcadas em vermelho, e o clique num erro levando o cursor até a linha.
-4. Digitar `KANGAROO (FULLCLIP) { }` e Executar: depois de 5 segundos, "tempo esgotado", e a página continua funcionando.
+1. O fatorial já rodado: `120`, "MISSION PASSED! Respect +" e o dinheiro do HUD subindo para $00250000.
+2. Clicar em **KANGAROO** no painel de cheats: o laço entra no código com "condição" selecionada.
+3. No menu Exemplos, `erro_semantico.cj`: os 4 erros no console, as linhas marcadas, **4 estrelas de procurado** acesas, "BUSTED", e o clique num erro levando o cursor até a linha.
+4. As abas Tokens, AST, Símbolos, TAC e Python, uma por uma.
+5. Clicar em **Compartilhar** ("Link copiado").
 
 **Legendas:**
-- `3:10–3:16` Tudo isso também roda no navegador, sem instalar nada
-- `3:16–3:26` Todas as etapas lado a lado: tokens, AST, símbolos, TAC e Python
-- `3:26–3:36` Os erros aparecem enquanto você digita; um clique leva até a linha
-- `3:36–3:52` Laço infinito? Depois de 5 segundos o programa para, e a página continua funcionando
+- `3:10–3:16` Grove Online: o compilador no navegador, sem instalar nada
+- `3:16–3:26` Escreva, aperte Executar e veja a saída; os cheats ficam na lateral
+- `3:26–3:36` Cada erro acende uma estrela de procurado; um clique leva até a linha
+- `3:36–3:52` Por dentro: tokens, AST, símbolos, TAC e Python. E um link compartilha o código
 
 ## Cena 9 — ESP32 · 3:52–4:22
 
@@ -240,7 +241,7 @@ OK
 
 - **Terminal:** fonte de 20 pt ou mais, tema escuro, janela em tela cheia, na raiz do repositório. Cole os comandos em vez de digitar, e deixe cada saída parada na tela pelo tempo da legenda.
 - **Editor:** `examples/fatorial.cj` e `examples/erro_semantico.cj` abertos, com fonte grande.
-- **Navegador:** o playground publicado, com zoom de 125% e a janela em 1920×1080.
+- **Navegador:** o Grove Online publicado, com zoom de 125% e a janela em 1920×1080.
 - **Placa:** filmagem de perto do LED, com o monitor serial visível no mesmo quadro, ou em tela dividida.
 - **Som:** mudo, ou uma música de fundo sem direitos autorais (por exemplo, da Biblioteca de áudio do YouTube). Os áudios do jogo são da Rockstar: evite-os se o vídeo for publicado.
 
@@ -248,6 +249,6 @@ OK
 
 - [ ] Terminal: cenas 3 a 7 e 10
 - [ ] Editor com `fatorial.cj` e `erro_semantico.cj`: cenas 2 e 5
-- [ ] Playground, na ordem da cena 8
+- [ ] Grove Online, na ordem da cena 8
 - [ ] Placa ou Wokwi: LED acelerando + monitor serial (cena 9)
 - [ ] Cartelas de abertura e encerramento (cenas 1 e 10)

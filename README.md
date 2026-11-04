@@ -65,9 +65,20 @@ python -m unittest                                # testes
 
 As flags combinam (`--tokens --ast` mostra as duas). Erro léxico, sintático, semântico ou de execução sai com código 1. `examples/erro_semantico.cj` mostra quatro erros semânticos de uma vez.
 
-## Playground
+## Grove Online (o app)
 
-O compilador inteiro no navegador, sem instalar nada: editor, etapas e abas com tokens, AST, tabela de símbolos, TAC, Python e a saída. É Python de verdade rodando no navegador (Pyodide).
+Um compilador online da Grove, no estilo do Programiz e do OnlineGDB, com o tema de GTA San Andreas. Escreva, aperte **Executar** (ou Ctrl+Enter) e veja a saída; nada é instalado, porque o próprio compilador em Python roda no navegador (Pyodide).
+
+- **Editor** com realce dos cheats, numeração de linhas, recuo automático e as linhas com erro marcadas. O código fica salvo no navegador.
+- **Cheats** na lateral: um clique insere o cheat no código, com o trecho a preencher já selecionado.
+- **Console** com a saída e os erros no formato `arquivo:linha:coluna`; um clique num erro leva até a linha. Cada execução termina como no jogo: "Mission passed!", "Wasted", "Busted" ou "Mission failed!".
+- **HUD**: uma estrela de procurado por erro encontrado, e $250.000 a cada missão cumprida.
+- **Por dentro do compilador**: abas com tokens, AST, tabela de símbolos, TAC, Python e MicroPython para o ESP32.
+- **Arquivo**: Exemplos, Abrir e Baixar `.cj`, e Compartilhar, que copia um link com o código. Um laço infinito é interrompido em 5 s, ou antes, com **Parar**.
+
+O código do app está em `playground/`: `index.html` (a página), `estilo.css` (o tema), `app.js` (a lógica), `editor.js` (o editor com realce) e `worker.js` (o Python, fora da página). A fonte dos títulos é a Passion One, sob a licença SIL OFL (`playground/fontes/OFL.txt`); o visual se inspira no HUD do jogo, sem logos nem imagens da Rockstar.
+
+Onde abrir:
 
 - Publicado: <https://fernandomcrsilva.github.io/grove-language/playground/> (com o GitHub Pages ativo: *Settings → Pages → Deploy from a branch → `main` / root*)
 - Local: `python -m http.server` na raiz do repositório e abrir <http://localhost:8000/playground/>
@@ -101,7 +112,7 @@ grove/ir.py        código de três endereços (AST → TAC) + executor de TAC
 grove/codegen_py.py   gera Python / MicroPython para o ESP32 (AST → .py)
 grove/sounds.py    toca assets/<evento>.wav ao compilar ou dar erro
 grove/__main__.py  linha de comando
-playground/        o compilador no navegador (Pyodide)
+playground/        Grove Online, o app: compilador online no navegador (Pyodide)
 assets/            clipes .wav (não versionados)
 docs/              entregáveis: tokens, gramática, semântica, interpretador, TAC, geração de código, pitch
 examples/          programas de exemplo (.cj)
