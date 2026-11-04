@@ -18,4 +18,4 @@ Converter mp3 para wav: `ffmpeg -i fala.mp3 passed.wav`. Sem arquivo, o Grove fi
 - O app também aceita `.mp3` com os mesmos nomes (`passed.mp3`…); a linha de comando só toca `.wav`.
 - O botão de alto-falante no canto, ao lado das estrelas, liga e desliga as falas. A escolha fica salva no navegador.
 - O app procura os arquivos em `assets/`, ao lado de `playground/`. Funciona quando a página é aberta de onde os arquivos estão, por exemplo com `python -m http.server` na raiz do repositório, como na apresentação.
-- No GitHub Pages os arquivos só existem se forem commitados, e hoje eles não são: `.gitignore` ignora `assets/*.wav`. Publicar os áudios da Rockstar no repositório é uma decisão do grupo. Sem eles, o app no ar fica em silêncio e avisa uma vez.
+- No GitHub Pages os arquivos só existem se forem commitados, e hoje eles não são: `.gitignore` ignora `assets/*.wav` e `assets/*.mp3`. Publicar os áudios da Rockstar no repositório é uma decisão do grupo. Sem eles, o app no ar fica em silêncio e avisa uma vez.
