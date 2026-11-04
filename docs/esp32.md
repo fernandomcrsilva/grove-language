@@ -121,7 +121,126 @@ Cada número sai na serial 1,5 s depois de o LED mudar: o programa espera logo d
 | `ImportError: no module named 'machine'` | o `main.py` rodou no computador, não na placa | grave na placa (`mpremote cp`) em vez de rodar com `python` |
 | Nada aparece na serial | outra janela usando a porta | feche o Thonny antes de usar o `mpremote`, e vice-versa |
 
-## 7. Para a entrega
+## 7. Upgrade: o HUD de procurado
+
+O circuito completo imita o canto da tela do GTA. Seis luzes amarelas mostram as estrelas de procurado, de 0 a 6. A partir de 4 estrelas, um par vermelho e azul começa a piscar alternado, como o giroflex da polícia, e acelera a cada estrela. O LED da própria placa continua piscando mais rápido conforme as estrelas, como no circuito simples.
+
+```bash
+python -m grove examples/procurado.cj --esp32 --hud > main.py
+mpremote cp main.py :main.py && mpremote reset
+```
+
+(ou a aba **Python → ESP32 · HUD** do Grove Online)
+
+### O que comprar a mais
+
+| Item | Qtd. | Observação |
+|---|---|---|
+| LED amarelo 5 mm | 6 (+1 de reserva) | uma luz por estrela |
+| LED azul 5 mm | 1 (+1 de reserva) | o vermelho do giroflex é o LED vermelho da lista de cima |
+| Resistor de 220 Ω | 7 | 6 estrelas + o LED vermelho |
+| Resistor de 100 Ω | 1 | para o LED azul, que precisa de mais tensão (veja abaixo) |
+| Protoboard de 830 furos | 1 | ou duas pequenas: são 8 LEDs e 8 resistores |
+| Jumpers macho-macho | ~20 | |
+
+### Pinos
+
+| Função | GPIO | Marcação na DevKit V1 | No Wokwi (DevKitC V4) |
+|---|---|---|---|
+| estrela 1 | 32 | D32 | `esp:32` |
+| estrela 2 | 33 | D33 | `esp:33` |
+| estrela 3 | 25 | D25 | `esp:25` |
+| estrela 4 | 26 | D26 | `esp:26` |
+| estrela 5 | 27 | D27 | `esp:27` |
+| estrela 6 | 14 | D14 | `esp:14` |
+| giroflex vermelho | 18 | D18 | `esp:18` |
+| giroflex azul | 19 | D19 | `esp:19` |
+| pisca da placa | 2 | D2 (LED azul da placa) | `esp:2` |
+| terra de todos | GND | GND | `esp:GND.1` |
+
+Na DevKit V1, os seis pinos das estrelas ficam lado a lado na mesma borda da placa. São GPIOs seguros para saída: nenhum deles é de boot, de memória ou só de entrada.
+
+### Montagem
+
+Cada um dos oito LEDs é ligado igual ao do circuito simples:
+
+```
+GPIO ──[ resistor ]──▶|── GND
+                    LED
+          (perna longa no resistor)
+```
+
+- Ligue um GND da placa à fileira azul (−) da protoboard e ponha as pernas curtas dos oito LEDs nela: um terra só para todos.
+- **O LED azul é mais fraco.** Ele precisa de quase 3 V para acender, e a placa dá 3,3 V. Por isso o resistor dele é de 100 Ω, não 220 Ω, e mesmo assim ele brilha menos que o vermelho. Se ficar fraco demais, use um LED azul de alto brilho. Não ligue LED nenhum direto no pino, sem resistor.
+- Os amarelos e o vermelho com 220 Ω ficam em uns 5 a 6 mA cada, bem dentro do que um pino aguenta.
+
+### O que tem que acontecer com o `procurado.cj`
+
+| Estrelas | Luzes amarelas | Giroflex | LED da placa |
+|---|---|---|---|
+| 0 | nenhuma | apagado | apagado |
+| 1 a 3 | 1 a 3 acesas | apagado | 600, 300, 200 ms |
+| 4 | 4 acesas | troca a cada 300 ms | 150 ms |
+| 5 | 5 acesas | 250 ms | 120 ms |
+| 6 | todas | 200 ms | 100 ms |
+
+Cada nível dura 1,5 s. No fim, as seis ficam acesas e o giroflex continua piscando até a placa ser reiniciada.
+
+### No Wokwi
+
+No projeto do template de MicroPython (seção 2), cole o programa do `--esp32 --hud` no `main.py` e acrescente ao `diagram.json`, dentro de `"parts"`:
+
+```json
+{"type": "wokwi-resistor", "id": "r1", "top": 60, "left": 160, "rotate": 90, "attrs": {"value": "220"}},
+{"type": "wokwi-led", "id": "led1", "top": -10, "left": 180, "attrs": {"color": "yellow"}},
+{"type": "wokwi-resistor", "id": "r2", "top": 60, "left": 198, "rotate": 90, "attrs": {"value": "220"}},
+{"type": "wokwi-led", "id": "led2", "top": -10, "left": 218, "attrs": {"color": "yellow"}},
+{"type": "wokwi-resistor", "id": "r3", "top": 60, "left": 236, "rotate": 90, "attrs": {"value": "220"}},
+{"type": "wokwi-led", "id": "led3", "top": -10, "left": 256, "attrs": {"color": "yellow"}},
+{"type": "wokwi-resistor", "id": "r4", "top": 60, "left": 274, "rotate": 90, "attrs": {"value": "220"}},
+{"type": "wokwi-led", "id": "led4", "top": -10, "left": 294, "attrs": {"color": "yellow"}},
+{"type": "wokwi-resistor", "id": "r5", "top": 60, "left": 312, "rotate": 90, "attrs": {"value": "220"}},
+{"type": "wokwi-led", "id": "led5", "top": -10, "left": 332, "attrs": {"color": "yellow"}},
+{"type": "wokwi-resistor", "id": "r6", "top": 60, "left": 350, "rotate": 90, "attrs": {"value": "220"}},
+{"type": "wokwi-led", "id": "led6", "top": -10, "left": 370, "attrs": {"color": "yellow"}},
+{"type": "wokwi-resistor", "id": "r7", "top": 60, "left": 418, "rotate": 90, "attrs": {"value": "220"}},
+{"type": "wokwi-led", "id": "led7", "top": -10, "left": 438, "attrs": {"color": "red"}},
+{"type": "wokwi-resistor", "id": "r8", "top": 60, "left": 456, "rotate": 90, "attrs": {"value": "100"}},
+{"type": "wokwi-led", "id": "led8", "top": -10, "left": 476, "attrs": {"color": "blue"}}
+```
+
+E dentro de `"connections"`:
+
+```json
+["esp:32", "r1:1", "green", []],
+["r1:2", "led1:A", "green", []],
+["led1:C", "esp:GND.1", "black", []],
+["esp:33", "r2:1", "green", []],
+["r2:2", "led2:A", "green", []],
+["led2:C", "esp:GND.1", "black", []],
+["esp:25", "r3:1", "green", []],
+["r3:2", "led3:A", "green", []],
+["led3:C", "esp:GND.1", "black", []],
+["esp:26", "r4:1", "green", []],
+["r4:2", "led4:A", "green", []],
+["led4:C", "esp:GND.1", "black", []],
+["esp:27", "r5:1", "green", []],
+["r5:2", "led5:A", "green", []],
+["led5:C", "esp:GND.1", "black", []],
+["esp:14", "r6:1", "green", []],
+["r6:2", "led6:A", "green", []],
+["led6:C", "esp:GND.1", "black", []],
+["esp:18", "r7:1", "green", []],
+["r7:2", "led7:A", "green", []],
+["led7:C", "esp:GND.1", "black", []],
+["esp:19", "r8:1", "green", []],
+["r8:2", "led8:A", "green", []],
+["led8:C", "esp:GND.1", "black", []]
+```
+
+Como na seção 2, `esp` é o `id` da placa no template. As posições são só um ponto de partida: arraste as peças no desenho se quiser arrumar.
+
+## 8. Para a entrega
 
 - [ ] Foto do circuito montado
 - [ ] Vídeo curto do LED acelerando, com a serial na tela (é a cena 9 do [roteiro do vídeo](roteiro-video.md))

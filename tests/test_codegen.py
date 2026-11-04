@@ -29,10 +29,11 @@ def saida_python(codigo, globais=None):
 
 
 class PlacaFalsa:
-    """machine e time do MicroPython, só o que o --esp32 usa; registra o que acontece no LED."""
+    """machine e time do MicroPython, só o que o --esp32 usa; registra o que acontece nos pinos e timers."""
 
     def __init__(self):
-        self.pinos, self.periodos, self.esperas = [], [], []
+        self.pinos, self.periodos, self.esperas, self.fotos = [], [], [], []
+        self.pino, self.timer = {}, {}  # número do pino → Pin; id do timer → Timer
         placa = self
 
         class Pin:
@@ -40,6 +41,7 @@ class PlacaFalsa:
 
             def __init__(self, n, modo):
                 placa.pinos.append(n)
+                placa.pino[n] = self
                 self.v = 0
 
             def value(self, v=None):
@@ -51,17 +53,27 @@ class PlacaFalsa:
             PERIODIC = 1
 
             def __init__(self, n):
-                self.callback = None
+                placa.timer[n] = self
+                self.callback, self.periodos = None, []
 
             def init(self, period, mode, callback):
                 placa.periodos.append(period)
+                self.periodos.append(period)
                 self.callback = callback
 
             def deinit(self):
                 self.callback = None
 
+        def sleep_ms(ms):  # o prelúdio espera depois de cada valor novo: a hora de tirar a foto do HUD
+            self.esperas.append(ms)
+            self.fotos.append(self.foto())
+
         self.machine = types.SimpleNamespace(Pin=Pin, Timer=Timer)
-        self.time = types.SimpleNamespace(sleep_ms=self.esperas.append)
+        self.time = types.SimpleNamespace(sleep_ms=sleep_ms)
+
+    def foto(self):
+        return {"pinos": {n: p.v for n, p in self.pino.items()},
+                "timers": {n: t.callback is not None for n, t in self.timer.items()}}
 
     def rodar(self, codigo):
         globais = {"__name__": "__grove__"}
@@ -165,6 +177,37 @@ class Esp32Test(unittest.TestCase):
         timer.callback(timer)
         self.assertEqual(led.value(), 1)                        # o tique do timer acende o LED
 
+    def test_hud_acende_uma_luz_por_estrela_e_o_giroflex(self):
+        from grove.codegen_py import GIROFLEX_A_PARTIR_DE, PINO_AZUL, PINO_VERMELHO, PINOS_ESTRELAS
+        prog, analise = compilar(self.PROCURADO)
+        placa = PlacaFalsa()
+        saida, globais = placa.rodar(emit_python(prog, analise, esp32=True, hud=True))
+        self.assertEqual(saida, saida_interpretador(prog))
+        self.assertEqual(placa.pinos, [2, *PINOS_ESTRELAS, PINO_VERMELHO, PINO_AZUL])
+        acesas = [sum(f["pinos"][n] for n in PINOS_ESTRELAS) for f in placa.fotos]
+        self.assertEqual(acesas, [0, 1, 2, 3, 4, 5, 6])                  # uma luz por estrela, de 0 a 6
+        for f, n in zip(placa.fotos, range(7)):                         # as primeiras n acesas, na ordem
+            self.assertEqual([f["pinos"][p] for p in PINOS_ESTRELAS], [1] * n + [0] * (6 - n))
+        giroflex = [f["timers"][1] for f in placa.fotos]
+        self.assertEqual(giroflex, [n >= GIROFLEX_A_PARTIR_DE for n in range(7)])
+        self.assertEqual(placa.timer[1].periodos, [300, 250, 200])      # mais rápido a cada estrela
+        self.assertEqual(placa.timer[0].periodos, [600, 300, 200, 150, 120, 100])  # o LED da placa continua
+        giro = globais["_giroflex"]
+        giro(None)
+        primeiro = (placa.pino[PINO_VERMELHO].v, placa.pino[PINO_AZUL].v)
+        giro(None)
+        segundo = (placa.pino[PINO_VERMELHO].v, placa.pino[PINO_AZUL].v)
+        self.assertEqual({primeiro, segundo}, {(1, 0), (0, 1)})          # vermelho e azul alternando
+
+    def test_hud_apaga_o_giroflex_quando_as_estrelas_baixam(self):
+        from grove.codegen_py import PINO_AZUL, PINO_VERMELHO
+        prog, analise = compilar("HESOYAM estrelas = 5; estrelas = 2; estrelas = 9; estrelas = -1;")
+        placa = PlacaFalsa()
+        placa.rodar(emit_python(prog, analise, esp32=True, hud=True))
+        self.assertEqual([f["timers"][1] for f in placa.fotos], [True, False, True, False])
+        self.assertEqual([sum(f["pinos"].values()) - f["pinos"][2] for f in placa.fotos], [5, 2, 6, 0])
+        self.assertEqual((placa.pino[PINO_VERMELHO].v, placa.pino[PINO_AZUL].v), (0, 0))
+
     def test_sem_estrelas_sai_igual_ao_python(self):
         prog, analise = compilar(FATORIAL)
         self.assertEqual(emit_python(prog, analise, esp32=True), emit_python(prog, analise))
@@ -174,18 +217,26 @@ class Esp32Test(unittest.TestCase):
         self.assertNotIn("_procurado", emit_python(prog, analise, esp32=True))
 
     def test_nomes_do_preludio_ficam_reservados(self):
-        src = "HESOYAM estrelas = 1; HESOYAM time = 2; HESOYAM _led = 3; HESOYAM max = 4; HELLOLADIES time + _led + max;"
+        src = ("HESOYAM estrelas = 1; HESOYAM time = 2; HESOYAM _led = 3; HESOYAM max = 4; HESOYAM enumerate = 5;"
+               " HESOYAM _luzes = 6; HELLOLADIES time + _led + max + enumerate + _luzes;")
         codigo = emit_python(*compilar(src), esp32=True)
         self.assertIn("time_ = 2", codigo)
         self.assertIn("_led_ = 3", codigo)
         self.assertIn("max_ = 4", codigo)  # o prelúdio chama max()
-        self.assertEqual(PlacaFalsa().rodar(codigo)[0], ["9"])
+        self.assertEqual(PlacaFalsa().rodar(codigo)[0], ["20"])
+        hud = emit_python(*compilar(src), esp32=True, hud=True)
+        self.assertIn("enumerate_ = 5", hud)
+        self.assertIn("_luzes_ = 6", hud)
+        self.assertEqual(PlacaFalsa().rodar(hud)[0], ["20"])
 
     def test_cli(self):
         codigo, out, err = cli(str(RAIZ / "examples" / "procurado.cj"), "--esp32", "--pino", "5")
         self.assertEqual(codigo, 0)
         self.assertIn("_led = Pin(5, Pin.OUT)", out)
         self.assertEqual(err, "")
+        codigo, out, _ = cli(str(RAIZ / "examples" / "procurado.cj"), "--esp32", "--hud")
+        self.assertEqual(codigo, 0)
+        self.assertIn("_giroflex", out)
         _, _, err = cli(str(RAIZ / "examples" / "fatorial.cj"), "--esp32")
         self.assertIn("aviso: nenhuma variável inteira 'estrelas'", err)
 

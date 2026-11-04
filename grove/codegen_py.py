@@ -45,7 +45,48 @@ def _procurado(n):
     time.sleep_ms(1500)  # tempo para ver cada nível
 
 """
-RESERVADOS_ESP32 = RESERVADOS | {"Pin", "Timer", "time", "max", "_led", "_timer", "_procurado"}  # o que o prelúdio usa
+# O HUD de procurado (--hud): uma luz por estrela e o giroflex da polícia a partir de 4 estrelas.
+# GPIOs seguros para saída na DevKit V1; os das estrelas ficam lado a lado na mesma borda da placa.
+PINOS_ESTRELAS = (32, 33, 25, 26, 27, 14)
+PINO_VERMELHO, PINO_AZUL = 18, 19
+GIROFLEX_A_PARTIR_DE = 4
+PRELUDIO_HUD = """\
+from machine import Pin, Timer
+import time
+
+_led = Pin({pino}, Pin.OUT)  # LED da placa: pisca mais rápido a cada estrela
+_luzes = [Pin(n, Pin.OUT) for n in {estrelas}]  # uma luz por estrela de procurado
+_vermelho = Pin({vermelho}, Pin.OUT)  # giroflex da polícia
+_azul = Pin({azul}, Pin.OUT)
+_timer = Timer(0)
+_giro = Timer(1)
+_fase = [0]
+
+
+def _giroflex(t):
+    _fase[0] = 1 - _fase[0]
+    _vermelho.value(_fase[0])
+    _azul.value(1 - _fase[0])
+
+
+def _procurado(n):
+    for i, luz in enumerate(_luzes):  # acende as primeiras n
+        luz.value(1 if i < n else 0)
+    _timer.deinit()
+    _led.value(0)
+    if n > 0:
+        _timer.init(period=max(50, 600 // n), mode=Timer.PERIODIC,
+                    callback=lambda t: _led.value(not _led.value()))
+    _giro.deinit()
+    _vermelho.value(0)
+    _azul.value(0)
+    if n >= {giroflex}:  # a polícia chegou: vermelho e azul alternando, mais rápido a cada estrela
+        _giro.init(period=max(100, 300 - 50 * (n - {giroflex})), mode=Timer.PERIODIC, callback=_giroflex)
+    time.sleep_ms(1500)  # tempo para ver cada nível
+
+"""
+RESERVADOS_ESP32 = RESERVADOS | {"Pin", "Timer", "time", "max", "enumerate", "_led", "_timer", "_procurado",
+                                 "_luzes", "_vermelho", "_azul", "_giro", "_fase", "_giroflex"}  # o que os prelúdios usam
 
 
 def tem_estrelas(analise: Analise) -> bool:
@@ -158,17 +199,26 @@ class PythonGen:
         return f"({texto})" if p < minima else texto
 
 
-def emit_python(program: Program, analise: Analise, origem: str | None = None, esp32=False, pino=2) -> str:
+def emit_python(program: Program, analise: Analise, origem: str | None = None, esp32=False, pino=2, hud=False) -> str:
     """Traduz a AST já conferida por check() para Python.
 
     Com esp32=True sai MicroPython: se o programa tem uma variável inteira
     `estrelas`, cada valor novo dela muda o pisca-pisca do LED no GPIO `pino`.
+    Com hud=True também acende uma luz por estrela (PINOS_ESTRELAS) e liga o
+    giroflex vermelho e azul a partir de GIROFLEX_A_PARTIR_DE estrelas.
     """
     g = PythonGen(analise, esp32)
     cabecalho = f"# gerado pela Grove a partir de {origem}" if origem else "# gerado pela Grove"
     if g.led:
-        cabecalho += f"\n# MicroPython para ESP32: '{ESTRELAS}' pisca o LED no GPIO {pino}\n"
-        cabecalho += PRELUDIO_ESP32.format(pino=pino)
+        if hud:
+            cabecalho += (f"\n# MicroPython para ESP32, HUD de procurado: '{ESTRELAS}' acende as luzes nos GPIOs "
+                          f"{', '.join(map(str, PINOS_ESTRELAS))}, liga o giroflex nos GPIOs {PINO_VERMELHO} e {PINO_AZUL} "
+                          f"a partir de {GIROFLEX_A_PARTIR_DE} estrelas e pisca o LED no GPIO {pino}\n")
+            cabecalho += PRELUDIO_HUD.format(pino=pino, estrelas=PINOS_ESTRELAS, vermelho=PINO_VERMELHO,
+                                             azul=PINO_AZUL, giroflex=GIROFLEX_A_PARTIR_DE)
+        else:
+            cabecalho += f"\n# MicroPython para ESP32: '{ESTRELAS}' pisca o LED no GPIO {pino}\n"
+            cabecalho += PRELUDIO_ESP32.format(pino=pino)
     g.linhas.append(cabecalho)
     g.gen(program)
     return "\n".join(g.linhas)

@@ -275,11 +275,13 @@ function tacComOtimizacao(d) {
 }
 
 function python(d) {
-  const botoes = [["python", "Python"], ["esp32", "MicroPython · ESP32"]]
+  const botoes = [["python", "Python"], ["esp32", "MicroPython · ESP32"], ["hud", "ESP32 · HUD"]]
     .map(([v, n]) => `<button type="button" data-alvo="${v}" aria-pressed="${alvoPython === v}">${n}</button>`).join("");
-  const nota = alvoPython === "esp32"
-    ? `A variável inteira <code>estrelas</code> pisca o LED no GPIO 2: quanto mais estrelas, mais rápido. Na CLI: <code>python -m grove arquivo.cj --esp32</code>.`
-    : `O mesmo programa, traduzido da AST. Na CLI: <code>python -m grove arquivo.cj --python | python3</code>.`;
+  const nota = {
+    esp32: `A variável inteira <code>estrelas</code> pisca o LED no GPIO 2: quanto mais estrelas, mais rápido. Na CLI: <code>python -m grove arquivo.cj --esp32</code>.`,
+    hud: `O circuito completo: uma luz por estrela (GPIOs 32, 33, 25, 26, 27 e 14) e o giroflex vermelho e azul (GPIOs 18 e 19) a partir de 4 estrelas. Na CLI: <code>python -m grove arquivo.cj --esp32 --hud</code>.`,
+    python: `O mesmo programa, traduzido da AST. Na CLI: <code>python -m grove arquivo.cj --python | python3</code>.`,
+  }[alvoPython];
   return `<div class="alternar" role="group" aria-label="Alvo">${botoes}</div><p class="nota">${nota}</p>
     <pre class="codigo">${esc(d[alvoPython])}</pre>`;
 }

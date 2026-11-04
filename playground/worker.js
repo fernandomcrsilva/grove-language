@@ -52,6 +52,7 @@ def compilar(src):
         r["ir_resumo"] = resumo(codigo, otimizado, conta)
         r["python"] = emit_python(programa, analise)
         r["esp32"] = emit_python(programa, analise, esp32=True)
+        r["hud"] = emit_python(programa, analise, esp32=True, hud=True)
         r["etapas"]["semantico"] = "ok"
         _programa = programa
     except LexError as e:

@@ -118,6 +118,8 @@ print("fim: ")
 
 Montagem, lista de compras, gravação na placa, simulação no Wokwi e problemas comuns: [esp32.md](esp32.md).
 
+**HUD de procurado (`--hud`).** Com `--esp32 --hud`, o prelúdio também acende uma luz por estrela (GPIOs 32, 33, 25, 26, 27 e 14) e liga um giroflex vermelho e azul (GPIOs 18 e 19) a partir de 4 estrelas, num segundo timer que acelera a cada estrela. O LED da placa continua piscando. A linguagem não muda: é a mesma variável `estrelas`. Montagem e pinos em [esp32.md](esp32.md#7-upgrade-o-hud-de-procurado).
+
 ### Como foi testado
 
 O ESP32 de verdade não foi testado: a validação na placa fica com o grupo. Nos testes automáticos (`tests/test_codegen.py`):

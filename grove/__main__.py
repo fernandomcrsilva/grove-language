@@ -1,4 +1,4 @@
-"""Uso: python -m grove arquivo.cj [--tokens] [--ast] [--simbolos] [--ir] [--otimizar] [--python] [--esp32 [--pino N]]
+"""Uso: python -m grove arquivo.cj [--tokens] [--ast] [--simbolos] [--ir] [--otimizar] [--python] [--esp32 [--hud] [--pino N]]
 
 Sem flags confere e executa o programa. Com flags só mostra essas etapas.
 Sai com código 1 em erro léxico, sintático, semântico ou de execução.
@@ -26,6 +26,8 @@ def main(argv=None):
     ap.add_argument("--python", action="store_true", help="imprime o programa traduzido para Python em vez de executar")
     ap.add_argument("--esp32", action="store_true",
                     help=f"imprime MicroPython para o ESP32: a variável '{ESTRELAS}' pisca o LED")
+    ap.add_argument("--hud", action="store_true",
+                    help="com --esp32: uma luz por estrela e o giroflex da polícia (ver docs/esp32.md)")
     ap.add_argument("--pino", type=int, default=2, metavar="N", help="GPIO do LED no --esp32 (padrão: 2)")
     args = ap.parse_args(argv)
 
@@ -68,7 +70,7 @@ def main(argv=None):
             if args.esp32:
                 if not tem_estrelas(analise):
                     print(f"aviso: nenhuma variável inteira '{ESTRELAS}': o programa não mexe no LED", file=sys.stderr)
-                mostrar(emit_python(program, analise, origem=args.arquivo, esp32=True, pino=args.pino))
+                mostrar(emit_python(program, analise, origem=args.arquivo, esp32=True, pino=args.pino, hud=args.hud))
         if executar:
             run(program)
     except (LexError, ParseError, SemanticError, RuntimeError_) as e:

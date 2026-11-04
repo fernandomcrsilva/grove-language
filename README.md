@@ -44,7 +44,7 @@ texto ─léxico─▶ tokens ─sintático─▶ AST ─semântico─▶ AST an
 | interpretador | [docs/interpretador.md](docs/interpretador.md) |
 | código de três endereços e otimização | [docs/codigo-intermediario.md](docs/codigo-intermediario.md) |
 | Python e MicroPython (ESP32) | [docs/geracao-de-codigo.md](docs/geracao-de-codigo.md) |
-| ESP32 na bancada: compras, montagem, gravação, Wokwi | [docs/esp32.md](docs/esp32.md) |
+| ESP32 na bancada: compras, montagem, gravação, Wokwi, o upgrade do HUD | [docs/esp32.md](docs/esp32.md) |
 | vídeo tutorial (mudo): roteiro cena a cena e legendas | [docs/roteiro-video.md](docs/roteiro-video.md) · [docs/legendas-video.srt](docs/legendas-video.srt) |
 
 ## Rodar
@@ -61,6 +61,7 @@ python -m grove examples/otimizacao.cj --otimizar # a TAC otimizada: 13 → 4 in
 python -m grove examples/fatorial.cj --python     # o programa traduzido para Python
 python -m grove examples/fatorial.cj --python | python3   # … e rodando
 python -m grove examples/procurado.cj --esp32 > main.py   # MicroPython: estrelas piscam o LED
+python -m grove examples/procurado.cj --esp32 --hud > main.py   # … e acendem 6 luzes + o giroflex
 python -m unittest                                # testes
 ```
 
