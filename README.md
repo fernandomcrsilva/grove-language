@@ -73,6 +73,7 @@ Um compilador online da Grove, no estilo do Programiz e do OnlineGDB, com o tema
 - **Cheats** na lateral: um clique insere o cheat no código, com o trecho a preencher já selecionado.
 - **Console** com a saída e os erros no formato `arquivo:linha:coluna`; um clique num erro leva até a linha. Cada execução termina como no jogo: "Mission passed!", "Wasted", "Busted" ou "Mission failed!".
 - **HUD**: uma estrela de procurado por erro encontrado, e $250.000 a cada missão cumprida.
+- **Falas do jogo**: cada execução toca o clipe do resultado (CJ no erro de execução, "BUSTED" no semântico…), se os áudios estiverem em `assets/`; o alto-falante no canto liga e desliga.
 - **Por dentro do compilador**: abas com tokens, AST, tabela de símbolos, TAC, Python e MicroPython para o ESP32.
 - **Arquivo**: Exemplos, Abrir e Baixar `.cj`, e Compartilhar, que copia um link com o código. Um laço infinito é interrompido em 5 s, ou antes, com **Parar**.
 
@@ -97,7 +98,7 @@ O notebook tem o front-end do AP1 (léxico + sintático) em duas células: a pri
 
 ## Falas do jogo
 
-Ao rodar, o Grove toca um clipe do jogo: "MISSION PASSED" quando dá certo, "WASTED" em erro léxico, Big Smoke ("follow the damn train, CJ!") em erro sintático, "BUSTED" em erro semântico, CJ ("Ah shit, here we go again") em erro de execução. Os `.wav` não vêm no repositório; veja [assets/README.md](assets/README.md) para os nomes. Sem arquivo, fica em silêncio.
+Ao rodar, na linha de comando e no Grove Online, o Grove toca um clipe do jogo: "MISSION PASSED" quando dá certo, "WASTED" em erro léxico, Big Smoke ("follow the damn train, CJ!") em erro sintático, "BUSTED" em erro semântico, CJ ("Ah shit, here we go again") em erro de execução. Os `.wav` não vêm no repositório; veja [assets/README.md](assets/README.md) para os nomes. Sem arquivo, fica em silêncio.
 
 ## Estrutura
 

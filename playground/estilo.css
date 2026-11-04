@@ -124,6 +124,22 @@ select { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 1
 
 /* HUD: estrelas de procurado em cima, dinheiro embaixo, como no canto do jogo */
 .hud { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.hud-linha { display: flex; align-items: center; gap: 10px; }
+.som {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: var(--painel-2);
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  color: var(--texto);
+  cursor: pointer;
+}
+.som:hover { border-color: var(--ouro); }
+.som[aria-pressed="false"] { color: var(--suave); }
+.som svg { width: 18px; height: 18px; }
 .estrelas { display: flex; gap: 2px; }
 .estrela { width: 22px; height: 22px; }
 .estrela path { fill: #2a2a26; stroke: #000; stroke-width: 1.6; }

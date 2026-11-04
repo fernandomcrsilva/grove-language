@@ -30,6 +30,11 @@ const MISSAO = {
   parado: ["falhou", "Mission failed!", "você parou o programa"],
 };
 
+// as falas que tocam no fim de cada execução: os mesmos assets/<evento>.wav da CLI (grove/sounds.py)
+const SOM = { ok: "passed", "léxico": "lex_error", "sintático": "parse_error", "semântico": "semantic_error",
+  "execução": "runtime_error", tempo: "runtime_error" };
+const PREF_SOM = "grove-online-som";
+
 const ETAPA_ANTES = { lexico: "léxico", sintatico: "sintático", semantico: "semântico" };
 const reduzMovimento = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
@@ -40,6 +45,9 @@ let compilado = null;   // o que o worker devolveu da última compilação
 let execucao = null;    // { saida, erro, fim, fonte, rodando } da última execução
 let carregando = { pct: 0, texto: "" };
 let alvoPython = "python", nome = "main.cj", dinheiro = 0, estrelas = -1, ultimaMissao = "";
+let somLigado = (() => { try { return localStorage.getItem(PREF_SOM) !== "desligado"; } catch (_) { return true; } })();
+const sons = {};  // evento → Audio; null quando o arquivo não existe
+let avisouSemSom = false;
 
 const editor = criarEditor({
   area: $("#fonte"),
@@ -73,7 +81,7 @@ const receber = {
   pronto({ versao }) {
     pronto = true;
     $("#versao").textContent = `Python ${versao} no navegador (Pyodide)`;
-    enviar(primeiraVez);  // na primeira vez já roda o programa aberto
+    enviar(primeiraVez, true);  // na primeira vez já roda o programa aberto, sem som
     primeiraVez = false;
     desenharBotao();
   },
@@ -85,6 +93,7 @@ const receber = {
   compilado(d) {
     if (d.id === idExecucao && d.erros.length) {  // tem erro: não vai executar
       clearTimeout(relogio);
+      if (execucao && !execucao.automatica) tocar(d.erros[0].tipo);
       execucao = null;
     }
     if (d.id !== idCompilacao) return;
@@ -96,11 +105,12 @@ const receber = {
     clearTimeout(relogio);
     Object.assign(execucao, { saida: d.saida, erro: d.erro, fim: d.erro ? "execução" : "ok", rodando: false });
     if (!d.erro) ganhar(RECOMPENSA);
+    if (!execucao.automatica) tocar(execucao.fim);
     mostrar();
   },
 };
 
-function enviar(executar) {
+function enviar(executar, automatica = false) {
   if (!pronto) {
     if (executar) avisar("O Python ainda está carregando.");
     return;
@@ -109,7 +119,7 @@ function enviar(executar) {
   idCompilacao = id;
   if (executar) {
     idExecucao = id;
-    execucao = { saida: [], erro: null, fim: null, fonte: editor.valor(), rodando: true };
+    execucao = { saida: [], erro: null, fim: null, fonte: editor.valor(), rodando: true, automatica };
     clearTimeout(relogio);
     relogio = setTimeout(() => interromper("tempo"), TEMPO_MAXIMO);
     abrirAba($("#tab-console"));
@@ -126,6 +136,7 @@ function interromper(fim) {
     fim,
     erro: fim === "tempo" ? `tempo esgotado: o programa rodou por mais de ${TEMPO_MAXIMO / 1000} s` : "programa interrompido",
   });
+  if (!execucao.automatica) tocar(fim);
   mostrar();
   iniciarWorker();  // um Python novo, em ~2 s
 }
@@ -264,6 +275,46 @@ function python(d) {
     <pre class="codigo">${esc(d[alvoPython])}</pre>`;
 }
 
+// ---- falas do jogo ----
+// Os áudios são da Rockstar e não vão para o repositório: cada um coloca os seus em assets/
+// (ver assets/README.md). Sem o arquivo, o app fica em silêncio e avisa uma vez.
+function tocar(fim) {
+  const evento = SOM[fim];
+  if (!somLigado || !evento || sons[evento] === null) return;
+  const audio = (sons[evento] ??= carregarSom(evento));
+  for (const outro of Object.values(sons)) if (outro && outro !== audio) outro.pause();
+  audio.currentTime = 0;
+  audio.play().catch(() => {});  // o navegador pode recusar som sem um clique: tudo bem
+}
+
+function carregarSom(evento) {
+  const audio = new Audio(), formatos = ["wav", "mp3"];
+  const proximo = () => { audio.src = `../assets/${evento}.${formatos.shift()}`; };
+  audio.addEventListener("error", () => {
+    if (formatos.length) {
+      proximo();
+      audio.play().catch(() => {});
+    } else {
+      sons[evento] = null;
+      if (!avisouSemSom) {
+        avisouSemSom = true;
+        avisar(`Sem a fala do jogo: falta assets/${evento}.wav (veja assets/README.md).`);
+      }
+    }
+  });
+  proximo();
+  return audio;
+}
+
+function desenharSom() {
+  const b = $("#som");
+  b.setAttribute("aria-pressed", somLigado);
+  b.title = somLigado ? "Falas do jogo ligadas: clique para desligar" : "Falas do jogo desligadas: clique para ligar";
+  b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" fill="currentColor"/>${somLigado
+    ? '<path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'
+    : '<path d="M16.5 9.5l5 5m0-5l-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'}</svg>`;
+}
+
 // ---- arquivo: guardar, abrir, baixar, compartilhar ----
 function guardar() {
   try {
@@ -364,6 +415,12 @@ $("#lista-cheats").addEventListener("click", (e) => {
 
 $("#executar").addEventListener("click", () => (execucao?.rodando ? interromper("parado") : enviar(true)));
 $("#baixar").addEventListener("click", baixar);
+$("#som").addEventListener("click", () => {
+  somLigado = !somLigado;
+  try { localStorage.setItem(PREF_SOM, somLigado ? "ligado" : "desligado"); } catch (_) { /* sem armazenamento */ }
+  if (!somLigado) for (const a of Object.values(sons)) a?.pause();
+  desenharSom();
+});
 $("#compartilhar").addEventListener("click", compartilhar);
 $("#abrir").addEventListener("click", () => $("#arquivo").click());
 $("#arquivo").addEventListener("change", async (e) => {
@@ -410,6 +467,7 @@ $("#aba-python").addEventListener("click", (e) => {
 
 // ---- início: código do link, ou o último deste navegador, ou o fatorial ----
 desenharEstrelas(0);
+desenharSom();
 desenharConsole();
 (async () => {
   const doLink = codigoDoLink(), salvo = guardado();
