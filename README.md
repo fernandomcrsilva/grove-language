@@ -39,10 +39,10 @@ texto ─léxico─▶ tokens ─sintático─▶ AST ─semântico─▶ AST an
 | Etapa | Documento |
 |---|---|
 | léxico | [docs/tokens.md](docs/tokens.md) |
-| sintático | [docs/gramatica.md](docs/gramatica.md) |
+| sintático, recuperação de erros, "você quis dizer…?" | [docs/gramatica.md](docs/gramatica.md) |
 | semântico: tabela de símbolos, tipos, erros | [docs/semantica.md](docs/semantica.md) |
 | interpretador | [docs/interpretador.md](docs/interpretador.md) |
-| código de três endereços | [docs/codigo-intermediario.md](docs/codigo-intermediario.md) |
+| código de três endereços e otimização | [docs/codigo-intermediario.md](docs/codigo-intermediario.md) |
 | Python e MicroPython (ESP32) | [docs/geracao-de-codigo.md](docs/geracao-de-codigo.md) |
 | ESP32 na bancada: compras, montagem, gravação, Wokwi | [docs/esp32.md](docs/esp32.md) |
 | vídeo tutorial (mudo): roteiro cena a cena e legendas | [docs/roteiro-video.md](docs/roteiro-video.md) · [docs/legendas-video.srt](docs/legendas-video.srt) |
@@ -57,13 +57,14 @@ python -m grove examples/fatorial.cj --tokens     # só a tabela de tokens
 python -m grove examples/fatorial.cj --ast        # só a AST
 python -m grove examples/fatorial.cj --simbolos   # só a tabela de símbolos
 python -m grove examples/fatorial.cj --ir         # só o código de três endereços
+python -m grove examples/otimizacao.cj --otimizar # a TAC otimizada: 13 → 4 instruções
 python -m grove examples/fatorial.cj --python     # o programa traduzido para Python
 python -m grove examples/fatorial.cj --python | python3   # … e rodando
 python -m grove examples/procurado.cj --esp32 > main.py   # MicroPython: estrelas piscam o LED
 python -m unittest                                # testes
 ```
 
-As flags combinam (`--tokens --ast` mostra as duas). Erro léxico, sintático, semântico ou de execução sai com código 1. `examples/erro_semantico.cj` mostra quatro erros semânticos de uma vez.
+As flags combinam (`--tokens --ast` mostra as duas). Erro léxico, sintático, semântico ou de execução sai com código 1. `examples/erro_semantico.cj` mostra quatro erros semânticos de uma vez, e `examples/erro_digitacao.cj` mostra os erros sintáticos todos juntos, com o cheat certo sugerido ("você quis dizer HESOYAM?").
 
 ## Grove Online (o app)
 
@@ -119,8 +120,10 @@ grove/lexer.py     análise léxica  (texto → tokens)
 grove/ast.py       nós da AST + impressão
 grove/parser.py    análise sintática (tokens → AST), descida recursiva
 grove/semantic.py  análise semântica: tabela de símbolos, tipos, todos os erros de uma vez
+grove/sugestao.py  "você quis dizer…?": o cheat ou a variável mais parecida
 grove/interpreter.py  executa a AST (tree-walking)
 grove/ir.py        código de três endereços (AST → TAC) + executor de TAC
+grove/otimizador.py   otimização da TAC: constantes, cópias, desvios, código morto
 grove/codegen_py.py   gera Python / MicroPython para o ESP32 (AST → .py)
 grove/sounds.py    toca assets/<evento>.wav ao compilar ou dar erro
 grove/__main__.py  linha de comando

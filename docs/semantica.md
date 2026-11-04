@@ -82,6 +82,14 @@ Todos com linha e coluna. A CLI imprime um por linha, mais o total, e sai com c�
 
 **Sem cascata:** uma expressão que já deu erro ganha o tipo interno `erro`, que é aceito em qualquer lugar. Assim `HELLOLADIES y + 1 * 2;` com `y` não declarada dá um erro só, não três.
 
+**Sugestões:** quando uma variável não existe, a mensagem sugere o nome parecido, comparando pela distância de edição (`grove/sugestao.py`). Primeiro procura um cheat, depois uma variável visível naquele ponto:
+
+| Programa | Mensagem |
+|---|---|
+| `HELLOLADIES FULCLIP;` | `variável 'FULCLIP' não declarada; você quis dizer o cheat FULLCLIP?` |
+| `HESOYAM contador = 0; HELLOLADIES contdor;` | `variável 'contdor' não declarada; você quis dizer 'contador'?` |
+| `HESOYAM x = 1; HELLOLADIES y;` | `variável 'y' não declarada` (nomes de uma ou duas letras não ganham sugestão) |
+
 Saída de `python -m grove examples/erro_semantico.cj`:
 
 ```

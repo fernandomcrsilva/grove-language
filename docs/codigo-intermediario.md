@@ -94,8 +94,51 @@ Saída de `python -m grove examples/procurado.cj --ir`. `!policia_ligada || estr
  16      print "fim: "
 ```
 
-Não há otimização: `ifFalse FULLCLIP goto L4` fica como está, mesmo sendo sempre falso.
+`ifFalse FULLCLIP goto L4` nunca desvia; quem tira essa instrução é o otimizador.
+
+## Otimização
+
+`grove/otimizador.py` recebe a TAC e devolve uma lista nova, sem mexer na original. As passadas abaixo se repetem até nada mais mudar:
+
+| Passada | Antes | Depois |
+|---|---|---|
+| contas calculadas na compilação | `t1 = 60 * 60` | `t1 = 3600` |
+| propagação de constantes, dentro do bloco básico | `a = 5` · `b = a * 2` | `a = 5` · `b = 5 * 2` |
+| propagação de cópias para temporários | `t2 = x` · `print t2` | `print x` |
+| simplificação algébrica | `t3 = x + 0` · `t4 = x * 0` | `t3 = x` · `t4 = 0` |
+| desvio com condição constante | `ifFalse FULLCLIP goto L4` · `ifFalse GHOSTTOWN goto L1` | (some) · `goto L1` |
+| instruções mortas | o que vem depois de um `goto` até o próximo rótulo, `goto` para o rótulo logo abaixo, rótulo que ninguém usa, temporário que ninguém lê | (some) |
+
+**Bloco básico** é um trecho sem rótulos no meio. A propagação só vale dentro dele: num rótulo, o que se sabia é esquecido, porque o código pode chegar ali por outro caminho, como a volta de um laço. Por isso o fatorial não muda: `n` e `r` mudam dentro do laço.
+
+**Erro continua erro.** Divisão ou resto por zero nunca é calculado na compilação nem removido: `HELLOLADIES 1 / 0;` continua dando `divisão por zero` ao executar, depois do que foi impresso antes.
+
+Saída de `python -m grove examples/otimizacao.cj --ir --otimizar`, a TAC original e depois a otimizada:
+
+```
+  1      segundos = 60 * 60
+  2      dobro = segundos * 2
+  3      t1 = dobro + 0
+  4      print t1
+  5      ifFalse GHOSTTOWN goto L1
+  6      print "nunca"
+  7  L1:
+  8  L2:
+  9      ifFalse FULLCLIP goto L3
+ 10      print "uma vez"
+ 11      goto L3
+ 12      goto L2
+ 13  L3:
+
+  1      segundos = 3600
+  2      dobro = 7200
+  3      print 7200
+  4      print "uma vez"
+# 13 → 4 instruções · 2 contas calculadas na compilação · 3 valores propagados · 1 simplificação algébrica · 2 desvios resolvidos · 8 instruções mortas removidas
+```
+
+No `procurado.cj` a otimização tira só o `ifFalse FULLCLIP goto L4` (16 → 15). No `fatorial.cj` e no `fizzbuzz.cj` não há nada a otimizar. No Grove Online, a aba TAC alterna entre a original e a otimizada.
 
 ## Executor de TAC
 
-`execute(code)` roda a listagem: um contador de programa, um dicionário de memória e um índice rótulo → posição. Serve de **oráculo**: nos testes (`tests/test_ir.py`, `tests/test_codegen.py`), todo exemplo e todo trecho delicado (sombra, curto-circuito, `break` aninhado, negativos em `/` e `%`) dá a mesma saída no interpretador, na TAC e no Python gerado.
+`execute(code)` roda a listagem: um contador de programa, um dicionário de memória e um índice rótulo → posição. Serve de **oráculo**: nos testes (`tests/test_ir.py`, `tests/test_otimizador.py`, `tests/test_codegen.py`, `tests/test_aleatorio.py`), todo exemplo, todo trecho delicado (sombra, curto-circuito, `break` aninhado, negativos em `/` e `%`) e cada programa aleatório dá a mesma saída no interpretador, na TAC, na TAC otimizada e no Python gerado.

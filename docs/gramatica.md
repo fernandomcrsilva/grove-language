@@ -76,11 +76,27 @@ Definidos em `grove/ast.py` como `dataclass`es:
 
 ## Erros sintáticos
 
-`ParseError` com linha, coluna, o que era esperado e o que foi encontrado:
+Cada erro tem linha, coluna, o que era esperado e o que foi encontrado:
 
 ```
 erro: linha 2, coluna 1: esperado ; (fim de instrução), encontrado 'HELLOLADIES'
 ```
+
+**Todos de uma vez.** O parser não para no primeiro erro (recuperação em *modo pânico*): anota a mensagem, pula até um ponto seguro e continua. O ponto seguro é logo depois do próximo `;`, ou o começo de outra instrução (`HESOYAM`, `TURNUPTHEHEAT`, `KANGAROO`, `HELLOLADIES`, `GOODBYECRUELWORLD`, `{`), ou o `}` que fecha o bloco. No fim, `ParseError` traz a lista em `erros`. Parar no começo da próxima instrução, e não só depois de um `;`, evita erros em cascata: um `;` esquecido gera um erro, não dois.
+
+**"Você quis dizer…?"** Os cheats são compridos, e um cheat digitado errado vira um identificador comum, com um erro confuso logo depois. Quando uma instrução começa por um nome que não é seguido de `=`, o parser compara esse nome com os nove cheats pela distância de edição (`grove/sugestao.py`: inserção, remoção, troca ou inversão de duas letras vizinhas). Se a diferença é pequena para o tamanho do cheat, a mensagem sugere o certo. `TURNDOWNTHEHEAT` e `BRINGITON` soltos também têm mensagem própria.
+
+Saída de `python -m grove examples/erro_digitacao.cj`:
+
+```
+erro: linha 2, coluna 1: 'HESOYM' não é um cheat da Grove; você quis dizer HESOYAM?
+erro: linha 4, coluna 1: 'TURNUPTHEHEET' não é um cheat da Grove; você quis dizer TURNUPTHEHEAT?
+erro: linha 5, coluna 5: 'HELLOLADYS' não é um cheat da Grove; você quis dizer HELLOLADIES?
+erro: linha 7, coluna 19: esperado expressão, encontrado ')'
+4 erros sintáticos
+```
+
+Cheat em minúsculas tem mensagem própria: `'hesoyam' não é um cheat da Grove: os cheats são em maiúsculas (HESOYAM)`.
 
 ## Exemplo de AST
 
