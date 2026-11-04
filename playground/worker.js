@@ -83,15 +83,21 @@ def executar():
 
 let pyodide = null;
 
+const progresso = (pct, texto) => postMessage({ tipo: "progresso", pct, texto });
+
 async function carregar() {
+  progresso(5, "baixando o Python (Pyodide)");
   const { loadPyodide } = await import(PYODIDE + "pyodide.mjs");  // o Pyodide 314 só roda em module worker
+  progresso(20, "iniciando o Python");
   pyodide = await loadPyodide({ indexURL: PYODIDE });
+  progresso(75, "carregando o compilador da Grove");
   pyodide.FS.mkdirTree("/home/pyodide/grove");
   await Promise.all(MODULOS.map(async (m) => {
     const resp = await fetch(`../grove/${m}.py`);
     if (!resp.ok) throw new Error(`grove/${m}.py: HTTP ${resp.status}`);
     pyodide.FS.writeFile(`/home/pyodide/grove/${m}.py`, await resp.text());
   }));
+  progresso(95, "quase lá");
   pyodide.runPython(GLUE);
   return pyodide.runPython("import sys; sys.version.split()[0]");
 }

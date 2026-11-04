@@ -3,193 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Grove Playground</title>
-<meta name="description" content="Escreva Grove no navegador e veja tokens, AST, tabela de símbolos, código de três endereços, Python gerado e a saída do programa.">
-<style>
-  :root {
-    --pinho: #12372A; --grove: #2E7D32; --missao: #B7E46C; --concreto: #F4F1E8; --alerta: #D95D39;
-    --fundo: var(--concreto);
-    --superficie: #FFFFFF;
-    --superficie-2: #EAF0EA;
-    --texto: #142019;
-    --texto-suave: #4F6156;
-    --borda: #DCE7DE;
-    --primaria: var(--grove);
-    --primaria-texto: #FFFFFF;
-    --foco: var(--grove);
-    --ok: var(--grove);
-    --erro: #B4431F;
-    --erro-fundo: #FBE8E0;
-    --aviso: #7D6418;
-    --aviso-fundo: #F5EDD3;
-    --rotulo: var(--grove);
-    --sans: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
-    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
-    color-scheme: light;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --fundo: #0D1712;
-      --superficie: #142019;
-      --superficie-2: #1B2C23;
-      --texto: #F4F1E8;
-      --texto-suave: #A6B5AB;
-      --borda: #263D31;
-      --primaria: var(--missao);
-      --primaria-texto: var(--pinho);
-      --foco: var(--missao);
-      --ok: var(--missao);
-      --erro: #F2906F;
-      --erro-fundo: #3A1D14;
-      --aviso: #E2C46E;
-      --aviso-fundo: #2F2914;
-      --rotulo: var(--missao);
-      color-scheme: dark;
-    }
-  }
-
-  * { box-sizing: border-box; }
-  html, body { height: 100%; }
-  body {
-    margin: 0; background: var(--fundo); color: var(--texto);
-    font: 15px/1.45 var(--sans);
-    display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto;
-  }
-  button, select { font: inherit; color: inherit; }
-  :focus-visible { outline: 2px solid var(--foco); outline-offset: 2px; }
-  .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-
-  /* topo */
-  .topo {
-    display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px;
-    padding: 14px 24px; background: var(--pinho); color: var(--concreto);
-  }
-  .marca { color: inherit; text-decoration: none; font-weight: 700; font-size: 22px; letter-spacing: -0.02em; }
-  .marca .chave { color: var(--missao); font-family: var(--mono); font-weight: 600; }
-  .sub { color: #B9CABF; font-size: 14px; }
-  .acoes { margin-left: auto; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-  .topo a.link { color: #D7E3DA; font-size: 14px; }
-  select {
-    background: #1B4535; color: var(--concreto); border: 1px solid #2D5A47; border-radius: 8px;
-    padding: 7px 10px; min-height: 36px;
-  }
-  .executar {
-    display: inline-flex; align-items: center; gap: 8px; min-height: 36px;
-    background: var(--missao); color: var(--pinho); border: 0; border-radius: 8px;
-    padding: 7px 16px; font-weight: 700; cursor: pointer;
-  }
-  .executar:hover:not(:disabled) { filter: brightness(1.06); }
-  .executar:disabled { opacity: .55; cursor: progress; }
-  .executar kbd { font: 12px var(--mono); opacity: .7; }
-  .topo :focus-visible { outline-color: var(--missao); }
-
-  /* etapas */
-  .pipeline {
-    list-style: none; margin: 0; padding: 10px 24px; display: flex; flex-wrap: wrap; gap: 6px 4px;
-    align-items: center; background: var(--superficie); border-bottom: 1px solid var(--borda);
-    font-size: 13px; color: var(--texto-suave);
-  }
-  .pipeline li { display: inline-flex; align-items: center; gap: 6px; }
-  .pipeline li + li::before { content: "→"; margin: 0 6px 0 2px; color: var(--texto-suave); opacity: .6; }
-  .etapa { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--borda); }
-  .etapa::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--borda); }
-  .etapa[data-estado="ok"] { color: var(--texto); }
-  .etapa[data-estado="ok"]::before { background: var(--ok); }
-  .etapa[data-estado="erro"] { color: var(--erro); border-color: var(--erro); background: var(--erro-fundo); }
-  .etapa[data-estado="erro"]::before { background: var(--erro); }
-  .etapa[data-estado="rodando"]::before { background: var(--ok); animation: pulsa 1s infinite; }
-  @keyframes pulsa { 50% { opacity: .2; } }
-  @media (prefers-reduced-motion: reduce) { .etapa[data-estado="rodando"]::before { animation: none; } }
-
-  /* área principal */
-  .area { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); min-height: 0; }
-  .editor { display: flex; min-height: 0; border-right: 1px solid var(--borda); background: var(--superficie); }
-  .gutter, #fonte { font: 14px/1.6 var(--mono); padding: 16px 0; margin: 0; }
-  .gutter {
-    min-width: 48px; padding-right: 10px; padding-left: 8px; text-align: right; color: var(--texto-suave);
-    opacity: .75; user-select: none; overflow: hidden; background: var(--superficie-2);
-  }
-  .gutter span { display: block; }
-  .gutter .erro { color: var(--erro); opacity: 1; font-weight: 700; background: var(--erro-fundo); margin: 0 -10px 0 -8px; padding: 0 10px 0 8px; }
-  .gutter .aviso { color: var(--aviso); opacity: 1; font-weight: 700; }
-  #fonte {
-    flex: 1; min-width: 0; resize: none; border: 0; outline: none; padding-left: 14px; padding-right: 16px;
-    background: transparent; color: var(--texto); tab-size: 4; white-space: pre; overflow: auto;
-  }
-  #fonte:focus-visible { box-shadow: inset 0 0 0 2px var(--foco); }
-
-  .painel { display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0; background: var(--fundo); }
-  [role="tablist"] {
-    display: flex; gap: 2px; padding: 8px 16px 0; overflow-x: auto; border-bottom: 1px solid var(--borda);
-    background: var(--superficie);
-  }
-  [role="tab"] {
-    background: none; border: 0; border-bottom: 2px solid transparent; padding: 8px 12px; cursor: pointer;
-    color: var(--texto-suave); white-space: nowrap; font-size: 14px;
-  }
-  [role="tab"][aria-selected="true"] { color: var(--texto); border-bottom-color: var(--primaria); font-weight: 600; }
-  [role="tab"]:hover { color: var(--texto); }
-  [role="tabpanel"] { overflow: auto; padding: 18px 20px 28px; min-height: 0; }
-  [role="tabpanel"][hidden] { display: none; }
-
-  pre.codigo { margin: 0; font: 13.5px/1.6 var(--mono); white-space: pre; tab-size: 4; }
-  .codigo .num { color: var(--texto-suave); opacity: .7; }
-  .codigo .rotulo { color: var(--rotulo); font-weight: 700; }
-  .vazio { color: var(--texto-suave); margin: 0; }
-  table { border-collapse: collapse; font: 13.5px/1.5 var(--mono); }
-  th { text-align: left; font: 600 12px var(--sans); color: var(--texto-suave); letter-spacing: .03em; padding: 0 18px 6px 0; border-bottom: 1px solid var(--borda); }
-  td { padding: 3px 18px 3px 0; border-bottom: 1px solid var(--borda); white-space: pre; }
-
-  .veredito { display: inline-block; font-weight: 800; letter-spacing: .04em; font-size: 13px; padding: 4px 10px; border-radius: 6px; margin-bottom: 14px; }
-  .veredito.ok { background: var(--pinho); color: var(--missao); }
-  .veredito.erro { background: var(--erro-fundo); color: var(--erro); }
-  .diagnosticos { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 6px; }
-  .diagnosticos button {
-    width: 100%; text-align: left; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; align-items: baseline;
-    border: 1px solid transparent; border-radius: 8px; padding: 8px 12px; cursor: pointer;
-  }
-  .diagnosticos .erro button { background: var(--erro-fundo); color: var(--erro); }
-  .diagnosticos .aviso button { background: var(--aviso-fundo); color: var(--aviso); }
-  .diagnosticos button:hover { border-color: currentColor; }
-  .diagnosticos .onde { font: 600 12.5px var(--mono); white-space: nowrap; }
-  .diagnosticos .msg { color: var(--texto); }
-  .saida { margin: 0; font: 14px/1.6 var(--mono); white-space: pre-wrap; overflow-wrap: anywhere; }
-  .saida.velha { opacity: .5; }
-  .saida .falha { color: var(--erro); font-weight: 600; }
-  .nota { color: var(--texto-suave); font-size: 13.5px; margin: 0 0 10px; }
-  .alternar { display: inline-flex; border: 1px solid var(--borda); border-radius: 8px; overflow: hidden; margin-bottom: 14px; }
-  .alternar button { background: var(--superficie); border: 0; padding: 6px 12px; cursor: pointer; font-size: 13px; color: var(--texto-suave); }
-  .alternar button[aria-pressed="true"] { background: var(--primaria); color: var(--primaria-texto); font-weight: 600; }
-
-  footer { padding: 10px 24px; font-size: 13px; color: var(--texto-suave); border-top: 1px solid var(--borda); background: var(--superficie); }
-  footer[data-estado="erro"] { color: var(--erro); }
-
-  @media (max-width: 860px) {
-    body { height: auto; display: block; }
-    .topo { padding: 12px 16px; }
-    .acoes { margin-left: 0; width: 100%; }
-    .acoes select { flex: 1; min-width: 0; }
-    .pipeline { padding: 8px 16px; }
-    .area { grid-template-columns: minmax(0, 1fr); }
-    .editor { height: 46vh; min-height: 260px; border-right: 0; border-bottom: 1px solid var(--borda); }
-    [role="tablist"] { padding: 6px 8px 0; }
-    [role="tab"] { padding: 8px 9px; }
-    [role="tabpanel"] { padding: 16px; min-height: 40vh; }
-    footer { padding: 10px 16px; }
-  }
-  @media (max-width: 480px) {
-    .pipeline { gap: 6px; }
-    .pipeline li + li::before { display: none; }  /* sem as setas os quatro cabem numa linha */
-    .etapa { padding: 3px 8px; }
-  }
-</style>
+<title>Grove Online — compilador da linguagem dos cheats</title>
+<meta name="description" content="Compilador online da Grove, a linguagem cujas palavras-chave são cheats de GTA San Andreas. Escreva, compile e rode no navegador, e veja cada etapa do compilador.">
+<meta name="theme-color" content="#070908">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1.5l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.6l-6.4 3.5 1.4-7.1-5.3-5 7.2-.9z' fill='%23e2a529' stroke='%23000' stroke-width='1.5'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="estilo.css">
+<script type="module" src="app.js"></script>
 </head>
 <body>
 <header class="topo">
-  <a class="marca" href="https://github.com/fernandomcrsilva/grove-language"><span class="chave">{</span>grove<span class="chave">}</span></a>
-  <span class="sub">playground do compilador</span>
-  <div class="acoes">
-    <label class="sr-only" for="exemplo">Carregar exemplo</label>
+  <a class="marca" href="./" aria-label="Grove Online">
+    <span class="logo">Grove</span>
+    <span class="logo-sub">compilador online</span>
+  </a>
+
+  <div class="acoes" role="toolbar" aria-label="Arquivo">
+    <label class="sr-only" for="exemplo">Abrir um exemplo</label>
     <select id="exemplo">
       <option value="">Exemplos…</option>
       <option value="fatorial">fatorial.cj</option>
@@ -200,333 +29,77 @@
       <option value="erro_semantico">erro_semantico.cj</option>
       <option value="erro_execucao">erro_execucao.cj</option>
     </select>
-    <button class="executar" id="executar" disabled>▶ Executar <kbd>Ctrl ↵</kbd></button>
-    <a class="link" href="https://github.com/fernandomcrsilva/grove-language/tree/main/docs">docs</a>
+    <button type="button" class="botao" id="abrir">Abrir</button>
+    <input type="file" id="arquivo" accept=".cj,.txt,text/plain" hidden>
+    <button type="button" class="botao" id="baixar" title="Baixar o código (Ctrl+S)">Baixar</button>
+    <button type="button" class="botao" id="compartilhar" title="Copiar um link com este código">Compartilhar</button>
+  </div>
+
+  <button type="button" class="executar" id="executar" disabled>
+    <span class="executar-rotulo">Executar</span><kbd>Ctrl ↵</kbd>
+  </button>
+
+  <div class="hud">
+    <div class="estrelas" id="estrelas" role="img" aria-label="Nível de procurado: 0 de 6"
+         title="Nível de procurado: uma estrela por erro encontrado"></div>
+    <div class="dinheiro" id="dinheiro" title="Cada missão cumprida vale um HESOYAM: $250.000">$00000000</div>
   </div>
 </header>
 
-<ol class="pipeline" aria-label="Etapas do compilador">
-  <li><span class="etapa" data-etapa="lexico">léxico</span></li>
-  <li><span class="etapa" data-etapa="sintatico">sintático</span></li>
-  <li><span class="etapa" data-etapa="semantico">semântico</span></li>
-  <li><span class="etapa" data-etapa="execucao">execução</span></li>
-</ol>
-
 <main class="area">
-  <section class="editor" aria-label="Editor">
-    <pre class="gutter" id="gutter" aria-hidden="true"></pre>
-    <textarea id="fonte" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off"
-              aria-label="Código-fonte Grove"></textarea>
+  <aside class="cheats" aria-labelledby="cheats-titulo">
+    <h2 id="cheats-titulo" class="titulo-painel">Cheats</h2>
+    <p class="cheats-dica">Clique para inserir no código.</p>
+    <ul id="lista-cheats"></ul>
+  </aside>
+
+  <section class="painel editor-painel" aria-label="Editor">
+    <div class="painel-topo">
+      <span class="arquivo" id="nome-arquivo">main.cj</span>
+      <span class="salvo" id="salvo"></span>
+    </div>
+    <div class="editor">
+      <pre class="numeros" id="numeros" aria-hidden="true"></pre>
+      <div class="codigo">
+        <pre class="realce" id="realce" aria-hidden="true"></pre>
+        <textarea id="fonte" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off"
+                  aria-label="Código-fonte Grove" aria-describedby="dica-teclado"></textarea>
+      </div>
+    </div>
   </section>
 
-  <section class="painel" aria-label="Resultado">
-    <div role="tablist" aria-label="Saídas do compilador">
-      <button role="tab" id="tab-saida" aria-controls="aba-saida" aria-selected="true">Saída</button>
+  <section class="painel saida-painel" aria-label="Resultado">
+    <div role="tablist" class="abas" aria-label="Saídas do compilador">
+      <button role="tab" id="tab-console" aria-controls="aba-console" aria-selected="true">Console</button>
       <button role="tab" id="tab-tokens" aria-controls="aba-tokens" aria-selected="false" tabindex="-1">Tokens</button>
       <button role="tab" id="tab-ast" aria-controls="aba-ast" aria-selected="false" tabindex="-1">AST</button>
       <button role="tab" id="tab-simbolos" aria-controls="aba-simbolos" aria-selected="false" tabindex="-1">Símbolos</button>
       <button role="tab" id="tab-ir" aria-controls="aba-ir" aria-selected="false" tabindex="-1">TAC</button>
       <button role="tab" id="tab-python" aria-controls="aba-python" aria-selected="false" tabindex="-1">Python</button>
     </div>
-    <div role="tabpanel" id="aba-saida" aria-labelledby="tab-saida" tabindex="0"></div>
-    <div role="tabpanel" id="aba-tokens" aria-labelledby="tab-tokens" tabindex="0" hidden></div>
-    <div role="tabpanel" id="aba-ast" aria-labelledby="tab-ast" tabindex="0" hidden></div>
-    <div role="tabpanel" id="aba-simbolos" aria-labelledby="tab-simbolos" tabindex="0" hidden></div>
-    <div role="tabpanel" id="aba-ir" aria-labelledby="tab-ir" tabindex="0" hidden></div>
-    <div role="tabpanel" id="aba-python" aria-labelledby="tab-python" tabindex="0" hidden></div>
+    <div role="tabpanel" class="aba console" id="aba-console" aria-labelledby="tab-console" tabindex="0" aria-live="polite"></div>
+    <div role="tabpanel" class="aba" id="aba-tokens" aria-labelledby="tab-tokens" tabindex="0" hidden></div>
+    <div role="tabpanel" class="aba" id="aba-ast" aria-labelledby="tab-ast" tabindex="0" hidden></div>
+    <div role="tabpanel" class="aba" id="aba-simbolos" aria-labelledby="tab-simbolos" tabindex="0" hidden></div>
+    <div role="tabpanel" class="aba" id="aba-ir" aria-labelledby="tab-ir" tabindex="0" hidden></div>
+    <div role="tabpanel" class="aba" id="aba-python" aria-labelledby="tab-python" tabindex="0" hidden></div>
   </section>
 </main>
 
-<footer id="status" role="status">carregando Python no navegador…</footer>
+<footer class="barra-status">
+  <ol class="etapas" aria-label="Etapas do compilador">
+    <li class="etapa" data-etapa="lexico">léxico</li>
+    <li class="etapa" data-etapa="sintatico">sintático</li>
+    <li class="etapa" data-etapa="semantico">semântico</li>
+    <li class="etapa" data-etapa="execucao">execução</li>
+  </ol>
+  <span id="posicao">Ln 1, Col 1</span>
+  <span id="dica-teclado">Ctrl+Enter executa · Tab recua · Esc e Tab saem do editor</span>
+  <span id="versao">carregando o Python…</span>
+  <a href="https://github.com/fernandomcrsilva/grove-language">código no GitHub</a>
+</footer>
 
-<noscript><p style="padding:16px">O playground precisa de JavaScript para rodar o Python no navegador.</p></noscript>
-
-<script>
-"use strict";
-const $ = (s) => document.querySelector(s);
-const fonte = $("#fonte"), gutter = $("#gutter"), botao = $("#executar"), rodape = $("#status");
-const TEMPO_MAXIMO = 5000;  // ms; depois disso o worker é encerrado (laço infinito)
-const GUARDADO = "grove-playground-fonte";
-const VEREDITO = {  // as falas da CLI (grove/sounds.py), em texto
-  ok: "MISSION PASSED! Respect +",
-  "léxico": "WASTED",
-  "sintático": "All you had to do was follow the damn train, CJ!",
-  "semântico": "BUSTED",
-  "execução": "Ah shit, here we go again.",
-};
-const ANTES = { lexico: "léxico", sintatico: "sintático", semantico: "semântico" };
-
-let worker, pronto = false, primeiraVez = true;
-let seq = 0, idCompilacao = 0, idExecucao = 0, relogio = null;
-let compilado = null;   // resultado da última compilação
-let execucao = null;    // { saida, erro, fonte } da última execução
-let alvoPython = "python";
-
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
-
-function status(texto, estado) {
-  rodape.textContent = texto;
-  rodape.dataset.estado = estado || "";
-}
-
-// ---- worker com o Python ----
-function iniciarWorker() {
-  pronto = false;
-  botao.disabled = true;
-  const local = new URLSearchParams(location.search).get("pyodide");  // ver worker.js
-  worker = new Worker(local ? `worker.js?pyodide=${encodeURIComponent(local)}` : "worker.js", { type: "module" });
-  worker.onmessage = ({ data }) => receber[data.tipo](data);
-  worker.onerror = (e) => status(`não deu para carregar o Python: ${e.message || "erro no worker"}`, "erro");
-}
-
-const receber = {
-  pronto({ versao }) {
-    pronto = true;
-    botao.disabled = false;
-    status(`Python ${versao} rodando no seu navegador (Pyodide). Nada sai daqui.`);
-    enviar(primeiraVez);
-    primeiraVez = false;
-  },
-  falhou({ mensagem }) {
-    status(`não deu para carregar o Python: ${mensagem}`, "erro");
-  },
-  compilado(d) {
-    if (d.id === idExecucao && d.erros.length) {  // não vai executar
-      clearTimeout(relogio);
-      execucao = null;
-    }
-    if (d.id !== idCompilacao) return;
-    compilado = d;
-    mostrar();
-  },
-  executado(d) {
-    if (d.id !== idExecucao) return;
-    clearTimeout(relogio);
-    execucao.saida = d.saida;
-    execucao.erro = d.erro;
-    execucao.rodando = false;
-    mostrar();
-  },
-};
-
-function enviar(executar) {
-  if (!pronto) return;
-  const id = ++seq;
-  idCompilacao = id;
-  if (executar) {
-    idExecucao = id;
-    execucao = { saida: [], erro: null, fonte: fonte.value, rodando: true };
-    clearTimeout(relogio);
-    relogio = setTimeout(estourou, TEMPO_MAXIMO);
-    mostrar();
-  }
-  worker.postMessage({ id, src: fonte.value, executar });
-}
-
-function estourou() {
-  worker.terminate();
-  execucao.rodando = false;
-  execucao.erro = `tempo esgotado: o programa rodou por mais de ${TEMPO_MAXIMO / 1000} s. Faltou um GOODBYECRUELWORLD?`;
-  mostrar();
-  status("reiniciando o Python…");
-  iniciarWorker();
-}
-
-// ---- desenho ----
-function mostrar() {
-  const d = compilado;
-  const etapas = d ? d.etapas : {};
-  for (const el of document.querySelectorAll(".etapa")) {
-    const e = el.dataset.etapa;
-    el.dataset.estado = e === "execucao" ? estadoExecucao() : (etapas[e] || "");
-  }
-  marcarLinhas();
-  if (!d) return;
-  const parou = d.erros.length ? `Não chegou nesta etapa: o programa parou no erro ${d.erros[0].tipo}.` : "";
-  $("#aba-tokens").innerHTML = d.tokens ? tabela(d.tokens) : vazio(parou);
-  $("#aba-ast").innerHTML = d.ast ? `<pre class="codigo">${esc(d.ast)}</pre>` : vazio(parou);
-  $("#aba-simbolos").innerHTML = d.simbolos
-    ? (d.simbolos.includes("\n") ? tabela(d.simbolos) : vazio("O programa não declara variáveis."))
-    : vazio(parou);
-  $("#aba-ir").innerHTML = d.ir !== undefined ? (d.ir ? `<pre class="codigo">${tac(d.ir)}</pre>` : vazio("Programa vazio.")) : vazio(parou);
-  $("#aba-python").innerHTML = d.python !== undefined ? python(d) : vazio(parou);
-  $("#aba-saida").innerHTML = saida(d);
-}
-
-function estadoExecucao() {
-  if (!execucao) return "";
-  if (execucao.rodando) return "rodando";
-  return execucao.erro ? "erro" : "ok";
-}
-
-function vazio(texto) {
-  return `<p class="vazio">${esc(texto)}</p>`;
-}
-
-function tabela(tsv) {
-  const [cab, ...linhas] = tsv.split("\n").map((l) => l.split("\t"));
-  return `<table><thead><tr>${cab.map((c) => `<th scope="col">${esc(c)}</th>`).join("")}</tr></thead><tbody>${
-    linhas.map((l) => `<tr>${l.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody></table>`;
-}
-
-function tac(texto) {
-  return texto.split("\n").map((l) => {
-    const m = l.match(/^(\s*\d+)(\s+)(.*)$/);
-    if (!m) return esc(l);
-    const corpo = /^L\d+:$/.test(m[3]) ? `<span class="rotulo">${esc(m[3])}</span>` : esc(m[3]);
-    return `<span class="num">${m[1]}</span>${m[2]}${corpo}`;
-  }).join("\n");
-}
-
-function python(d) {
-  const botoes = [["python", "Python"], ["esp32", "MicroPython · ESP32"]]
-    .map(([v, nome]) => `<button type="button" data-alvo="${v}" aria-pressed="${alvoPython === v}">${nome}</button>`).join("");
-  const nota = alvoPython === "esp32"
-    ? `<p class="nota">A variável inteira <code>estrelas</code> pisca o LED no GPIO 2: quanto mais estrelas, mais rápido. Na CLI: <code>python -m grove arquivo.cj --esp32</code>.</p>`
-    : `<p class="nota">O mesmo programa traduzido da AST. Na CLI: <code>python -m grove arquivo.cj --python | python3</code>.</p>`;
-  return `<div class="alternar" role="group" aria-label="Alvo">${botoes}</div>${nota}<pre class="codigo">${esc(d[alvoPython])}</pre>`;
-}
-
-function saida(d) {
-  let html = "";
-  const erroEtapa = d.erros.length ? d.erros[0].tipo : null;
-  const mudou = execucao && execucao.fonte !== fonte.value;
-  if (erroEtapa) {
-    html += `<div class="veredito erro">${esc(VEREDITO[erroEtapa])}</div>`;
-  } else if (execucao && !execucao.rodando && !mudou) {
-    html += execucao.erro
-      ? `<div class="veredito erro">${esc(VEREDITO["execução"])}</div>`
-      : `<div class="veredito ok">${esc(VEREDITO.ok)}</div>`;
-  }
-  const diags = [...d.erros.map((x) => ["erro", x]), ...d.avisos.map((x) => ["aviso", x])];
-  if (diags.length) {
-    html += `<ul class="diagnosticos">${diags.map(([cls, x]) => `<li class="${cls}"><button type="button"
-      data-linha="${x.linha ?? ""}" data-coluna="${x.coluna ?? ""}"><span class="onde">${
-      x.linha ? `${x.linha}:${x.coluna}` : cls}</span><span class="msg">${
-      cls === "erro" ? `erro ${esc(x.tipo)}: ` : "aviso: "}${esc(x.mensagem)}</span></button></li>`).join("")}</ul>`;
-  }
-  if (erroEtapa) {
-    return html + `<p class="nota">Corrija ${d.erros.length > 1 ? "os erros" : "o erro"} acima; clique para ir até a linha.</p>`;
-  }
-  if (!execucao) {
-    return html + `<p class="nota">Aperte <strong>Executar</strong> (Ctrl + Enter) para rodar o programa.</p>`;
-  }
-  if (execucao.rodando) {
-    return html + `<p class="nota">Rodando…</p>`;
-  }
-  if (mudou) html += `<p class="nota">O código mudou desde a última execução. Aperte Executar para rodar de novo.</p>`;
-  const linhas = execucao.saida.map(esc).join("\n");
-  const falha = execucao.erro ? `${linhas ? "\n" : ""}<span class="falha">erro: ${esc(execucao.erro)}</span>` : "";
-  const nada = !linhas && !falha ? `<span class="vazio">(o programa não imprimiu nada)</span>` : "";
-  return html + `<pre class="saida${mudou ? " velha" : ""}">${linhas}${falha}${nada}</pre>`;
-}
-
-function marcarLinhas() {
-  const n = fonte.value.split("\n").length;
-  const erros = new Set((compilado ? compilado.erros : []).map((x) => x.linha));
-  const avisos = new Set((compilado ? compilado.avisos : []).map((x) => x.linha));
-  let html = "";
-  for (let i = 1; i <= n; i++) {
-    html += `<span${erros.has(i) ? ' class="erro"' : avisos.has(i) ? ' class="aviso"' : ""}>${i}</span>`;
-  }
-  gutter.innerHTML = html;
-  gutter.scrollTop = fonte.scrollTop;
-}
-
-function irPara(linha, coluna) {
-  const linhas = fonte.value.split("\n");
-  let pos = 0;
-  for (let i = 0; i < linha - 1 && i < linhas.length; i++) pos += linhas[i].length + 1;
-  pos += Math.max(0, coluna - 1);
-  fonte.focus();
-  fonte.setSelectionRange(pos, pos + 1);
-}
-
-// ---- eventos ----
-let espera = null;
-fonte.addEventListener("input", () => {
-  marcarLinhas();
-  try { localStorage.setItem(GUARDADO, fonte.value); } catch (_) { /* sem armazenamento: tudo bem */ }
-  clearTimeout(espera);
-  espera = setTimeout(() => enviar(false), 300);  // compila enquanto digita; executar é no botão
-});
-fonte.addEventListener("scroll", () => { gutter.scrollTop = fonte.scrollTop; });
-fonte.addEventListener("keydown", (e) => {
-  if (e.key === "Tab" && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
-    e.preventDefault();
-    fonte.setRangeText("    ", fonte.selectionStart, fonte.selectionEnd, "end");
-    fonte.dispatchEvent(new Event("input"));
-  }
-});
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
-    e.preventDefault();
-    enviar(true);
-  }
-});
-botao.addEventListener("click", () => enviar(true));
-
-$("#exemplo").addEventListener("change", async (e) => {
-  const nome = e.target.value;
-  if (!nome) return;
-  try {
-    const resp = await fetch(`../examples/${nome}.cj`);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    fonte.value = await resp.text();
-  } catch (erro) {
-    status(`não deu para abrir examples/${nome}.cj: ${erro.message}`, "erro");
-    return;
-  }
-  e.target.value = "";
-  fonte.dispatchEvent(new Event("input"));
-  clearTimeout(espera);
-  enviar(true);
-});
-
-$("#aba-saida").addEventListener("click", (e) => {
-  const b = e.target.closest("button[data-linha]");
-  if (b && b.dataset.linha) irPara(Number(b.dataset.linha), Number(b.dataset.coluna));
-});
-$("#aba-python").addEventListener("click", (e) => {
-  const b = e.target.closest("button[data-alvo]");
-  if (!b) return;
-  alvoPython = b.dataset.alvo;
-  mostrar();
-});
-
-const abas = [...document.querySelectorAll('[role="tab"]')];
-function abrirAba(tab) {
-  for (const t of abas) {
-    const sel = t === tab;
-    t.setAttribute("aria-selected", sel);
-    t.tabIndex = sel ? 0 : -1;
-    document.getElementById(t.getAttribute("aria-controls")).hidden = !sel;
-  }
-}
-for (const t of abas) {
-  t.addEventListener("click", () => abrirAba(t));
-  t.addEventListener("keydown", (e) => {
-    const i = abas.indexOf(t);
-    const j = e.key === "ArrowRight" ? i + 1 : e.key === "ArrowLeft" ? i - 1 : null;
-    if (j === null) return;
-    const alvo = abas[(j + abas.length) % abas.length];
-    alvo.focus();
-    abrirAba(alvo);
-  });
-}
-
-// ---- início ----
-(async () => {
-  let guardado = null;
-  try { guardado = localStorage.getItem(GUARDADO); } catch (_) { /* sem armazenamento */ }
-  if (guardado) {
-    fonte.value = guardado;
-  } else {
-    try { fonte.value = await (await fetch("../examples/fatorial.cj")).text(); } catch (_) { fonte.value = ""; }
-  }
-  marcarLinhas();
-  iniciarWorker();
-})();
-</script>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<noscript><p class="sem-js">O Grove Online precisa de JavaScript para rodar o Python no navegador.</p></noscript>
 </body>
 </html>
