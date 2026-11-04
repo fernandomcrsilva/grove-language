@@ -90,6 +90,17 @@ Onde abrir:
   python -m http.server        # e abrir http://localhost:8000/playground/?pyodide=pyodide/
   ```
 
+### Publicar na Cloudflare
+
+O repositório já vem com a configuração (`wrangler.jsonc` e `.assetsignore`): o site é um Worker que só serve arquivos estáticos, sem servidor, e o `.assetsignore` deixa de fora tudo o que não é do site (testes, slides, a linha de comando, os áudios). Com o Node.js instalado, na raiz do repositório:
+
+```bash
+npx wrangler@4.151.3 login     # só na primeira vez: abre o navegador para entrar na conta
+npx wrangler@4.151.3 deploy
+```
+
+O endereço sai como `https://grove-online.<subdomínio-da-conta>.workers.dev/`. Para usar um domínio que já está na mesma conta da Cloudflare, edite a linha `routes` do `wrangler.jsonc` e rode o `deploy` de novo: a Cloudflare cria o registro de DNS e o certificado sozinha. Outra opção é ligar este repositório do GitHub no painel (*Workers & Pages → Create → Import a repository*), que publica de novo a cada push.
+
 ## Colab
 
 [![Abrir no Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/fernandomcrsilva/grove-language/blob/main/colab/grove.ipynb)

@@ -4,3 +4,4 @@ __pycache__/
 .vscode/
 assets/*.wav
 playground/pyodide/
+.wrangler/

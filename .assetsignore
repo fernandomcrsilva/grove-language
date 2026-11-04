@@ -1,0 +1,19 @@
+# O que vai para o site na Cloudflare (wrangler.jsonc publica a raiz do repositório).
+# Mesma sintaxe do .gitignore: ignora tudo e traz de volta só o que o site usa.
+/*
+!/index.html
+!/playground/
+!/grove/
+!/examples/
+!/assets/
+
+# o Pyodide vem do CDN; a cópia local é só para apresentar sem internet
+/playground/pyodide/
+# só o compilador: a linha de comando e os sons dela não rodam no navegador
+/grove/__main__.py
+/grove/sounds.py
+__pycache__/
+*.pyc
+# os áudios do jogo são da Rockstar: tire estas linhas só se o grupo decidir publicá-los
+/assets/*.wav
+/assets/*.mp3
