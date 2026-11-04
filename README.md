@@ -83,7 +83,7 @@ O código do app está em `playground/`: `index.html` (a página), `estilo.css` 
 
 Onde abrir:
 
-- Publicado: <https://fernandomcrsilva.github.io/grove-language/playground/> (com o GitHub Pages ativo: *Settings → Pages → Deploy from a branch → `main` / root*)
+- No ar: <https://grove.heybrain.uk/>, na Cloudflare (ver abaixo)
 - Local: `python -m http.server` na raiz do repositório e abrir <http://localhost:8000/playground/>
 - Sem internet (apresentação numa rede que bloqueia o CDN): baixe o Pyodide uma vez e abra com `?pyodide=pyodide/`
 
@@ -101,7 +101,7 @@ npx wrangler@4.151.3 login     # só na primeira vez: abre o navegador para entr
 npx wrangler@4.151.3 deploy
 ```
 
-O endereço sai como `https://grove-online.<subdomínio-da-conta>.workers.dev/`. Para usar um domínio que já está na mesma conta da Cloudflare, edite a linha `routes` do `wrangler.jsonc` e rode o `deploy` de novo: a Cloudflare cria o registro de DNS e o certificado sozinha. Outra opção é ligar este repositório do GitHub no painel (*Workers & Pages → Create → Import a repository*), que publica de novo a cada push.
+O site no ar, <https://grove.heybrain.uk/>, foi publicado pelo painel da Cloudflare (*Workers & Pages → Create → Upload your static files*), enviando a pasta do site com os áudios em `assets/`. Pelo `wrangler`, o endereço sai como `https://grove-online.<subdomínio-da-conta>.workers.dev/`. Para usar um domínio que já está na mesma conta da Cloudflare, edite a linha `routes` do `wrangler.jsonc` e rode o `deploy` de novo: a Cloudflare cria o registro de DNS e o certificado sozinha. Outra opção é ligar este repositório do GitHub no painel (*Workers & Pages → Create → Import a repository*), que publica de novo a cada push.
 
 ## Colab
 

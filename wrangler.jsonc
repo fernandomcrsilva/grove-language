@@ -11,6 +11,7 @@
     "html_handling": "auto-trailing-slash"
   },
   "workers_dev": true
-  // domínio próprio: troque por exemplo.com e tire as barras da linha abaixo (o domínio precisa estar nesta conta da Cloudflare)
-  // , "routes": [{ "pattern": "grove.exemplo.com", "custom_domain": true }]
+  // domínio próprio: o site no ar está em grove.heybrain.uk; para publicar lá pelo wrangler, tire as barras
+  // da linha abaixo (o domínio precisa estar nesta conta da Cloudflare)
+  // , "routes": [{ "pattern": "grove.heybrain.uk", "custom_domain": true }]
 }
