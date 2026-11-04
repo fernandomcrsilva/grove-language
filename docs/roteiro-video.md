@@ -22,7 +22,8 @@ Você vai ajudar a editar um vídeo tutorial mudo de cerca de 4 min 36 s sobre a
 - O compilador é Python puro, sem dependências (Python 3.10+). Etapas: análise léxica → sintática (descida recursiva) → semântica (tabela de símbolos e tipos) → código de três endereços (TAC) → Python. Três formas de executar: interpretador, TAC e Python gerado.
 - Grove Online, o app: um compilador online no estilo do Programiz, com o tema de GTA San Andreas. Editor com realce, painel de cheats, console, abas Tokens, AST, Símbolos, TAC e Python. No canto, como o HUD do jogo: uma estrela de procurado por erro e $250.000 por missão cumprida. Cada execução termina com "Mission passed!", "Wasted", "Busted" ou "Mission failed!".
 - ESP32: o compilador gera MicroPython; a variável `estrelas` faz um LED vermelho piscar mais rápido quanto maior o nível de procurado (0 a 6 estrelas).
-- 62 testes automatizados; interpretador, TAC e Python deram a mesma saída em 15.000 programas aleatórios.
+- 78 testes automatizados; interpretador, TAC, TAC otimizada e Python deram a mesma saída em 15.000 programas aleatórios.
+- O compilador mostra todos os erros sintáticos de uma vez e sugere o cheat certo quando um é digitado errado ("você quis dizer HESOYAM?"), e otimiza o código de três endereços (o exemplo otimizacao.cj vai de 13 para 4 instruções).
 - Grupo: Gabriel Lacerda, Gabriel Mendonça e Fernando Mendonça. Repositório: github.com/fernandomcrsilva/grove-language
 
 **Visual:** a marca do grupo, não a de GTA. Cores: Pinho `#12372A` (fundo das cartelas), Missão `#B7E46C` (destaque, as chaves de `{grove}`), Concreto `#F4F1E8` (texto claro), Alerta `#D95D39` (só para erros). Fonte sem serifa (Helvetica Neue, Inter ou Arial). Legenda em branco ou Concreto sobre uma faixa Pinho semitransparente, na parte de baixo.
@@ -226,13 +227,13 @@ mpremote reset
 **Na tela:** `python -m unittest` rodando por 3 s; depois a cartela em fundo Pinho.
 
 ```
-Ran 62 tests in 0.266s
+Ran 78 tests in 0.327s
 
 OK
 ```
 
 **Cartela:**
-- `4:22–4:28` 62 testes automáticos · Python puro, sem dependências
+- `4:22–4:28` 78 testes automáticos · Python puro, sem dependências
 - `4:28–4:36` github.com/fernandomcrsilva/grove-language · MISSION PASSED
 
 ---

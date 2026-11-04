@@ -138,7 +138,7 @@ O mesmo procurado.cj, sem mudar uma linha
 
 35
 00:04:22,000 --> 00:04:28,000
-62 testes automáticos · Python puro, sem dependências
+78 testes automáticos · Python puro, sem dependências
 
 36
 00:04:28,000 --> 00:04:36,000
