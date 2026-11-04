@@ -2,6 +2,7 @@
 # Mesma sintaxe do .gitignore: ignora tudo e traz de volta só o que o site usa.
 /*
 !/index.html
+!/_headers
 !/playground/
 !/grove/
 !/examples/
