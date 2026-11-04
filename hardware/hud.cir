@@ -1,0 +1,50 @@
+* HUD de procurado: os oito LEDs acesos ao mesmo tempo
+*
+* ngspice -b hardware/hud.cir
+*
+* A ESP32 não é simulada: cada GPIO em nível alto vira uma fonte de 3,3 V.
+* O programa nunca acende os oito juntos (o giroflex alterna vermelho e azul),
+* então a corrente total daqui é um teto.
+
+.include leds.lib
+.param vpino=3.3
+
+* seis estrelas: GPIO -> 220 ohms -> LED amarelo -> GND
+V32 g32 0 {vpino}
+R32 g32 a32 220
+D32 a32 0 LED_AMARELO
+V33 g33 0 {vpino}
+R33 g33 a33 220
+D33 a33 0 LED_AMARELO
+V25 g25 0 {vpino}
+R25 g25 a25 220
+D25 a25 0 LED_AMARELO
+V26 g26 0 {vpino}
+R26 g26 a26 220
+D26 a26 0 LED_AMARELO
+V27 g27 0 {vpino}
+R27 g27 a27 220
+D27 a27 0 LED_AMARELO
+V14 g14 0 {vpino}
+R14 g14 a14 220
+D14 a14 0 LED_AMARELO
+
+* giroflex: vermelho com 220 ohms, azul com 100 ohms
+V18 g18 0 {vpino}
+R18 g18 a18 220
+D18 a18 0 LED_VERMELHO
+V19 g19 0 {vpino}
+R19 g19 a19 100
+D19 a19 0 LED_AZUL
+
+.control
+op
+echo "corrente em cada LED (mA) e tensão sobre ele (V)"
+print -i(V32)*1000 v(a32)
+print -i(V18)*1000 v(a18)
+print -i(V19)*1000 v(a19)
+let total = -(i(V32)+i(V33)+i(V25)+i(V26)+i(V27)+i(V14)+i(V18)+i(V19))*1000
+print total
+.endc
+
+.end

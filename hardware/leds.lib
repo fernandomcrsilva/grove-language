@@ -1,0 +1,21 @@
+* Modelos SPICE dos LEDs de 5 mm do HUD de procurado (docs/esp32.md, seção 7).
+*
+* Não são de uma peça específica: cada modelo é um diodo ajustado a dois pontos
+* típicos de datasheet de LED genérico, a tensão direta a 1 mA e a 20 mA.
+* Os modelos _ALTO são o pior caso, um LED que pede mais tensão para a mesma
+* corrente. Servem para o ngspice e para o simulador do EasyEDA.
+*
+*                     1 mA     20 mA
+* vermelho            1,75 V   2,00 V
+* amarelo             1,85 V   2,10 V
+* azul                2,70 V   3,20 V
+* vermelho (alto)     1,90 V   2,20 V
+* amarelo (alto)      2,10 V   2,40 V
+* azul (alto)         2,85 V   3,40 V
+
+.model LED_VERMELHO      D(IS=1.410e-13 N=2.981 RS=1)
+.model LED_AMARELO       D(IS=3.856e-14 N=2.981 RS=1)
+.model LED_AZUL          D(IS=5.008e-11 N=6.208 RS=1)
+.model LED_VERMELHO_ALTO D(IS=1.613e-12 N=3.627 RS=1)
+.model LED_AMARELO_ALTO  D(IS=1.913e-13 N=3.627 RS=1)
+.model LED_AZUL_ALTO     D(IS=1.046e-10 N=6.853 RS=1)

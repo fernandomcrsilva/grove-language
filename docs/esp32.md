@@ -240,8 +240,70 @@ E dentro de `"connections"`:
 
 Como na seção 2, `esp` é o `id` da placa no template. As posições são só um ponto de partida: arraste as peças no desenho se quiser arrumar.
 
+### Simulação elétrica (ngspice, o mesmo motor do EasyEDA)
+
+Antes de comprar e montar, dá para conferir o circuito no simulador. A pasta `hardware/` tem o circuito em SPICE e um script que testa o circuito e o programa juntos:
+
+```bash
+sudo apt install ngspice          # uma vez (no Windows/Mac: ngspice.sourceforge.io)
+ngspice -b hardware/hud.cir       # só o circuito: os 8 LEDs acesos
+python hardware/testar_circuito.py --figura docs/img/simulacao-hud.png
+```
+
+A ESP32 não entra na simulação elétrica: cada GPIO em nível alto vira uma fonte de 3,3 V. Os LEDs são modelos de LED genérico de 5 mm (`hardware/leds.lib`), ajustados a valores típicos de datasheet, não às peças que vocês vão comprar.
+
+**1. Cada LED aceso.** No pior caso, o pino dá só 3,0 V, o resistor está 5% acima e o LED pede mais tensão. O critério é ficar entre 1 mA, para o LED ser bem visível numa sala, e 20 mA, a força padrão do pino e a corrente nominal do LED.
+
+| LED | Resistor | Tensão no LED | Corrente típica | Pior caso | Máximo | Potência no resistor |
+|---|---|---|---|---|---|---|
+| amarelo | 220 Ω | 1,99 V | 5,94 mA | 3,39 mA | 6,24 mA | 8,1 mW |
+| vermelho | 220 Ω | 1,90 V | 6,37 mA | 4,17 mA | 6,69 mA | 9,3 mW |
+| azul | 100 Ω | 2,92 V | 3,82 mA | 1,17 mA | 3,96 mA | 1,5 mW |
+| azul com 220 Ω (só comparação) | 220 Ω | 2,82 V | 2,16 mA | **0,81 mA** | 2,24 mA | 1,1 mW |
+
+É por isso que o azul leva 100 Ω: com 220 Ω, no pior caso, ele fica abaixo de 1 mA. Mesmo com 100 Ω, a folga dele é pequena, e o LED azul de alto brilho é a garantia. Os resistores de 1/4 W (250 mW) sobram.
+
+**2. O programa e o circuito juntos.** O script gera o MicroPython do `procurado.cj` com `--esp32 --hud` e roda numa placa de mentira com relógio virtual, onde os timers disparam no tempo certo. O que cada pino fez vira uma fonte no ngspice, que simula os 12,5 s do programa. As conferências são feitas na corrente dos LEDs:
+
+| Tempo | Estrelas | LEDs amarelos acesos | Giroflex | Corrente total |
+|---|---|---|---|---|
+| 0 s | 0 | 0 | apagado | 0 mA |
+| 1,5 s | 1 | 1 | apagado | 5,9 mA |
+| 3,0 s | 2 | 2 | apagado | 11,9 mA |
+| 4,5 s | 3 | 3 | apagado | 17,8 mA |
+| 6,0 s | 4 | 4 | alterna a cada 300 ms | até 30,2 mA |
+| 7,5 s | 5 | 5 | 250 ms | até 36,1 mA |
+| 9,0 s | 6 | 6 | 200 ms | até 42,0 mA |
+
+Em nenhum instante o vermelho e o azul conduzem juntos. A corrente total nunca passa de 42 mA, uns 6 mA por pino, longe do limite de cada pino e do que o regulador de 3,3 V da placa fornece. O LED da própria placa, no GPIO 2, fica de fora: o circuito dele é o da placa.
+
+![Corrente em cada LED durante o procurado.cj](img/simulacao-hud.png)
+
+**O teste reprova circuito ou código errado.** Antes de confiar nele, foi rodado com defeitos de propósito: azul com resistor de 10 kΩ, um LED amarelo sem corrente, o giroflex acendendo os dois juntos, o período errado, uma estrela a mais. Os cinco foram reprovados.
+
+#### No EasyEDA
+
+Pela documentação oficial, o EasyEDA Pro simula desde a versão 3.2, com dois motores: NGSpice e SimulIDE. Escolham o NGSpice, o mesmo usado aqui. A edição Std também tem modo de simulação. O EasyEDA não roda o programa da ESP32: lá também cada pino vira uma fonte. Para repetir o teste 1:
+
+1. Num esquemático de simulação, monte um ramo: fonte de tensão DC de 3,3 V → resistor de 220 Ω → LED → terra.
+2. Use o LED da biblioteca de simulação, ou cole como diretiva SPICE a linha `.model` correspondente de `hardware/leds.lib`. O EasyEDA não aceita `.include`, então tem que ser a linha em si.
+3. Rode o ponto de operação (ou um transiente curto) e leia a corrente na fonte.
+4. Repita com o LED azul e o resistor de 100 Ω, e depois com 220 Ω, para ver a diferença.
+
+Para ver o ritmo do giroflex com 4 estrelas, troque as fontes DC do vermelho e do azul por pulsos e rode um transiente de 3 s:
+
+```
+vermelho: PULSE(0 3.3 0    1u 1u 300m 600m)
+azul:     PULSE(0 3.3 300m 1u 1u 300m 600m)
+```
+
+Com o LED da biblioteca do EasyEDA, as correntes podem sair um pouco diferentes das da tabela, porque o modelo é outro. O que importa é o critério: entre 1 e 20 mA, e o vermelho e o azul nunca juntos.
+
+> Não consegui abrir o EasyEDA do ambiente onde este guia foi escrito (a rede bloqueia o site). Os resultados acima são do ngspice 42; o nome dos menus pode variar entre as edições do EasyEDA.
+
 ## 8. Para a entrega
 
 - [ ] Foto do circuito montado
+- [ ] Opcional: print do teste no EasyEDA, ao lado da tabela da simulação elétrica (seção 7)
 - [ ] Vídeo curto do LED acelerando, com a serial na tela (é a cena 9 do [roteiro do vídeo](roteiro-video.md))
 - [ ] Preencher no artigo o parágrafo "Teste na placa": modelo da placa, pino usado, se o LED se comportou como na tabela da seção 5

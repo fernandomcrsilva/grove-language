@@ -44,7 +44,7 @@ texto ─léxico─▶ tokens ─sintático─▶ AST ─semântico─▶ AST an
 | interpretador | [docs/interpretador.md](docs/interpretador.md) |
 | código de três endereços e otimização | [docs/codigo-intermediario.md](docs/codigo-intermediario.md) |
 | Python e MicroPython (ESP32) | [docs/geracao-de-codigo.md](docs/geracao-de-codigo.md) |
-| ESP32 na bancada: compras, montagem, gravação, Wokwi, o upgrade do HUD | [docs/esp32.md](docs/esp32.md) |
+| ESP32 na bancada: compras, montagem, gravação, Wokwi, o upgrade do HUD, simulação elétrica (ngspice e EasyEDA) | [docs/esp32.md](docs/esp32.md) |
 | vídeo tutorial (mudo): roteiro cena a cena e legendas | [docs/roteiro-video.md](docs/roteiro-video.md) · [docs/legendas-video.srt](docs/legendas-video.srt) |
 
 ## Rodar
@@ -132,6 +132,7 @@ playground/        Grove Online, o app: compilador online no navegador (Pyodide)
 assets/            clipes .wav (não versionados)
 docs/              entregáveis: tokens, gramática, semântica, interpretador, TAC, geração de código, pitch
 examples/          programas de exemplo (.cj)
+hardware/          o circuito do HUD em SPICE + teste do programa no circuito (ngspice)
 colab/             front-end em arquivo único + notebook do Colab (grove.ipynb, gerado por gerar_notebook.py)
 tests/             unittest
 ```
