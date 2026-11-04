@@ -67,11 +67,11 @@ def main(argv=None):
         if executar:
             run(program)
     except (LexError, ParseError, SemanticError, RuntimeError_) as e:
-        erros = e.erros if isinstance(e, SemanticError) else [e]
+        erros = getattr(e, "erros", [e])
         for erro in erros:
             print(f"erro: {erro}", file=sys.stderr)
         if len(erros) > 1:
-            print(f"{len(erros)} erros semânticos", file=sys.stderr)
+            print(f"{len(erros)} erros {'sintáticos' if isinstance(e, ParseError) else 'semânticos'}", file=sys.stderr)
         play(SONS.get(type(e), "runtime_error"))
         return 1
     play("passed")

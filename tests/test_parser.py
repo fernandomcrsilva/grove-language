@@ -56,6 +56,60 @@ class ParserTest(unittest.TestCase):
         self.assertIn("linha 2", str(cm.exception))
         self.assertIn(";", str(cm.exception))
 
+    def test_junta_todos_os_erros_sintaticos(self):
+        src = (
+            "HESOYM vida = 100;\n"                  # 1: cheat digitado errado
+            "HESOYAM grana = 250000;\n"
+            "TURNUPTHEHEET (grana > 0) {\n"         # 3: cheat digitado errado
+            "    HELLOLADIES grana;\n"
+            "}\n"
+            "hesoyam x = 1;\n"                       # 6: cheat em minúsculas
+            "KANGAROO (grana > ) {\n"                # 7: falta a expressão
+            "    HELLOLADIES 1;\n"
+            "}\n"
+            "TURNDOWNTHEHEAT { }\n"                  # 10: else sem if
+            "HESOYAM y = 5\n"
+            "HELLOLADIES y;\n"                       # 12: faltou o ; da linha 11
+        )
+        with self.assertRaises(ParseError) as cm:
+            p(src)
+        self.assertEqual([int(e.split(",")[0].split()[1]) for e in cm.exception.erros], [1, 3, 6, 7, 10, 12])
+
+    def test_sugere_o_cheat_certo(self):
+        casos = {
+            "HESOYM x = 1;": "'HESOYM' não é um cheat da Grove; você quis dizer HESOYAM?",
+            "HESOYMA x = 1;": "você quis dizer HESOYAM?",
+            "TURNUPTHEHEET (FULLCLIP) { }": "você quis dizer TURNUPTHEHEAT?",
+            "KANGARO (FULLCLIP) { }": "você quis dizer KANGAROO?",
+            "HELLOLADYS 1;": "você quis dizer HELLOLADIES?",
+            "GOODBYECRUELWRLD;": "você quis dizer GOODBYECRUELWORLD?",
+            "hesoyam x = 1;": "os cheats são em maiúsculas (HESOYAM)",
+        }
+        for src, trecho in casos.items():
+            with self.subTest(src=src), self.assertRaises(ParseError) as cm:
+                p(src)
+            self.assertIn(trecho, str(cm.exception))
+            self.assertIn("linha 1, coluna 1:", str(cm.exception))
+
+    def test_nome_comum_nao_vira_sugestao(self):
+        with self.assertRaises(ParseError) as cm:
+            p("nome x = 1;")
+        self.assertIn("esperado =", str(cm.exception))
+        self.assertNotIn("quis dizer", str(cm.exception))
+
+    def test_recuperacao_sem_cascata(self):
+        for src in ("TURNUPTHEHEAT (x > ) { HELLOLADIES 1; HELLOLADIES 2; }",
+                    "HESOYAM a = (1 + 2; HELLOLADIES a; HELLOLADIES a;",
+                    "KANGAROO (FULLCLIP) {"):
+            with self.subTest(src=src), self.assertRaises(ParseError) as cm:
+                p(src)
+            self.assertEqual(len(cm.exception.erros), 1, cm.exception.erros)
+
+    def test_else_sem_if(self):
+        with self.assertRaises(ParseError) as cm:
+            p("BRINGITON (FULLCLIP) { }")
+        self.assertIn("BRINGITON sem um TURNUPTHEHEAT antes", str(cm.exception))
+
     def test_dump(self):
         texto = dump(p("HESOYAM x = 1;"))
         self.assertIn("Program", texto)

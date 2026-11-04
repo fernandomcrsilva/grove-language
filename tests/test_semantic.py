@@ -98,6 +98,13 @@ class SemanticTest(unittest.TestCase):
         # erro num ramo que nunca roda também é achado
         self.assertEqual(len(erros("TURNUPTHEHEAT (GHOSTTOWN) { HELLOLADIES z; }")), 1)
 
+    def test_sugere_variavel_ou_cheat_parecido(self):
+        self.assertEqual(erros("HESOYAM contador = 0; HELLOLADIES contdor;"),
+                         ["linha 1, coluna 35: variável 'contdor' não declarada; você quis dizer 'contador'?"])
+        self.assertIn("você quis dizer o cheat FULLCLIP?", erros("HELLOLADIES FULCLIP;")[0])
+        self.assertIn("você quis dizer o cheat HESOYAM?", erros("HESOYM = 5;")[0])
+        self.assertEqual(erros("HESOYAM x = 1; HELLOLADIES y;"), ["linha 1, coluna 28: variável 'y' não declarada"])
+
     def test_avisos_nao_impedem(self):
         a = analisar("HESOYAM x = 1; x = 2; HELLOLADIES 7 / 0; HELLOLADIES 7 % 0;")
         self.assertEqual([str(d) for d in a.avisos], [

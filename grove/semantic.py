@@ -8,6 +8,7 @@ VarDecl, Assign e Var ganha `simbolo`, a entrada da tabela de símbolos que usa.
 from dataclasses import dataclass, fields
 
 from .ast import Assign, Literal, Node, Program, Var, VarDecl
+from .sugestao import cheat_parecido, nome_parecido
 
 INTEIRO, STRING, BOOLEANO = "inteiro", "string", "booleano"
 ERRO = "erro"  # tipo de uma expressão que já deu erro: aceita tudo, para não gerar erro em cascata
@@ -103,7 +104,14 @@ class Checker:
         for escopo in reversed(self.escopos):
             if name in escopo:
                 return escopo[name]
-        self.erro(node, f"variável '{name}' não declarada")
+        visiveis = {n for escopo in self.escopos for n in escopo}
+        if (cheat := cheat_parecido(name)):
+            dica = f"; você quis dizer o cheat {cheat}?"
+        elif (outro := nome_parecido(name, visiveis)):
+            dica = f"; você quis dizer '{outro}'?"
+        else:
+            dica = ""
+        self.erro(node, f"variável '{name}' não declarada{dica}")
         return None
 
     def unico(self, nome):

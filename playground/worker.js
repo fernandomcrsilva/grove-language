@@ -53,7 +53,7 @@ def compilar(src):
     except LexError as e:
         r["erros"] = [_diagnostico(str(e), "léxico")]
     except ParseError as e:
-        r["erros"] = [_diagnostico(str(e), "sintático")]
+        r["erros"] = [_diagnostico(m, "sintático") for m in e.erros]
     except SemanticError as e:
         r["erros"] = [_diagnostico(str(d), "semântico") for d in e.erros]
     return json.dumps(r)

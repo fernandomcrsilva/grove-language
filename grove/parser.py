@@ -1,13 +1,20 @@
 """Análise sintática por descida recursiva: lista de Token → AST.
 
 Gramática em docs/gramatica.md. Cada método corresponde a uma regra.
+Num erro, o parser anota a mensagem, pula até um ponto seguro e continua
+(recuperação em modo pânico): no fim, ParseError traz todos os erros.
 """
 from .ast import Assign, Binary, Block, Break, If, Literal, Print, Program, Unary, Var, VarDecl, While
+from .sugestao import cheat_parecido, mensagem_cheat
 from .tokens import Token, TokenType as T
 
 
 class ParseError(Exception):
-    pass
+    """Um erro sintático ou, vinda de parse(), a lista de todos (em `erros`)."""
+
+    def __init__(self, mensagem: str, erros: list[str] | None = None):
+        super().__init__(mensagem)
+        self.erros = erros or [mensagem]
 
 
 def at(node, tok: Token):
@@ -15,6 +22,9 @@ def at(node, tok: Token):
     node.line, node.col = tok.line, tok.col
     return node
 
+
+# onde uma instrução pode começar: a recuperação de erro para neles
+INICIO = {T.VAR, T.IF, T.WHILE, T.PRINT, T.BREAK, T.LBRACE}
 
 NOMES = {  # como descrever cada token numa mensagem de erro
     T.SEMI: "; (fim de instrução)", T.LBRACE: "{ (abre bloco)", T.RBRACE: "} (fecha bloco)",
@@ -26,6 +36,7 @@ class Parser:
     def __init__(self, tokens: list[Token]):
         self.tokens = tokens
         self.pos = 0
+        self.erros: list[str] = []
 
     # ---- utilitários ----
     def peek(self) -> Token:
@@ -52,11 +63,31 @@ class Parser:
             f"linha {tok.line}, coluna {tok.col}: esperado {NOMES.get(tt, tt.name)}, encontrado {achado}"
         )
 
+    # ---- recuperação de erro ----
+    def protegida(self):
+        """Uma declaração; se der erro, anota, pula até um ponto seguro e devolve None."""
+        inicio = self.pos
+        try:
+            return self.declaration()
+        except ParseError as e:
+            self.erros.append(str(e))
+            self.sincronizar()
+            if self.pos == inicio:  # nada foi consumido: anda um token para não repetir o erro
+                self.advance()
+            return None
+
+    def sincronizar(self):
+        """Pula até depois de um ;, ou até o começo de outra instrução ou o } que fecha o bloco."""
+        while not self.check(T.EOF, T.RBRACE, *INICIO):
+            if self.advance().type is T.SEMI:
+                return
+
     # ---- regras ----
     def program(self) -> Program:
         body = []
         while not self.check(T.EOF):
-            body.append(self.declaration())
+            if (decl := self.protegida()) is not None:
+                body.append(decl)
         return Program(body)
 
     def declaration(self):
@@ -85,7 +116,12 @@ class Parser:
             return at(Break(), kw)
         if self.check(T.LBRACE):
             return self.block()
+        if self.check(T.ELIF, T.ELSE):
+            tok = self.peek()
+            raise ParseError(f"linha {tok.line}, coluna {tok.col}: {tok.lexeme} sem um TURNUPTHEHEAT antes")
         name = self.expect(T.IDENT)
+        if not self.check(T.ASSIGN) and (cheat := cheat_parecido(name.lexeme)):
+            raise ParseError(f"linha {name.line}, coluna {name.col}: {mensagem_cheat(name.lexeme, cheat)}")
         self.expect(T.ASSIGN)
         value = self.expression()
         self.expect(T.SEMI)
@@ -108,7 +144,8 @@ class Parser:
         brace = self.expect(T.LBRACE)
         stmts = []
         while not self.check(T.RBRACE, T.EOF):
-            stmts.append(self.declaration())
+            if (decl := self.protegida()) is not None:
+                stmts.append(decl)
         self.expect(T.RBRACE)
         return at(Block(stmts), brace)
 
@@ -162,4 +199,9 @@ class Parser:
 
 
 def parse(tokens: list[Token]) -> Program:
-    return Parser(tokens).program()
+    """AST do programa. Levanta ParseError com todos os erros sintáticos, se houver."""
+    p = Parser(tokens)
+    programa = p.program()
+    if p.erros:
+        raise ParseError("\n".join(p.erros), p.erros)
+    return programa
