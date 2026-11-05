@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grove — apresentação</title>
+<meta name="description" content="Grove: linguagem de programação cujas palavras-chave são os cheats de GTA San Andreas. Apresentação do projeto de Compiladores.">
+<script>document.documentElement.classList.add('js');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Passion+One:wght@400;700&family=Inter:wght@400;500;700;800&display=swap">
+<style>
+/* ---------- base ---------- */
+:root{
+  /* mesma paleta do Grove Online (playground/estilo.css) */
+  --fundo:#070908; --painel:#0e1310; --borda:#233029;
+  --texto:#ece8dc; --suave:#9aa79d;
+  --ouro:#e2a529; --grove:#3fae4f; --dinheiro:#62b84f;
+  --vermelho:#e0474b; --policia:#79a6f2; --aviso:#e8c25a;
+  --gta:"Passion One",Impact,"Arial Black",sans-serif;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --mx:50%; --my:40%;
+  --gap:clamp(0.9rem,2vh,1.8rem);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--fundo); color:var(--texto);
+  font-family:var(--sans); font-size:clamp(15px,1.1vw + 0.5rem,20px); line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.js html{scroll-snap-type:y mandatory; overscroll-behavior-y:contain}
+
+/* ---------- fundo vivo ---------- */
+.fundo{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden}
+.fundo::before{
+  content:""; position:absolute; inset:-40%;
+  background:
+    repeating-linear-gradient(0deg,rgba(63,174,79,.055) 0 1px,transparent 1px 44px),
+    repeating-linear-gradient(90deg,rgba(63,174,79,.055) 0 1px,transparent 1px 44px);
+  animation:desliza 26s linear infinite;
+}
+.fundo::after{
+  content:""; position:absolute; inset:0;
+  background:radial-gradient(42rem 42rem at var(--mx) var(--my),rgba(226,165,41,.14),transparent 62%);
+  transition:background-position .2s linear;
+}
+.vinheta{position:fixed; inset:0; z-index:1; pointer-events:none;
+  background:radial-gradient(130% 95% at 50% 45%,transparent 38%,rgba(0,0,0,.72) 100%)}
+@keyframes desliza{to{transform:translate3d(44px,44px,0)}}
+
+/* ---------- slide ---------- */
+.slide{
+  position:relative; z-index:2;
+  height:100vh; height:100dvh;
+  scroll-snap-align:start; scroll-snap-stop:always;
+  display:grid; align-content:center;
+  padding:clamp(1.6rem,4.5vmin,4.5rem) clamp(1.2rem,6vw,7rem);
+  max-width:84rem; margin-inline:auto;
+}
+/* projetor baixo (1024x640 e parecidos): devolve altura útil ao conteúdo */
+@media (max-height:680px){.slide{padding-block:clamp(.8rem,2.5vmin,1.6rem)}}
+.marca{
+  font-family:var(--mono); font-size:clamp(.66rem,.9vw,.8rem); letter-spacing:.24em;
+  text-transform:uppercase; color:var(--suave); margin-bottom:var(--gap);
+}
+.marca b{color:var(--ouro); font-weight:700}
+h1,h2,h3{font-family:var(--gta); font-weight:400; text-transform:uppercase; margin:0; line-height:.95}
+h1{font-size:clamp(3.4rem,13vw,10rem); letter-spacing:.01em}
+h2{font-size:clamp(2rem,5.4vw,4.2rem); color:var(--ouro); margin-bottom:var(--gap)}
+h3{font-size:clamp(1.1rem,1.9vw,1.6rem); color:var(--grove); letter-spacing:.04em}
+.sub{font-size:clamp(1.05rem,2.3vw,1.9rem); font-weight:500; color:var(--texto); max-width:42ch}
+.nota{color:var(--suave); font-size:clamp(.85rem,1.1vw,1.05rem); max-width:62ch}
+strong{color:var(--ouro); font-weight:700}
+em{color:var(--grove); font-style:normal; font-weight:600}
+code,.mono{font-family:var(--mono)}
+.cheat{font-family:var(--mono); color:var(--ouro); font-weight:700; letter-spacing:.02em}
+
+/* ---------- blocos ---------- */
+.painel{
+  background:color-mix(in srgb,var(--painel) 88%,transparent);
+  border:1px solid var(--borda); border-radius:14px;
+  padding:clamp(.9rem,1.8vmin,1.5rem);
+}
+pre{
+  margin:0; font-family:var(--mono); font-size:clamp(.74rem,1.15vw,1.02rem);
+  line-height:1.65; overflow-x:auto; color:var(--texto);
+}
+pre .k{color:var(--ouro); font-weight:700}
+pre .n{color:#86bdff}
+pre .s{color:#e3c58a}
+pre .c{color:#6f7d73}
+pre .r{color:var(--vermelho)}
+pre .g{color:var(--dinheiro)}
+.duas{display:grid; gap:clamp(.9rem,2.4vmin,2rem); grid-template-columns:1fr}
+@media (min-width:56rem){.duas{grid-template-columns:1fr 1fr; align-items:start}}
+.duas.larga-esq{grid-template-columns:1fr}
+@media (min-width:56rem){.duas.larga-esq{grid-template-columns:1.25fr .9fr}}
+
+ul{margin:0; padding:0; list-style:none; display:grid; gap:calc(var(--gap) * .62)}
+ul li{display:grid; grid-template-columns:auto 1fr; gap:.8rem; align-items:start}
+.pino{
+  width:1.65rem; height:1.65rem; flex:none; border-radius:50%;
+  display:grid; place-items:center; font-family:var(--mono); font-size:clamp(.64rem,.85vw,.78rem); font-weight:700;
+  background:rgba(63,174,79,.14); border:1px solid rgba(63,174,79,.45); color:var(--grove);
+}
+.pino.ouro{background:rgba(226,165,41,.14); border-color:rgba(226,165,41,.5); color:var(--ouro)}
+.pino.vermelho{background:rgba(224,71,75,.14); border-color:rgba(224,71,75,.5); color:var(--vermelho)}
+.pino.azul{background:rgba(121,166,242,.14); border-color:rgba(121,166,242,.5); color:var(--policia)}
+li b{display:block; color:var(--texto)}
+li span{color:var(--suave); font-size:.94em}
+
+/* tabela de cheats */
+.cheats{display:grid; gap:.55rem; grid-template-columns:1fr}
+@media (min-width:52rem){.cheats{grid-template-columns:1fr 1fr}}
+.cheats div{
+  display:grid; grid-template-columns:minmax(0,1fr) auto; gap:.6rem; align-items:baseline;
+  padding:.5rem .75rem; border-radius:10px; background:rgba(14,19,16,.85); border:1px solid var(--borda);
+}
+.cheats .sig{font-size:.9em; color:var(--suave); text-align:right; white-space:nowrap}
+
+/* números grandes */
+.numeros{display:grid; gap:var(--gap); grid-template-columns:repeat(2,1fr)}
+@media (min-width:56rem){.numeros{grid-template-columns:repeat(4,1fr)}}
+.numeros b{
+  display:block; font-family:var(--gta); font-size:clamp(3rem,8vw,6.5rem); line-height:.9; color:var(--ouro);
+  font-variant-numeric:tabular-nums;
+}
+.numeros span{display:block; color:var(--suave); font-size:clamp(.8rem,1.1vw,1rem); margin-top:.3rem}
+
+/* barra comparativa */
+.barras{display:grid; gap:.7rem; margin-top:var(--gap)}
+.barra{display:grid; grid-template-columns:6.2rem 1fr auto; gap:.8rem; align-items:center; font-family:var(--mono); font-size:clamp(.78rem,1vw,.95rem)}
+.trilho{height:.95rem; border-radius:99px; background:rgba(35,48,41,.8); overflow:hidden}
+.trilho i{display:block; height:100%; border-radius:99px; transform-origin:left center}
+.trilho i.antes{background:linear-gradient(90deg,var(--vermelho),#8e2b2e)}
+.trilho i.depois{background:linear-gradient(90deg,var(--grove),var(--dinheiro))}
+
+/* HUD de estrelas */
+.hud{display:flex; gap:.45rem; align-items:center}
+.hud svg{width:clamp(1.5rem,3.6vw,2.6rem); height:auto}
+.estrela{fill:none; stroke:var(--suave); stroke-width:1.4; opacity:.45}
+.estrela.on{fill:var(--ouro); stroke:var(--ouro); opacity:1}
+.grana{font-family:var(--gta); font-size:clamp(1.3rem,3.2vw,2.4rem); color:var(--dinheiro)}
+
+/* divisores de seção */
+.divisor{align-content:center; justify-items:start}
+.divisor h2{font-size:clamp(2.2rem,7.6vw,5.6rem); color:var(--texto)}
+.divisor .conta{font-family:var(--gta); font-size:clamp(3rem,10vw,8rem); color:rgba(226,165,41,.18); line-height:.8; margin:0 0 .2em}
+
+/* diagramas svg */
+.fig{width:100%; height:auto; overflow:visible}
+.fig .caixa{fill:rgba(14,19,16,.9); stroke:var(--borda); stroke-width:1.5; rx:10}
+.fig .caixa.ouro{stroke:rgba(226,165,41,.65)}
+.fig .caixa.verde{stroke:rgba(63,174,79,.6)}
+.fig text{font-family:var(--sans); font-size:15px; fill:var(--texto)}
+.fig text.rot{font-family:var(--mono); font-size:11.5px; fill:var(--suave); letter-spacing:.08em}
+.fig text.tit{font-weight:700}
+.fig .cano{fill:none; stroke:var(--grove); stroke-width:2; stroke-linecap:round}
+.fig .cano.ouro{stroke:var(--ouro)}
+.fig .ponta{fill:var(--grove)}
+.fig .ponta.ouro{fill:var(--ouro)}
+
+/* rodapé / progresso */
+#progresso{position:fixed; left:0; bottom:0; height:3px; width:0; z-index:9;
+  background:linear-gradient(90deg,var(--grove),var(--ouro)); transition:width .18s linear}
+#passo{position:fixed; right:clamp(.7rem,2vw,1.6rem); bottom:clamp(.7rem,2vw,1.4rem); z-index:9;
+  font-family:var(--mono); font-size:clamp(.66rem,.9vw,.8rem); letter-spacing:.14em; color:var(--suave)}
+.js #ajuda{position:fixed; left:clamp(.7rem,2vw,1.6rem); bottom:clamp(.7rem,2vw,1.4rem); z-index:9;
+  font-family:var(--mono); font-size:clamp(.62rem,.85vw,.76rem); letter-spacing:.1em; color:var(--suave); opacity:.6}
+#ajuda{display:none}
+.js #ajuda{display:block}
+
+/* ---------- animações ---------- */
+@keyframes sobe{from{opacity:0; transform:translateY(30px)}to{opacity:1; transform:none}}
+@keyframes esquerda{from{opacity:0; transform:translateX(-46px)}to{opacity:1; transform:none}}
+@keyframes direita{from{opacity:0; transform:translateX(46px)}to{opacity:1; transform:none}}
+@keyframes zoom{from{opacity:0; transform:scale(.72)}to{opacity:1; transform:none}}
+@keyframes gira{from{opacity:0; transform:rotate(-200deg) scale(.4)}to{opacity:1; transform:none}}
+@keyframes palavra{from{opacity:0; transform:translateY(.45em) rotate(2deg); filter:blur(7px)}
+  to{opacity:1; transform:none; filter:none}}
+@keyframes cortina{from{opacity:1; clip-path:inset(0 100% 0 0)}to{opacity:1; clip-path:inset(0)}}
+@keyframes cresce{from{opacity:1; transform:scaleX(0)}to{opacity:1; transform:scaleX(1)}}
+@keyframes traco{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
+/* só opacidade: uma animação de transform sobrescreveria o atributo transform do SVG */
+@keyframes pulsa{0%,100%{opacity:1}50%{opacity:.55}}
+@keyframes giroflex{0%,100%{fill:var(--policia)}50%{fill:var(--vermelho)}}
+@keyframes piscaCursor{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes marquee{to{transform:translateX(-50%)}}
+
+.js .slide:not(.is-visible) [data-anim]{opacity:0}
+.js .slide.is-visible [data-anim]{
+  animation:sobe .72s cubic-bezier(.2,.75,.25,1) both;
+  animation-delay:calc(var(--i,0) * 85ms);
+}
+.js .slide.is-visible [data-anim="esquerda"]{animation-name:esquerda}
+.js .slide.is-visible [data-anim="direita"]{animation-name:direita}
+.js .slide.is-visible [data-anim="zoom"]{animation-name:zoom}
+.js .slide.is-visible [data-anim="gira"]{animation-name:gira; animation-duration:.9s}
+.js .slide.is-visible [data-anim="palavra"]{animation-name:palavra; animation-duration:.85s}
+.js .slide.is-visible [data-anim="cortina"]{animation-name:cortina; animation-duration:1s}
+.js .slide.is-visible [data-anim="cresce"]{animation-name:cresce; animation-duration:1.05s}
+.js .slide:not(.is-visible) [data-anim="cresce"]{opacity:1; transform:scaleX(0)}
+.js .slide:not(.is-visible) [data-anim="cortina"]{opacity:1; clip-path:inset(0 100% 0 0)}
+.js [data-anim="traco"]{stroke-dasharray:1; stroke-dashoffset:1; opacity:1}
+.js .slide.is-visible [data-anim="traco"]{
+  animation:traco 1.05s cubic-bezier(.4,.1,.2,1) both; animation-delay:calc(var(--i,0) * 85ms);
+}
+.js .slide.is-visible .estrela.on{animation:pulsa 1.9s ease-in-out infinite; animation-delay:calc(var(--i,0) * 160ms)}
+.js .slide.is-visible .luz{animation:giroflex 1s steps(1) infinite}
+.cursor{display:inline-block; width:.6ch; background:var(--grove); color:transparent}
+.js .slide.is-visible .cursor{animation:piscaCursor 1s steps(1) infinite}
+.faixa{overflow:hidden; mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+.faixa div{display:flex; width:max-content; gap:2.4rem; font-family:var(--mono); color:var(--suave);
+  font-size:clamp(.7rem,.95vw,.88rem); letter-spacing:.18em; white-space:nowrap}
+.js .faixa div{animation:marquee 28s linear infinite}
+
+/* imprimir / salvar em PDF: uma página 16:9 por slide, tudo revelado */
+@media print{
+  @page{size:13.333in 7.5in; margin:0}
+  html,body{height:auto; background:var(--fundo); print-color-adjust:exact; -webkit-print-color-adjust:exact}
+  .fundo,.vinheta,#progresso,#passo,#ajuda,.faixa{display:none}
+  .slide{
+    height:7.5in; max-width:none; overflow:hidden; break-after:page; page-break-after:always;
+    print-color-adjust:exact; -webkit-print-color-adjust:exact;
+  }
+  .slide:last-child{break-after:auto; page-break-after:auto}
+  /* na impressão as media queries de largura não valem: as colunas vão na mão */
+  .duas{grid-template-columns:1fr 1fr; align-items:start}
+  .duas.larga-esq{grid-template-columns:1.25fr .9fr}
+  .cheats{grid-template-columns:1fr 1fr}
+  .numeros{grid-template-columns:repeat(4,1fr)}
+  .js .slide [data-anim],.js .slide.is-visible [data-anim]{
+    animation:none !important; opacity:1 !important; transform:none !important;
+    clip-path:none !important; stroke-dashoffset:0 !important; filter:none !important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .fundo::before,.faixa div{animation:none}
+  .js .slide [data-anim],.js .slide.is-visible [data-anim]{
+    animation:none !important; opacity:1 !important; transform:none !important;
+    clip-path:none !important; stroke-dashoffset:0 !important; filter:none !important;
+  }
+  .js .slide.is-visible .estrela.on,.js .slide.is-visible .luz,.js .slide.is-visible .cursor{animation:none}
+}
+</style>
+</head>
+<body>
+<div class="fundo" aria-hidden="true"></div>
+<div class="vinheta" aria-hidden="true"></div>
+<div id="progresso" aria-hidden="true"></div>
+<div id="passo" aria-hidden="true">01 / 18</div>
+<div id="ajuda" aria-hidden="true">← → navega</div>
+
+<main>
+
+<!-- 1 — título -->
+<section id="s1" class="slide" aria-label="Grove">
+  <p class="marca" data-anim style="--i:0">Projeto de Compiladores · <b>AP2</b></p>
+  <h1 aria-label="Grove">
+    <span data-anim="palavra" style="--i:1">G</span><span data-anim="palavra" style="--i:2">R</span><span data-anim="palavra" style="--i:3">O</span><span data-anim="palavra" style="--i:4">V</span><span data-anim="palavra" style="--i:5">E</span>
+  </h1>
+  <p class="sub" data-anim style="--i:6" >A linguagem de programação em que as palavras-chave são os <strong>cheats de GTA San Andreas</strong>.</p>
+  <p class="nota" data-anim style="--i:7">Arquivos <code>.cj</code>, de Carl Johnson. Python 3.10+, sem nenhuma dependência.</p>
+  <div class="hud" data-anim="zoom" style="--i:8; margin-top:var(--gap)" aria-label="Seis estrelas de procurado">
+    <svg viewBox="0 0 24 24"><path class="estrela on" style="--i:0" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/></svg>
+    <svg viewBox="0 0 24 24"><path class="estrela on" style="--i:1" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/></svg>
+    <svg viewBox="0 0 24 24"><path class="estrela on" style="--i:2" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/></svg>
+    <svg viewBox="0 0 24 24"><path class="estrela" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/></svg>
+    <svg viewBox="0 0 24 24"><path class="estrela" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/></svg>
+    <svg viewBox="0 0 24 24"><path class="estrela" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/></svg>
+  </div>
+  <p class="nota" data-anim style="--i:9; margin-top:var(--gap)">Gabriel Lacerda · Gabriel Mendonça · Fernando Mendonça</p>
+</section>
+
+<!-- 2 — por que cheats -->
+<section id="s2" class="slide" aria-label="Por que cheats">
+  <p class="marca" data-anim style="--i:0"><b>01</b> · a ideia</p>
+  <h2 data-anim="cortina" style="--i:1">Todo mundo já digitou isto</h2>
+  <p class="cheat" data-anim="zoom" style="--i:2; font-size:clamp(2rem,6.8vw,4.6rem); line-height:1">HESOYAM<span class="cursor">_</span></p>
+  <ul data-anim style="--i:3; margin-top:var(--gap); max-width:58ch">
+    <li><span class="pino ouro">1</span><span><b>Vocabulário que o público conhece</b>Ninguém precisa decorar palavra nova: o cheat já está na memória de quem jogou.</span></li>
+    <li><span class="pino ouro">2</span><span><b>Cada cheat combina com o que faz</b><span class="cheat">KANGAROO</span> pula de novo e vira o laço; <span class="cheat">GOODBYECRUELWORLD</span> mata o CJ e vira o <code>break</code>.</span></li>
+    <li><span class="pino ouro">3</span><span><b>O tema não dá desconto</b>Léxico, sintático, semântico, código intermediário e geração de código: o pipeline inteiro, do mesmo jeito.</span></li>
+  </ul>
+</section>
+
+<!-- 3 — as dez palavras -->
+<section id="s3" class="slide" aria-label="As dez palavras reservadas">
+  <p class="marca" data-anim style="--i:0"><b>02</b> · a linguagem</p>
+  <h2 data-anim="cortina" style="--i:1">Dez palavras reservadas</h2>
+  <div class="cheats" style="margin-bottom:var(--gap)">
+    <div data-anim="esquerda" style="--i:2"><span class="cheat">HESOYAM</span><span class="sig">declara variável</span></div>
+    <div data-anim="direita" style="--i:2"><span class="cheat">TURNUPTHEHEAT</span><span class="sig">if</span></div>
+    <div data-anim="esquerda" style="--i:3"><span class="cheat">BRINGITON</span><span class="sig">else if</span></div>
+    <div data-anim="direita" style="--i:3"><span class="cheat">TURNDOWNTHEHEAT</span><span class="sig">else</span></div>
+    <div data-anim="esquerda" style="--i:4"><span class="cheat">KANGAROO</span><span class="sig">while</span></div>
+    <div data-anim="direita" style="--i:4"><span class="cheat">GOODBYECRUELWORLD</span><span class="sig">break</span></div>
+    <div data-anim="esquerda" style="--i:5"><span class="cheat">HELLOLADIES</span><span class="sig">print</span></div>
+    <div data-anim="direita" style="--i:5"><span class="cheat">CJPHONEHOME</span><span class="sig">lê um inteiro</span></div>
+    <div data-anim="esquerda" style="--i:6"><span class="cheat">FULLCLIP</span><span class="sig">true</span></div>
+    <div data-anim="direita" style="--i:6"><span class="cheat">GHOSTTOWN</span><span class="sig">false</span></div>
+  </div>
+  <p class="nota" data-anim style="--i:7">O resto é sintaxe estilo C: <code>{ }</code> delimita bloco, <code>;</code> termina instrução, <code>( )</code> agrupa, <code>! &amp;&amp; ||</code> são os lógicos. Três tipos: inteiro, string e booleano, sem conversão implícita.</p>
+</section>
+
+<!-- 4 — um programa -->
+<section id="s4" class="slide" aria-label="Um programa em Grove">
+  <p class="marca" data-anim style="--i:0"><b>03</b> · um programa</p>
+  <h2 data-anim="cortina" style="--i:1">Fatorial de 5</h2>
+  <div class="duas">
+    <div class="painel" data-anim="esquerda" style="--i:2">
+<pre><span class="c"># fatorial de 5</span>
+<span class="k">HESOYAM</span> n = <span class="n">5</span>;
+<span class="k">HESOYAM</span> r = <span class="n">1</span>;
+<span class="k">KANGAROO</span> (n &gt; <span class="n">1</span>) {
+    r = r * n;
+    n = n - <span class="n">1</span>;
+}
+<span class="k">HELLOLADIES</span> r;</pre>
+    </div>
+    <div data-anim="direita" style="--i:3">
+      <div class="painel">
+<pre><span class="c">$</span> python -m grove examples/fatorial.cj
+<span class="g">120</span></pre>
+      </div>
+      <p class="nota" style="margin-top:var(--gap)">Cada execução termina como no jogo: <em>Mission passed!</em> no sucesso, <span style="color:var(--vermelho)">Wasted</span> no erro léxico, <span style="color:var(--policia)">Busted</span> no semântico — com o clipe de áudio do jogo, quando os <code>.wav</code> estão na pasta.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 5 — divisor: o pipeline -->
+<section id="s5" class="slide divisor" aria-label="Seção: o compilador">
+  <p class="conta" data-anim="zoom" style="--i:0">I</p>
+  <h2 data-anim="cortina" style="--i:1">O compilador</h2>
+  <p class="sub" data-anim style="--i:2">Cinco etapas, um arquivo cada, 2.041 linhas de Python e nenhuma dependência.</p>
+</section>
+
+<!-- 6 — pipeline -->
+<section id="s6" class="slide" aria-label="Pipeline">
+  <p class="marca" data-anim style="--i:0"><b>04</b> · pipeline</p>
+  <h2 data-anim="cortina" style="--i:1">Do texto a quatro saídas</h2>
+  <svg class="fig" viewBox="0 0 1000 330" role="img" aria-label="Diagrama: texto .cj passa por léxico, sintático e semântico; da AST anotada saem interpretador, TAC, Python e Arduino">
+    <rect class="caixa" x="2" y="136" width="146" height="58" data-anim="esquerda" style="--i:2"/>
+    <text class="tit" x="75" y="162" text-anchor="middle" data-anim="esquerda" style="--i:2">texto .cj</text>
+    <text class="rot" x="75" y="180" text-anchor="middle" data-anim="esquerda" style="--i:2">FONTE</text>
+
+    <path class="cano" pathLength="1" d="M152 165 H196" data-anim="traco" style="--i:3"/>
+    <polygon class="ponta" points="196,159 208,165 196,171" data-anim="zoom" style="--i:3"/>
+    <rect class="caixa verde" x="210" y="136" width="146" height="58" data-anim style="--i:4"/>
+    <text class="tit" x="283" y="162" text-anchor="middle" data-anim style="--i:4">léxico</text>
+    <text class="rot" x="283" y="180" text-anchor="middle" data-anim style="--i:4">TOKENS</text>
+
+    <path class="cano" pathLength="1" d="M360 165 H404" data-anim="traco" style="--i:5"/>
+    <polygon class="ponta" points="404,159 416,165 404,171" data-anim="zoom" style="--i:5"/>
+    <rect class="caixa verde" x="418" y="136" width="146" height="58" data-anim style="--i:6"/>
+    <text class="tit" x="491" y="162" text-anchor="middle" data-anim style="--i:6">sintático</text>
+    <text class="rot" x="491" y="180" text-anchor="middle" data-anim style="--i:6">AST</text>
+
+    <path class="cano" pathLength="1" d="M568 165 H612" data-anim="traco" style="--i:7"/>
+    <polygon class="ponta" points="612,159 624,165 612,171" data-anim="zoom" style="--i:7"/>
+    <rect class="caixa ouro" x="626" y="136" width="152" height="58" data-anim style="--i:8"/>
+    <text class="tit" x="702" y="162" text-anchor="middle" data-anim style="--i:8">semântico</text>
+    <text class="rot" x="702" y="180" text-anchor="middle" data-anim style="--i:8">AST ANOTADA</text>
+
+    <path class="cano ouro" pathLength="1" d="M782 165 H812 V40 H846" data-anim="traco" style="--i:9"/>
+    <path class="cano ouro" pathLength="1" d="M782 165 H846" data-anim="traco" style="--i:10"/>
+    <path class="cano ouro" pathLength="1" d="M782 165 H812 V230 H846" data-anim="traco" style="--i:11"/>
+    <path class="cano ouro" pathLength="1" d="M782 165 H812 V296 H846" data-anim="traco" style="--i:12"/>
+
+    <rect class="caixa ouro" x="848" y="16" width="150" height="48" data-anim="direita" style="--i:9"/>
+    <text x="923" y="38" text-anchor="middle" data-anim="direita" style="--i:9">interpretador</text>
+    <text class="rot" x="923" y="54" text-anchor="middle" data-anim="direita" style="--i:9">PADRÃO</text>
+
+    <rect class="caixa ouro" x="848" y="141" width="150" height="48" data-anim="direita" style="--i:10"/>
+    <text x="923" y="163" text-anchor="middle" data-anim="direita" style="--i:10">TAC + otimização</text>
+    <text class="rot" x="923" y="179" text-anchor="middle" data-anim="direita" style="--i:10">--ir</text>
+
+    <rect class="caixa ouro" x="848" y="206" width="150" height="48" data-anim="direita" style="--i:11"/>
+    <text x="923" y="228" text-anchor="middle" data-anim="direita" style="--i:11">Python</text>
+    <text class="rot" x="923" y="244" text-anchor="middle" data-anim="direita" style="--i:11">--python</text>
+
+    <rect class="caixa ouro" x="848" y="272" width="150" height="48" data-anim="direita" style="--i:12"/>
+    <text x="923" y="294" text-anchor="middle" data-anim="direita" style="--i:12">Arduino C++</text>
+    <text class="rot" x="923" y="310" text-anchor="middle" data-anim="direita" style="--i:12">--mega</text>
+  </svg>
+  <p class="nota" data-anim style="--i:13; margin-top:var(--gap)">As flags param o compilador em qualquer etapa: <code>--tokens</code>, <code>--ast</code>, <code>--simbolos</code>, <code>--ir</code>. E combinam entre si.</p>
+</section>
+
+<!-- 7 — léxico -->
+<section id="s7" class="slide" aria-label="Análise léxica">
+  <p class="marca" data-anim style="--i:0"><b>05</b> · etapa 1</p>
+  <h2 data-anim="cortina" style="--i:1">Léxico: texto vira tokens</h2>
+  <div class="duas larga-esq">
+    <div class="painel" data-anim="esquerda" style="--i:2">
+<pre><span class="c">$</span> python -m grove examples/fatorial.cj --tokens
+LINHA:COL  TIPO     LEXEMA
+2:1        <span class="k">VAR</span>      HESOYAM
+2:9        IDENT    n
+2:11       ASSIGN   =
+2:13       NUMBER   <span class="n">5</span>
+2:14       SEMI     ;
+…
+<span class="c">$</span> python -m grove examples/erro_lexico.cj
+<span class="r">erro: linha 2, coluna 13: caractere inesperado '$'</span></pre>
+    </div>
+    <ul data-anim="direita" style="--i:3">
+      <li><span class="pino">◆</span><span><b>Cinco classes</b>Cheat, pontuação e operador, número, string e identificador — duas tabelas resolvem as duas primeiras.</span></li>
+      <li><span class="pino">◆</span><span><b>Linha e coluna em cada token</b>É o que faz o erro apontar o lugar exato, aqui e nas etapas seguintes.</span></li>
+      <li><span class="pino">◆</span><span><b>Operador de dois caracteres primeiro</b>Senão <code>!=</code> viraria <code>!</code> seguido de <code>=</code>.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 8 — sintático -->
+<section id="s8" class="slide" aria-label="Análise sintática">
+  <p class="marca" data-anim style="--i:0"><b>06</b> · etapa 2</p>
+  <h2 data-anim="cortina" style="--i:1">Sintático: tokens viram AST</h2>
+  <div class="duas larga-esq">
+    <div class="painel" data-anim="esquerda" style="--i:2">
+<pre><span class="c">$</span> python -m grove examples/erro_digitacao.cj
+<span class="r">erro: linha 2, coluna 1: 'HESOYM' não é um cheat
+da Grove; <span class="g">você quis dizer HESOYAM?</span></span>
+<span class="r">erro: linha 4, coluna 1: 'TURNUPTHEHEET' não é um
+cheat da Grove; <span class="g">você quis dizer TURNUPTHEHEAT?</span></span>
+<span class="r">erro: linha 5, coluna 5: 'HELLOLADYS' não é um cheat
+da Grove; <span class="g">você quis dizer HELLOLADIES?</span></span>
+<span class="r">erro: linha 7, coluna 19: esperado expressão,
+encontrado ')'</span>
+<span class="r">4 erros sintáticos</span></pre>
+    </div>
+    <ul data-anim="direita" style="--i:3">
+      <li><span class="pino">◆</span><span><b>Descida recursiva, LL(1)</b>Um método por regra da gramática; cada regra decide olhando só o próximo token.</span></li>
+      <li><span class="pino">◆</span><span><b>Precedência na cadeia de regras</b><code>ou → e → igualdade → comparação → termo → fator → unário → primário</code>, tudo associativo à esquerda.</span></li>
+      <li><span class="pino">◆</span><span><b>Nada de <code>else</code> ambíguo</b>Bloco é sempre <code>{ }</code>, então o pendente não existe. <span class="cheat">BRINGITON</span> é açúcar: vira um <code>if</code> aninhado.</span></li>
+      <li><span class="pino ouro">◆</span><span><b>Recuperação e sugestão</b>O parser segue depois do erro e a distância de edição acha o cheat ou a variável mais parecida.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 9 — semântico -->
+<section id="s9" class="slide" aria-label="Análise semântica">
+  <p class="marca" data-anim style="--i:0"><b>07</b> · etapa 3</p>
+  <h2 data-anim="cortina" style="--i:1">Semântico: a AST anotada</h2>
+  <div class="duas larga-esq">
+    <div class="painel" data-anim="esquerda" style="--i:2">
+<pre><span class="c">$</span> python -m grove examples/fatorial.cj --simbolos
+NOME  TIPO      ESCOPO  LINHA:COL  ÚNICO  LIDA
+n     inteiro   0       2:9        n      sim
+r     inteiro   0       3:9        r      sim
+
+<span class="c">$</span> python -m grove examples/erro_semantico.cj
+<span class="r">erro: linha 4, coluna 1: 'grana' é inteiro,
+não pode receber string</span>
+<span class="r">erro: linha 5, coluna 1: condição do TURNUPTHEHEAT
+exige booleano, recebeu inteiro</span>
+<span class="r">erro: linha 6, coluna 17: variável 'respeito'
+não declarada</span>
+<span class="r">erro: linha 8, coluna 1: GOODBYECRUELWORLD
+fora de laço</span>
+<span class="r">4 erros semânticos</span></pre>
+    </div>
+    <ul data-anim="direita" style="--i:3">
+      <li><span class="pino">◆</span><span><b>Tabela de símbolos</b>Pilha de escopos, um por bloco. Cada símbolo guarda tipo, escopo, posição, nome único e se foi lido.</span></li>
+      <li><span class="pino">◆</span><span><b>Tipos sem conversão implícita</b><code>1 + "a"</code> é erro; a condição do <code>if</code> e do <code>while</code> tem de ser booleana.</span></li>
+      <li><span class="pino ouro">◆</span><span><b>Todos os erros de uma vez</b>Percorre o programa inteiro antes de reclamar — não para no primeiro.</span></li>
+      <li><span class="pino ouro">◆</span><span><b>Anota a AST</b>Cada expressão ganha tipo e cada variável ganha seu símbolo. É dessa AST que saem a TAC, o Python e o C++.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 10 — TAC -->
+<section id="s10" class="slide" aria-label="Código intermediário">
+  <p class="marca" data-anim style="--i:0"><b>08</b> · etapa 4</p>
+  <h2 data-anim="cortina" style="--i:1">Código de três endereços</h2>
+  <div class="duas">
+    <div class="painel" data-anim="esquerda" style="--i:2">
+<pre><span class="c">$</span> python -m grove examples/otimizacao.cj --ir
+ 1   segundos = <span class="n">60</span> * <span class="n">60</span>
+ 2   dobro = segundos * <span class="n">2</span>
+ 3   t1 = dobro + <span class="n">0</span>
+ 4   print t1
+ 5   ifFalse <span class="k">GHOSTTOWN</span> goto L1
+ 6   print <span class="s">"nunca"</span>
+ 7 L1:
+ 8 L2:
+ 9   ifFalse <span class="k">FULLCLIP</span> goto L3
+10   print <span class="s">"uma vez"</span>
+11   goto L3
+12   goto L2
+13 L3:</pre>
+    </div>
+    <ul data-anim="direita" style="--i:3">
+      <li><span class="pino">◆</span><span><b>Uma quádrupla por instrução</b><code>Quad(op, arg1, arg2, result)</code>: no máximo um operador, temporários <code>t1…tn</code> e rótulos <code>L1…Ln</code>.</span></li>
+      <li><span class="pino">◆</span><span><b>Sem escopo e sem aninhamento</b>As variáveis usam o nome único da tabela de símbolos, porque a TAC é linear.</span></li>
+      <li><span class="pino">◆</span><span><b>Curto-circuito explícito</b><code>&amp;&amp;</code> e <code>||</code> viram desvios; <code>break</code> vira um <code>goto</code> para o fim do laço.</span></li>
+      <li><span class="pino">◆</span><span><b>Executável</b>A TAC roda num executor próprio — é o que garante que ela faz o mesmo que o interpretador.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 11 — otimização -->
+<section id="s11" class="slide" aria-label="Otimização">
+  <p class="marca" data-anim style="--i:0"><b>09</b> · etapa 4b</p>
+  <h2 data-anim="cortina" style="--i:1">Treze instruções viram quatro</h2>
+  <div class="duas">
+    <div data-anim="esquerda" style="--i:2">
+      <div class="numeros" style="grid-template-columns:repeat(2,1fr)">
+        <div><b data-conta="13" data-de="13">13</b><span>instruções antes</span></div>
+        <div><b data-conta="4" data-de="13" style="color:var(--grove)">4</b><span>depois</span></div>
+      </div>
+      <div class="barras">
+        <div class="barra"><span>antes</span><span class="trilho"><i class="antes" data-anim="cresce" style="--i:3"></i></span><span>13</span></div>
+        <div class="barra"><span>depois</span><span class="trilho"><i class="depois" data-anim="cresce" style="--i:4; width:30.7%"></i></span><span>4</span></div>
+      </div>
+      <div class="painel" data-anim style="--i:5; margin-top:var(--gap)">
+<pre> 1   segundos = <span class="n">3600</span>
+ 2   dobro = <span class="n">7200</span>
+ 3   print <span class="n">7200</span>
+ 4   print <span class="s">"uma vez"</span></pre>
+      </div>
+    </div>
+    <ul data-anim="direita" style="--i:6">
+      <li><span class="pino">◆</span><span><b>Dobra de constantes</b><code>60 * 60</code> é resolvido na compilação: duas contas saem do programa.</span></li>
+      <li><span class="pino">◆</span><span><b>Propagação de cópias e constantes</b>Três valores seguem adiante sem passar por temporário.</span></li>
+      <li><span class="pino">◆</span><span><b>Simplificação algébrica</b><code>dobro + 0</code> é só <code>dobro</code>.</span></li>
+      <li><span class="pino">◆</span><span><b>Desvios e código morto</b>Dois desvios resolvidos de um lado; oito instruções inalcançáveis removidas do outro.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 12 — geração de código -->
+<section id="s12" class="slide" aria-label="Geração de código">
+  <p class="marca" data-anim style="--i:0"><b>10</b> · etapa 5</p>
+  <h2 data-anim="cortina" style="--i:1">Duas linguagens de saída</h2>
+  <div class="duas">
+    <div data-anim="esquerda" style="--i:2">
+      <h3>Python · <code>--python</code></h3>
+      <div class="painel" style="margin-top:.6rem">
+<pre>n = <span class="n">5</span>
+r = <span class="n">1</span>
+<span class="k">while</span> n &gt; <span class="n">1</span>:
+    r = r * n
+    n = n - <span class="n">1</span>
+<span class="k">print</span>(r)</pre>
+      </div>
+      <p class="nota" style="margin-top:.7rem">Sai da AST, não da TAC: Python não tem <code>goto</code>, e o <code>if</code>/<code>while</code> da árvore vira <code>if</code>/<code>while</code> direto. Dá para canalizar: <code>--python | python3</code>.</p>
+    </div>
+    <div data-anim="direita" style="--i:3">
+      <h3>Arduino C++ · <code>--mega</code></h3>
+      <div class="painel" style="margin-top:.6rem">
+<pre><span class="k">void</span> setup() {
+  Serial.begin(<span class="n">115200</span>);
+  _inicializar();
+  <span class="k">long</span> estrelas = <span class="n">0L</span>;
+  _procurado(estrelas);
+  <span class="k">while</span> (<span class="k">true</span>) {
+    estrelas = _linha();   <span class="c">// CJPHONEHOME</span>
+    _procurado(estrelas);
+    Serial.println(estrelas);
+  }
+}</pre>
+      </div>
+      <p class="nota" style="margin-top:.7rem">Mesma AST, outro alvo: o C++ do Mega 2560, com <code>CJPHONEHOME</code> lendo a serial e o nível de procurado acendendo o HUD.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 13 — divisor: fora do terminal -->
+<section id="s13" class="slide divisor" aria-label="Seção: fora do terminal">
+  <p class="conta" data-anim="zoom" style="--i:0">II</p>
+  <h2 data-anim="cortina" style="--i:1">Fora do terminal</h2>
+  <p class="sub" data-anim style="--i:2">O mesmo compilador rodando no navegador, numa protoboard e ligado ao jogo.</p>
+</section>
+
+<!-- 14 — grove online -->
+<section id="s14" class="slide" aria-label="Grove Online">
+  <p class="marca" data-anim style="--i:0"><b>11</b> · no navegador</p>
+  <h2 data-anim="cortina" style="--i:1">Grove Online</h2>
+  <div class="duas larga-esq">
+    <ul data-anim="esquerda" style="--i:2">
+      <li><span class="pino azul">◆</span><span><b>O compilador em Python roda no navegador</b>Pyodide carrega o próprio pacote <code>grove</code>: nada é instalado e nenhum servidor compila nada.</span></li>
+      <li><span class="pino azul">◆</span><span><b>Editor com realce dos cheats</b>Numeração, recuo automático, linha de erro marcada e o código salvo no navegador.</span></li>
+      <li><span class="pino azul">◆</span><span><b>Por dentro do compilador</b>Abas com tokens, AST, tabela de símbolos, TAC, Python e o C++ do Arduino.</span></li>
+      <li><span class="pino ouro">◆</span><span><b>HUD do jogo como feedback</b>Uma estrela de procurado por erro encontrado, $250.000 a cada missão cumprida.</span></li>
+    </ul>
+    <div data-anim="direita" style="--i:3">
+      <div class="painel">
+        <p class="marca" style="margin-bottom:.6rem">no ar em</p>
+        <p class="cheat" style="font-size:clamp(1rem,2.3vw,1.5rem); word-break:break-all">grove.heybrain.uk</p>
+        <div class="hud" style="margin-top:1rem">
+          <svg viewBox="0 0 24 24"><path class="estrela on" style="--i:0" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/></svg>
+          <svg viewBox="0 0 24 24"><path class="estrela on" style="--i:1" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/></svg>
+          <svg viewBox="0 0 24 24"><path class="estrela" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/></svg>
+        </div>
+        <p class="grana" style="margin:.5rem 0 0">$250.000</p>
+        <p class="nota" style="margin-top:.8rem">Ctrl+Enter executa. Laço infinito para em 5 s. Compartilhar copia um link com o código dentro.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 — HUD físico -->
+<section id="s15" class="slide" aria-label="O HUD na bancada">
+  <p class="marca" data-anim style="--i:0"><b>12</b> · na bancada</p>
+  <h2 data-anim="cortina" style="--i:1">Seis estrelas e um giroflex</h2>
+  <div class="duas larga-esq">
+    <div data-anim="esquerda" style="--i:2">
+      <svg class="fig" viewBox="0 0 520 170" role="img" aria-label="Seis LEDs de estrela e o giroflex na protoboard">
+        <g>
+          <path class="estrela on" style="--i:0" transform="translate(4,30) scale(2.6)" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/>
+          <path class="estrela on" style="--i:1" transform="translate(74,30) scale(2.6)" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/>
+          <path class="estrela on" style="--i:2" transform="translate(144,30) scale(2.6)" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/>
+          <path class="estrela" transform="translate(214,30) scale(2.6)" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/>
+          <path class="estrela" transform="translate(284,30) scale(2.6)" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/>
+          <path class="estrela" transform="translate(354,30) scale(2.6)" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/>
+          <circle class="luz" cx="470" cy="62" r="26" fill="#79a6f2"/>
+          <text class="rot" x="470" y="124" text-anchor="middle">GIROFLEX</text>
+          <text class="rot" x="112" y="124" text-anchor="middle">NÍVEL DE PROCURADO · 3 ESTRELAS</text>
+        </g>
+      </svg>
+    </div>
+    <ul data-anim="direita" style="--i:3">
+      <li><span class="pino">◆</span><span><b>Arduino Mega 2560</b>O <code>.cj</code> compilado para C++, gravado com <code>arduino-cli</code>. Seis LEDs de estrela mais o giroflex azul e vermelho.</span></li>
+      <li><span class="pino">◆</span><span><b>Mais estrelas, mais rápido</b>O nível de procurado controla a frequência: uma estrela pisca devagar, seis é alarme.</span></li>
+      <li><span class="pino">◆</span><span><b>Simulado antes de soldar</b>Circuito em SPICE e teste no Wokwi; o teste roda o programa contra um <code>Arduino.h</code> falso, sem placa.</span></li>
+    </ul>
+  </div>
+</section>
+
+<!-- 16 — a ponte com o GTA -->
+<section id="s16" class="slide" aria-label="O GTA acendendo os LEDs">
+  <p class="marca" data-anim style="--i:0"><b>13</b> · a volta completa</p>
+  <h2 data-anim="cortina" style="--i:1">O jogo acendendo os LEDs</h2>
+  <svg class="fig" viewBox="0 0 1000 220" role="img" aria-label="Do script CLEO dentro do GTA, pela ponte em Python, até o Mega 2560">
+    <rect class="caixa ouro" x="2" y="60" width="250" height="90" data-anim="esquerda" style="--i:2"/>
+    <text class="rot" x="127" y="88" text-anchor="middle" data-anim="esquerda" style="--i:2">NO JOGO</text>
+    <text class="tit" x="127" y="112" text-anchor="middle" data-anim="esquerda" style="--i:2">script CLEO</text>
+    <text class="rot" x="127" y="132" text-anchor="middle" data-anim="esquerda" style="--i:2">OPCODE 01C0 · 200 ms</text>
+
+    <path class="cano ouro" pathLength="1" d="M256 105 H340" data-anim="traco" style="--i:3"/>
+    <polygon class="ponta ouro" points="340,98 356,105 340,112" data-anim="zoom" style="--i:3"/>
+    <text class="rot" x="298" y="92" text-anchor="middle" data-anim style="--i:3">procurado.txt</text>
+
+    <rect class="caixa verde" x="358" y="60" width="250" height="90" data-anim style="--i:4"/>
+    <text class="rot" x="483" y="88" text-anchor="middle" data-anim style="--i:4">NO PC</text>
+    <text class="tit" x="483" y="112" text-anchor="middle" data-anim style="--i:4">gta/ponte.py</text>
+    <text class="rot" x="483" y="132" text-anchor="middle" data-anim style="--i:4">PYSERIAL · 100 ms</text>
+
+    <path class="cano" pathLength="1" d="M612 105 H696" data-anim="traco" style="--i:5"/>
+    <polygon class="ponta" points="696,98 712,105 696,112" data-anim="zoom" style="--i:5"/>
+    <text class="rot" x="654" y="92" text-anchor="middle" data-anim style="--i:5">USB · "3\n"</text>
+
+    <rect class="caixa ouro" x="714" y="60" width="284" height="90" data-anim="direita" style="--i:6"/>
+    <text class="rot" x="856" y="88" text-anchor="middle" data-anim="direita" style="--i:6">NA PLACA</text>
+    <text class="tit" x="856" y="112" text-anchor="middle" data-anim="direita" style="--i:6">procurado_led.cj</text>
+    <text class="rot" x="856" y="132" text-anchor="middle" data-anim="direita" style="--i:6">CJPHONEHOME LÊ A LINHA</text>
+  </svg>
+  <div class="duas" style="margin-top:var(--gap)">
+    <p class="nota" data-anim style="--i:7"><span class="cheat">CJPHONEHOME</span> é a primeira expressão da Grove que <em>lê</em>: ela espera a próxima linha da entrada. No PC é o teclado; na placa, a serial. O mesmo programa serve aos dois.</p>
+    <p class="sub" data-anim="zoom" style="--i:8"><strong><span data-conta="0.3" data-casas="1">0,3</span> s</strong> entre a estrela aparecer na tela e o LED acender.</p>
+  </div>
+</section>
+
+<!-- 17 — números -->
+<section id="s17" class="slide" aria-label="Números do projeto">
+  <p class="marca" data-anim style="--i:0"><b>14</b> · o que está pronto</p>
+  <h2 data-anim="cortina" style="--i:1">O projeto em números</h2>
+  <div class="numeros">
+    <div data-anim="zoom" style="--i:2"><b data-conta="93">93</b><span>testes passando</span></div>
+    <div data-anim="zoom" style="--i:3"><b data-conta="2041">2041</b><span>linhas de Python</span></div>
+    <div data-anim="zoom" style="--i:4"><b data-conta="0">0</b><span>dependências</span></div>
+    <div data-anim="zoom" style="--i:5"><b data-conta="4">4</b><span>saídas: executa, TAC, Python, C++</span></div>
+  </div>
+  <div class="faixa" data-anim style="--i:6; margin-top:var(--gap)">
+    <div><span>LEXER · PARSER · SEMANTIC · IR · OTIMIZADOR · CODEGEN PY · CODEGEN INO · PLAYGROUND · HUD · PONTE GTA ·</span><span>LEXER · PARSER · SEMANTIC · IR · OTIMIZADOR · CODEGEN PY · CODEGEN INO · PLAYGROUND · HUD · PONTE GTA ·</span></div>
+  </div>
+  <p class="nota" data-anim style="--i:7; margin-top:var(--gap)">Dez programas de exemplo, incluindo cinco que só existem para errar: um erro léxico, um sintático, um de digitação com os cheats parecidos, quatro erros semânticos de uma vez e um de execução. Documentação por etapa em <code>docs/</code>.</p>
+</section>
+
+<!-- 18 — encerramento -->
+<section id="s18" class="slide" aria-label="Encerramento">
+  <p class="marca" data-anim style="--i:0">mission passed</p>
+  <h2 data-anim="cortina" style="--i:1; color:var(--dinheiro)">Respeito +<span data-conta="250000">250.000</span></h2>
+  <p class="sub" data-anim style="--i:2">Escreva um programa com os cheats e rode no navegador — não precisa instalar nada.</p>
+  <div class="duas" style="margin-top:var(--gap)">
+    <div class="painel" data-anim="esquerda" style="--i:3">
+      <p class="marca" style="margin-bottom:.4rem">o app</p>
+      <p class="cheat" style="font-size:clamp(1rem,2.1vw,1.4rem); word-break:break-all">grove.heybrain.uk</p>
+    </div>
+    <div class="painel" data-anim="direita" style="--i:4">
+      <p class="marca" style="margin-bottom:.4rem">o código</p>
+      <p class="cheat" style="font-size:clamp(.85rem,1.6vw,1.1rem); word-break:break-all">github.com/fernandomcrsilva/grove-language</p>
+    </div>
+  </div>
+  <p class="nota" data-anim style="--i:5; margin-top:var(--gap)">Gabriel Lacerda · Gabriel Mendonça · Fernando Mendonça — perguntas?</p>
+</section>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var root = document.documentElement;
+  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+  var progresso = document.getElementById("progresso");
+  var passo = document.getElementById("passo");
+  var calma = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  function dois(n){ return (n < 10 ? "0" : "") + n; }
+  passo.textContent = dois(1) + " / " + dois(slides.length);
+
+  /* --- abrir direto num slide: apresentacao.html#s6 --- */
+  /* o scroll-snap re-ancora no primeiro slide ao carregar, então o pulo é refeito aqui.
+     tem de vir antes do observador, senão ele avalia o alvo na posição antiga. */
+  function paraHash(imediato){
+    if (!location.hash) return;
+    var alvo = document.querySelector(location.hash);
+    if (!alvo || !alvo.classList.contains("slide")) return;
+    alvo.scrollIntoView({ behavior: imediato ? "instant" : "smooth", block: "start" });
+  }
+  paraHash(true);
+  window.addEventListener("load", function(){ paraHash(true); });
+  window.addEventListener("hashchange", function(){ paraHash(false); });
+
+  /* --- entra e sai: a animação repete toda vez que o slide volta ---
+     quem manda é o slide que cobre o meio da tela. Um IntersectionObserver
+     erraria ao abrir em #s6: ele avalia o alvo na posição de antes do pulo. */
+  var atual = 0;
+  function atualiza(){
+    var meio = window.innerHeight / 2;
+    slides.forEach(function(s, i){
+      var r = s.getBoundingClientRect();
+      var dentro = r.top <= meio && r.bottom > meio;
+      if (dentro !== s.classList.contains("is-visible")) {
+        s.classList.toggle("is-visible", dentro);
+        if (dentro) contar(s);
+      }
+      if (dentro && atual !== i) {
+        atual = i;
+        passo.textContent = dois(i + 1) + " / " + dois(slides.length);
+      }
+    });
+    var max = document.documentElement.scrollHeight - window.innerHeight;
+    progresso.style.width = (Math.min(1, max > 0 ? window.scrollY / max : 0) * 100).toFixed(2) + "%";
+  }
+  var agendado = false;
+  function agenda(){
+    if (agendado) return;
+    agendado = true;
+    requestAnimationFrame(function(){ agendado = false; atualiza(); });
+  }
+  window.addEventListener("scroll", agenda, { passive: true });
+  window.addEventListener("resize", agenda);
+  window.addEventListener("load", agenda);
+  atualiza();
+
+  /* --- números que contam --- */
+  function contar(slide){
+    slide.querySelectorAll("[data-conta]").forEach(function(el){
+      var alvo = parseFloat(el.getAttribute("data-conta"));
+      var casas = parseInt(el.getAttribute("data-casas") || "0", 10);
+      var de = parseFloat(el.getAttribute("data-de") || "0");
+      var formata = function(v){
+        return v.toLocaleString("pt-BR", { minimumFractionDigits: casas, maximumFractionDigits: casas });
+      };
+      if (calma.matches) { el.textContent = formata(alvo); return; }
+      var inicio = null, dur = 1100;
+      function quadro(t){
+        if (inicio === null) inicio = t;
+        var p = Math.min(1, (t - inicio) / dur);
+        var suave = 1 - Math.pow(1 - p, 3);
+        el.textContent = formata(de + (alvo - de) * suave);
+        if (p < 1) requestAnimationFrame(quadro);
+      }
+      requestAnimationFrame(quadro);
+    });
+  }
+
+  /* --- navegação: teclado e swipe --- */
+  function vai(i){
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    slides[i].scrollIntoView({ behavior: calma.matches ? "auto" : "smooth", block: "start" });
+  }
+  document.addEventListener("keydown", function(e){
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    switch (e.key) {
+      case "ArrowRight": case "ArrowDown": case "PageDown": case " ": vai(atual + 1); break;
+      case "ArrowLeft": case "ArrowUp": case "PageUp": vai(atual - 1); break;
+      case "Home": vai(0); break;
+      case "End": vai(slides.length - 1); break;
+      default: return;
+    }
+    e.preventDefault();
+  });
+
+  var x0 = null, y0 = null;
+  document.addEventListener("touchstart", function(e){
+    x0 = e.changedTouches[0].clientX; y0 = e.changedTouches[0].clientY;
+  }, { passive: true });
+  document.addEventListener("touchend", function(e){
+    if (x0 === null) return;
+    var dx = e.changedTouches[0].clientX - x0;
+    var dy = e.changedTouches[0].clientY - y0;
+    /* só o swipe horizontal navega: o vertical é o scroll-snap nativo */
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) vai(atual + (dx < 0 ? 1 : -1));
+    x0 = y0 = null;
+  }, { passive: true });
+
+  /* --- brilho seguindo o cursor --- */
+  if (!calma.matches && window.matchMedia("(hover: hover)").matches) {
+    var pendente = false, px = 0, py = 0;
+    window.addEventListener("pointermove", function(e){
+      px = e.clientX; py = e.clientY;
+      if (pendente) return;
+      pendente = true;
+      requestAnimationFrame(function(){
+        root.style.setProperty("--mx", (px / window.innerWidth * 100).toFixed(1) + "%");
+        root.style.setProperty("--my", (py / window.innerHeight * 100).toFixed(1) + "%");
+        pendente = false;
+      });
+    }, { passive: true });
+  }
+})();
+</script>
+</body>
+</html>
