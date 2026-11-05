@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grove Online — compilador da linguagem dos cheats</title>
+<meta name="description" content="Compilador online da Grove, a linguagem cujas palavras-chave são cheats de GTA San Andreas. Escreva, compile e rode no navegador, e veja cada etapa do compilador.">
+<meta name="theme-color" content="#070908">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 1.5l3.1 6.6 7.2.9-5.3 5 1.4 7.1L12 17.6l-6.4 3.5 1.4-7.1-5.3-5 7.2-.9z' fill='%23e2a529' stroke='%23000' stroke-width='1.5'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="estilo.css">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<header class="topo">
+  <a class="marca" href="./" aria-label="Grove Online">
+    <span class="logo">Grove</span>
+    <span class="logo-sub">compilador online</span>
+  </a>
+
+  <div class="acoes" role="toolbar" aria-label="Arquivo">
+    <label class="sr-only" for="exemplo">Abrir um exemplo</label>
+    <select id="exemplo">
+      <option value="">Exemplos…</option>
+      <option value="fatorial">fatorial.cj</option>
+      <option value="fizzbuzz">fizzbuzz.cj</option>
+      <option value="procurado">procurado.cj</option>
+      <option value="erro_lexico">erro_lexico.cj</option>
+      <option value="erro_sintatico">erro_sintatico.cj</option>
+      <option value="erro_digitacao">erro_digitacao.cj</option>
+      <option value="otimizacao">otimizacao.cj</option>
+      <option value="erro_semantico">erro_semantico.cj</option>
+      <option value="erro_execucao">erro_execucao.cj</option>
+    </select>
+    <button type="button" class="botao" id="abrir">Abrir</button>
+    <input type="file" id="arquivo" accept=".cj,.txt,text/plain" hidden>
+    <button type="button" class="botao" id="baixar" title="Baixar o código (Ctrl+S)">Baixar</button>
+    <button type="button" class="botao" id="compartilhar" title="Copiar um link com este código">Compartilhar</button>
+  </div>
+
+  <button type="button" class="executar" id="executar" disabled>
+    <span class="executar-rotulo">Executar</span><kbd>Ctrl ↵</kbd>
+  </button>
+
+  <div class="hud">
+    <div class="hud-linha">
+      <button type="button" class="som" id="som" aria-label="Falas do jogo" aria-pressed="true"></button>
+      <div class="estrelas" id="estrelas" role="img" aria-label="Nível de procurado: 0 de 6"
+           title="Nível de procurado: uma estrela por erro encontrado"></div>
+    </div>
+    <div class="dinheiro" id="dinheiro" title="Cada missão cumprida vale um HESOYAM: $250.000">$00000000</div>
+  </div>
+</header>
+
+<main class="area">
+  <aside class="cheats" aria-labelledby="cheats-titulo">
+    <h2 id="cheats-titulo" class="titulo-painel">Cheats</h2>
+    <p class="cheats-dica">Clique para inserir no código.</p>
+    <ul id="lista-cheats"></ul>
+  </aside>
+
+  <section class="painel editor-painel" aria-label="Editor">
+    <div class="painel-topo">
+      <span class="arquivo" id="nome-arquivo">main.cj</span>
+      <span class="salvo" id="salvo"></span>
+    </div>
+    <div class="editor">
+      <pre class="numeros" id="numeros" aria-hidden="true"></pre>
+      <div class="codigo">
+        <pre class="realce" id="realce" aria-hidden="true"></pre>
+        <textarea id="fonte" spellcheck="false" wrap="off" autocapitalize="off" autocomplete="off"
+                  aria-label="Código-fonte Grove" aria-describedby="dica-teclado"></textarea>
+      </div>
+    </div>
+  </section>
+
+  <section class="painel saida-painel" aria-label="Resultado">
+    <div role="tablist" class="abas" aria-label="Saídas do compilador">
+      <button role="tab" id="tab-console" aria-controls="aba-console" aria-selected="true">Console</button>
+      <button role="tab" id="tab-tokens" aria-controls="aba-tokens" aria-selected="false" tabindex="-1">Tokens</button>
+      <button role="tab" id="tab-ast" aria-controls="aba-ast" aria-selected="false" tabindex="-1">AST</button>
+      <button role="tab" id="tab-simbolos" aria-controls="aba-simbolos" aria-selected="false" tabindex="-1">Símbolos</button>
+      <button role="tab" id="tab-ir" aria-controls="aba-ir" aria-selected="false" tabindex="-1">TAC</button>
+      <button role="tab" id="tab-python" aria-controls="aba-python" aria-selected="false" tabindex="-1">Python</button>
+    </div>
+    <div role="tabpanel" class="aba console" id="aba-console" aria-labelledby="tab-console" tabindex="0" aria-live="polite"></div>
+    <div role="tabpanel" class="aba" id="aba-tokens" aria-labelledby="tab-tokens" tabindex="0" hidden></div>
+    <div role="tabpanel" class="aba" id="aba-ast" aria-labelledby="tab-ast" tabindex="0" hidden></div>
+    <div role="tabpanel" class="aba" id="aba-simbolos" aria-labelledby="tab-simbolos" tabindex="0" hidden></div>
+    <div role="tabpanel" class="aba" id="aba-ir" aria-labelledby="tab-ir" tabindex="0" hidden></div>
+    <div role="tabpanel" class="aba" id="aba-python" aria-labelledby="tab-python" tabindex="0" hidden></div>
+  </section>
+</main>
+
+<footer class="barra-status">
+  <ol class="etapas" aria-label="Etapas do compilador">
+    <li class="etapa" data-etapa="lexico">léxico</li>
+    <li class="etapa" data-etapa="sintatico">sintático</li>
+    <li class="etapa" data-etapa="semantico">semântico</li>
+    <li class="etapa" data-etapa="execucao">execução</li>
+  </ol>
+  <span id="posicao">Ln 1, Col 1</span>
+  <span id="dica-teclado">Ctrl+Enter executa · Tab recua · Esc e Tab saem do editor</span>
+  <span id="versao">carregando o Python…</span>
+  <a href="https://github.com/fernandomcrsilva/grove-language">código no GitHub</a>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+<noscript><p class="sem-js">O Grove Online precisa de JavaScript para rodar o Python no navegador.</p></noscript>
+</body>
+</html>

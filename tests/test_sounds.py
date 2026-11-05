@@ -19,7 +19,7 @@ class SoundsTest(unittest.TestCase):
             self.assertTrue(cmd[-1].endswith("assets/lex_error.wav"))
 
     def test_eventos_conhecidos(self):
-        self.assertEqual(set(sounds.EVENTOS), {"passed", "lex_error", "parse_error", "runtime_error"})
+        self.assertEqual(set(sounds.EVENTOS), {"passed", "lex_error", "parse_error", "semantic_error", "runtime_error"})
 
 
 if __name__ == "__main__":

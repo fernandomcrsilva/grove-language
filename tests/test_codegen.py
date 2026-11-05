@@ -1,0 +1,245 @@
+import io
+import shutil
+import subprocess
+import sys
+import types
+import unittest
+from contextlib import redirect_stdout
+from pathlib import Path
+from unittest import mock
+
+from grove.codegen_py import emit_python
+
+from tests.test_ir import TRECHOS, compilar, programas, saida_interpretador, saida_tac
+from tests.test_lexer import FATORIAL
+from tests.test_semantic import cli
+
+RAIZ = Path(__file__).resolve().parent.parent
+
+
+def python_de(src):
+    return emit_python(*compilar(src))
+
+
+def saida_python(codigo, globais=None):
+    out = io.StringIO()
+    with redirect_stdout(out):
+        exec(compile(codigo, "<grove>", "exec"), globais if globais is not None else {"__name__": "__grove__"})
+    return out.getvalue().splitlines()
+
+
+class PlacaFalsa:
+    """machine e time do MicroPython, só o que o --esp32 usa; registra o que acontece nos pinos e timers."""
+
+    def __init__(self):
+        self.pinos, self.periodos, self.esperas, self.fotos = [], [], [], []
+        self.pino, self.timer = {}, {}  # número do pino → Pin; id do timer → Timer
+        placa = self
+
+        class Pin:
+            OUT = 1
+
+            def __init__(self, n, modo):
+                placa.pinos.append(n)
+                placa.pino[n] = self
+                self.v = 0
+
+            def value(self, v=None):
+                if v is None:
+                    return self.v
+                self.v = int(bool(v))
+
+        class Timer:
+            PERIODIC = 1
+
+            def __init__(self, n):
+                placa.timer[n] = self
+                self.callback, self.periodos = None, []
+
+            def init(self, period, mode, callback):
+                placa.periodos.append(period)
+                self.periodos.append(period)
+                self.callback = callback
+
+            def deinit(self):
+                self.callback = None
+
+        def sleep_ms(ms):  # o prelúdio espera depois de cada valor novo: a hora de tirar a foto do HUD
+            self.esperas.append(ms)
+            self.fotos.append(self.foto())
+
+        self.machine = types.SimpleNamespace(Pin=Pin, Timer=Timer)
+        self.time = types.SimpleNamespace(sleep_ms=sleep_ms)
+
+    def foto(self):
+        return {"pinos": {n: p.v for n, p in self.pino.items()},
+                "timers": {n: t.callback is not None for n, t in self.timer.items()}}
+
+    def rodar(self, codigo):
+        globais = {"__name__": "__grove__"}
+        with mock.patch.dict(sys.modules, {"machine": self.machine, "time": self.time}):
+            return saida_python(codigo, globais), globais
+
+
+def corpo(src):
+    """Python gerado sem a linha de comentário do topo."""
+    return python_de(src).splitlines()[1:]
+
+
+class CodegenPythonTest(unittest.TestCase):
+    def test_fatorial(self):
+        self.assertEqual(python_de(FATORIAL).splitlines(), [
+            "# gerado pela Grove",
+            "n = 5",
+            "r = 1",
+            "while n > 1:",
+            "    r = r * n",
+            "    n = n - 1",
+            "print(r)",
+        ])
+
+    def test_if_else_if_else(self):
+        src = "HESOYAM n = 1; TURNUPTHEHEAT (n < 0) { } BRINGITON (n == 0) { HELLOLADIES 0; } TURNDOWNTHEHEAT { }"
+        self.assertEqual(corpo(src), ["n = 1", "if n < 0:", "    pass", "elif n == 0:", "    print(0)", "else:", "    pass"])
+
+    def test_literais_e_operadores(self):
+        self.assertEqual(corpo('HELLOLADIES "a\\b" + "c"; HELLOLADIES 7 / 2; HELLOLADIES FULLCLIP && !GHOSTTOWN;'), [
+            'print("a\\\\b" + "c")',
+            "print(7 // 2)",
+            'print("FULLCLIP" if True and not False else "GHOSTTOWN")',
+        ])
+
+    def test_parenteses_so_onde_precisa(self):
+        casos = {
+            "2 + 3 * 4": "2 + 3 * 4",
+            "(2 + 3) * 4": "(2 + 3) * 4",
+            "10 - 4 - 3": "10 - 4 - 3",
+            "10 - (4 - 3)": "10 - (4 - 3)",
+            "-(2 + 3)": "-(2 + 3)",
+            "!a == b": "(not a) == b",         # not é mais fraco que == em Python
+            "!(a == b)": "not a == b",
+            "a == !b": "a == (not b)",          # a == not b é erro de sintaxe em Python
+            "1 == 2 == b": "(1 == 2) == b",     # sem encadear comparação
+            "b == (1 == 2)": "b == (1 == 2)",
+            "!(a && b) || a": "not (a and b) or a",
+            "a || b && a": "a or b and a",
+        }
+        for grove, py in casos.items():
+            with self.subTest(grove):
+                linha = corpo(f"HESOYAM a = FULLCLIP; HESOYAM b = GHOSTTOWN; HELLOLADIES {grove};")[-1]
+                self.assertIn(linha, (f"print({py})", f'print("FULLCLIP" if {py} else "GHOSTTOWN")'))
+
+    def test_nomes_unicos_e_reservados_do_python(self):
+        self.assertEqual(corpo(TRECHOS["sombra"]), ["x = 1", "x_1 = x + 1", "print(x_1)", "print(x)"])
+        self.assertEqual(corpo("HESOYAM print = 1; HESOYAM print_ = 2; HELLOLADIES print + print_;"),
+                         ["print__ = 1", "print_ = 2", "print(print__ + print_)"])
+
+    def test_python_faz_o_mesmo_que_interpretador_e_tac(self):
+        for nome, src in programas():
+            with self.subTest(nome):
+                prog, analise = compilar(src)
+                esperado = saida_interpretador(prog)
+                self.assertEqual(saida_tac(prog, analise), esperado)
+                self.assertEqual(saida_python(emit_python(prog, analise)), esperado)
+
+    def test_divisao_por_zero_vira_zerodivisionerror(self):
+        with self.assertRaises(ZeroDivisionError):
+            saida_python(python_de("HESOYAM z = 0; HELLOLADIES 1 / z;"))
+
+    @unittest.skipUnless(shutil.which("micropython"), "MicroPython (porta unix) não instalado")
+    def test_python_gerado_roda_igual_no_micropython(self):
+        for nome, src in programas():
+            with self.subTest(nome):
+                prog, analise = compilar(src)
+                rodou = subprocess.run(["micropython", "-c", emit_python(prog, analise)],
+                                       capture_output=True, text=True, check=True)
+                self.assertEqual(rodou.stdout.splitlines(), saida_interpretador(prog))
+
+    def test_cli_python_roda_no_python(self):
+        codigo, out, _ = cli(str(RAIZ / "examples" / "fatorial.cj"), "--python")
+        self.assertEqual(codigo, 0)
+        rodou = subprocess.run([sys.executable, "-"], input=out, capture_output=True, text=True, check=True)
+        self.assertEqual(rodou.stdout, "120\n")
+
+
+class Esp32Test(unittest.TestCase):
+    PROCURADO = (RAIZ / "examples" / "procurado.cj").read_text()
+
+    def test_estrelas_comandam_o_led(self):
+        prog, analise = compilar(self.PROCURADO)
+        placa = PlacaFalsa()
+        saida, globais = placa.rodar(emit_python(prog, analise, esp32=True, pino=4))
+        self.assertEqual(saida, saida_interpretador(prog))     # HELLOLADIES sai na serial igual
+        self.assertEqual(placa.pinos, [4])
+        self.assertEqual(placa.periodos, [600, 300, 200, 150, 120, 100])  # 0 estrelas: apagado, sem timer
+        self.assertEqual(placa.esperas, [1500] * 7)             # uma pausa por valor novo, incluindo o 0
+        timer, led = globais["_timer"], globais["_led"]
+        timer.callback(timer)
+        self.assertEqual(led.value(), 1)                        # o tique do timer acende o LED
+
+    def test_hud_acende_uma_luz_por_estrela_e_o_giroflex(self):
+        from grove.codegen_py import GIROFLEX_A_PARTIR_DE, PINO_AZUL, PINO_VERMELHO, PINOS_ESTRELAS
+        prog, analise = compilar(self.PROCURADO)
+        placa = PlacaFalsa()
+        saida, globais = placa.rodar(emit_python(prog, analise, esp32=True, hud=True))
+        self.assertEqual(saida, saida_interpretador(prog))
+        self.assertEqual(placa.pinos, [2, *PINOS_ESTRELAS, PINO_VERMELHO, PINO_AZUL])
+        acesas = [sum(f["pinos"][n] for n in PINOS_ESTRELAS) for f in placa.fotos]
+        self.assertEqual(acesas, [0, 1, 2, 3, 4, 5, 6])                  # uma luz por estrela, de 0 a 6
+        for f, n in zip(placa.fotos, range(7)):                         # as primeiras n acesas, na ordem
+            self.assertEqual([f["pinos"][p] for p in PINOS_ESTRELAS], [1] * n + [0] * (6 - n))
+        giroflex = [f["timers"][1] for f in placa.fotos]
+        self.assertEqual(giroflex, [n >= GIROFLEX_A_PARTIR_DE for n in range(7)])
+        self.assertEqual(placa.timer[1].periodos, [300, 250, 200])      # mais rápido a cada estrela
+        self.assertEqual(placa.timer[0].periodos, [600, 300, 200, 150, 120, 100])  # o LED da placa continua
+        giro = globais["_giroflex"]
+        giro(None)
+        primeiro = (placa.pino[PINO_VERMELHO].v, placa.pino[PINO_AZUL].v)
+        giro(None)
+        segundo = (placa.pino[PINO_VERMELHO].v, placa.pino[PINO_AZUL].v)
+        self.assertEqual({primeiro, segundo}, {(1, 0), (0, 1)})          # vermelho e azul alternando
+
+    def test_hud_apaga_o_giroflex_quando_as_estrelas_baixam(self):
+        from grove.codegen_py import PINO_AZUL, PINO_VERMELHO
+        prog, analise = compilar("HESOYAM estrelas = 5; estrelas = 2; estrelas = 9; estrelas = -1;")
+        placa = PlacaFalsa()
+        placa.rodar(emit_python(prog, analise, esp32=True, hud=True))
+        self.assertEqual([f["timers"][1] for f in placa.fotos], [True, False, True, False])
+        self.assertEqual([sum(f["pinos"].values()) - f["pinos"][2] for f in placa.fotos], [5, 2, 6, 0])
+        self.assertEqual((placa.pino[PINO_VERMELHO].v, placa.pino[PINO_AZUL].v), (0, 0))
+
+    def test_sem_estrelas_sai_igual_ao_python(self):
+        prog, analise = compilar(FATORIAL)
+        self.assertEqual(emit_python(prog, analise, esp32=True), emit_python(prog, analise))
+
+    def test_estrelas_que_nao_e_inteiro_nao_mexe_no_led(self):
+        prog, analise = compilar('HESOYAM estrelas = "seis"; HELLOLADIES estrelas;')
+        self.assertNotIn("_procurado", emit_python(prog, analise, esp32=True))
+
+    def test_nomes_do_preludio_ficam_reservados(self):
+        src = ("HESOYAM estrelas = 1; HESOYAM time = 2; HESOYAM _led = 3; HESOYAM max = 4; HESOYAM enumerate = 5;"
+               " HESOYAM _luzes = 6; HELLOLADIES time + _led + max + enumerate + _luzes;")
+        codigo = emit_python(*compilar(src), esp32=True)
+        self.assertIn("time_ = 2", codigo)
+        self.assertIn("_led_ = 3", codigo)
+        self.assertIn("max_ = 4", codigo)  # o prelúdio chama max()
+        self.assertEqual(PlacaFalsa().rodar(codigo)[0], ["20"])
+        hud = emit_python(*compilar(src), esp32=True, hud=True)
+        self.assertIn("enumerate_ = 5", hud)
+        self.assertIn("_luzes_ = 6", hud)
+        self.assertEqual(PlacaFalsa().rodar(hud)[0], ["20"])
+
+    def test_cli(self):
+        codigo, out, err = cli(str(RAIZ / "examples" / "procurado.cj"), "--esp32", "--pino", "5")
+        self.assertEqual(codigo, 0)
+        self.assertIn("_led = Pin(5, Pin.OUT)", out)
+        self.assertEqual(err, "")
+        codigo, out, _ = cli(str(RAIZ / "examples" / "procurado.cj"), "--esp32", "--hud")
+        self.assertEqual(codigo, 0)
+        self.assertIn("_giroflex", out)
+        _, _, err = cli(str(RAIZ / "examples" / "fatorial.cj"), "--esp32")
+        self.assertIn("aviso: nenhuma variável inteira 'estrelas'", err)
+
+
+if __name__ == "__main__":
+    unittest.main()

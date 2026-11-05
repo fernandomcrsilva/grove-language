@@ -1,0 +1,17 @@
+// Publica o Grove Online na Cloudflare: um Worker que só serve arquivos estáticos.
+// Na raiz do repositório:
+//   npx wrangler@4.151.3 login    (só na primeira vez; abre o navegador)
+//   npx wrangler@4.151.3 deploy
+// O que vai para o site está em .assetsignore.
+{
+  "name": "grove-online",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": ".",
+    "html_handling": "auto-trailing-slash"
+  },
+  "workers_dev": true
+  // domínio próprio: o site no ar está em grove.heybrain.uk; para publicar lá pelo wrangler, tire as barras
+  // da linha abaixo (o domínio precisa estar nesta conta da Cloudflare)
+  // , "routes": [{ "pattern": "grove.heybrain.uk", "custom_domain": true }]
+}

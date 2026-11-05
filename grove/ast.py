@@ -1,31 +1,43 @@
 """Nós da árvore sintática abstrata (AST)."""
-from dataclasses import dataclass, fields, is_dataclass
+from dataclasses import dataclass, field, fields, is_dataclass
+
+
+def anotacao(default=None):
+    """Campo preenchido depois do parse: fica fora do ==, do repr e do dump."""
+    return field(default=default, kw_only=True, compare=False, repr=False)
 
 
 @dataclass
 class Node:
-    pass
+    line: int = anotacao(0)  # posição no fonte, gravada pelo parser
+    col: int = anotacao(0)
 
 
 # ---- expressões ----
 @dataclass
-class Literal(Node):
+class Expr(Node):
+    tipo: str | None = anotacao()  # "inteiro" | "string" | "booleano", gravado pela análise semântica
+
+
+@dataclass
+class Literal(Expr):
     value: object  # int | str | bool
 
 
 @dataclass
-class Var(Node):
+class Var(Expr):
     name: str
+    simbolo: object = anotacao()  # Simbolo da tabela, gravado pela análise semântica
 
 
 @dataclass
-class Unary(Node):
+class Unary(Expr):
     op: str        # "!" ou "-"
     operand: Node
 
 
 @dataclass
-class Binary(Node):
+class Binary(Expr):
     left: Node
     op: str        # "+", "-", "*", "/", "%", "==", "!=", "<", ">", "<=", ">=", "&&", "||"
     right: Node
@@ -36,12 +48,14 @@ class Binary(Node):
 class VarDecl(Node):
     name: str
     value: Node
+    simbolo: object = anotacao()
 
 
 @dataclass
 class Assign(Node):
     name: str
     value: Node
+    simbolo: object = anotacao()
 
 
 @dataclass
@@ -88,6 +102,8 @@ def dump(node, indent: int = 0) -> str:
         return f"{pad}{node!r}"
     lines = [f"{pad}{type(node).__name__}"]
     for f in fields(node):
+        if not f.repr:  # posição e anotações não fazem parte da árvore
+            continue
         v = getattr(node, f.name)
         if isinstance(v, list) or is_dataclass(v):
             lines.append(f"{pad}  {f.name}:")

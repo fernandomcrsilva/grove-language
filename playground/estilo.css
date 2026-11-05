@@ -1,0 +1,398 @@
+/* Grove Online — tema inspirado no HUD de GTA San Andreas:
+   dinheiro verde, estrelas e "MISSION PASSED" dourados, "WASTED" vermelho, fonte grossa com contorno preto. */
+
+@font-face {
+  font-family: "Passion One";
+  src: url("fontes/PassionOne-Regular.woff2") format("woff2");  /* SIL OFL 1.1, ver fontes/OFL.txt */
+  font-display: swap;
+}
+
+:root {
+  --fundo: #070908;
+  --painel: #0e1310;
+  --painel-2: #131a15;
+  --console: #050605;
+  --borda: #233029;
+  --texto: #ece8dc;
+  --suave: #9aa79d;
+  --ouro: #e2a529;
+  --grove: #3fae4f;
+  --dinheiro: #62b84f;
+  --vermelho: #e0474b;
+  --policia: #79a6f2;
+  --aviso: #e8c25a;
+  /* realce de sintaxe */
+  --c-ctrl: #f0ad3a;
+  --c-decl: #74d36d;
+  --c-lit: #86bdff;
+  --c-string: #e3c58a;
+  --c-coment: #6f7d73;
+  --c-op: #c2bdb1;
+  --gta: "Passion One", Impact, "Arial Black", sans-serif;
+  --sans: "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --linha: 22px;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font: 14px/1.45 var(--sans);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100dvh;
+}
+button, select, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--ouro); outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+a { color: var(--suave); }
+a:hover { color: var(--texto); }
+
+/* texto com cara de HUD: fonte grossa, contorno e sombra pretos */
+.gta {
+  font-family: var(--gta);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  -webkit-text-stroke: 2px #000;
+  paint-order: stroke fill;
+  text-shadow: 2px 2px 0 #000;
+}
+
+/* ---- topo ---- */
+.topo {
+  display: flex;
+  align-items: center;
+  gap: 14px 22px;
+  padding: 10px 20px;
+  background: linear-gradient(180deg, #0f1712 0%, var(--fundo) 100%);
+  border-bottom: 2px solid rgba(226, 165, 41, 0.45);
+}
+.marca { display: flex; flex-direction: column; text-decoration: none; line-height: 1; }
+.logo {
+  font-family: var(--gta);
+  font-size: 40px;
+  text-transform: uppercase;
+  color: #fff;
+  -webkit-text-stroke: 3px #000;
+  paint-order: stroke fill;
+  text-shadow: 3px 3px 0 #000;
+  letter-spacing: 0.02em;
+}
+.logo-sub { margin-top: 2px; font-size: 11px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--grove); }
+.acoes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.botao, select {
+  min-height: 34px;
+  padding: 6px 12px;
+  background: var(--painel-2);
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.botao:hover, select:hover { border-color: var(--ouro); }
+select { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 13px; }
+
+.executar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 42px;
+  padding: 4px 20px 4px 18px;
+  background: var(--grove);
+  color: #051a0b;
+  border: 2px solid #000;
+  border-radius: 6px;
+  box-shadow: 3px 3px 0 #000;
+  cursor: pointer;
+}
+.executar-rotulo { font-family: var(--gta); font-size: 24px; text-transform: uppercase; letter-spacing: 0.03em; }
+.executar-rotulo::before { content: "▶ "; font-size: 16px; vertical-align: 3px; }
+.executar kbd { font: 11px var(--mono); opacity: 0.7; }
+.executar:hover:not(:disabled) { filter: brightness(1.1); }
+.executar:active:not(:disabled) { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #000; }
+.executar:disabled { opacity: 0.5; cursor: progress; }
+.executar.parar { background: var(--vermelho); color: #fff; }
+.executar.parar .executar-rotulo::before { content: "■ "; }
+
+/* HUD: estrelas de procurado em cima, dinheiro embaixo, como no canto do jogo */
+.hud { margin-left: auto; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+.hud-linha { display: flex; align-items: center; gap: 10px; }
+.som {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  background: var(--painel-2);
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  color: var(--texto);
+  cursor: pointer;
+}
+.som:hover { border-color: var(--ouro); }
+.som[aria-pressed="false"] { color: var(--suave); }
+.som svg { width: 18px; height: 18px; }
+.estrelas { display: flex; gap: 2px; }
+.estrela { width: 22px; height: 22px; }
+.estrela path { fill: #2a2a26; stroke: #000; stroke-width: 1.6; }
+.estrela.acesa path { fill: var(--ouro); }
+.estrelas.piscando .estrela.acesa { animation: pisca 0.35s steps(1) 4; }
+@keyframes pisca { 50% { opacity: 0.15; } }
+.dinheiro {
+  font-family: var(--gta);
+  font-size: 28px;
+  line-height: 1;
+  color: var(--dinheiro);
+  -webkit-text-stroke: 2px #000;
+  paint-order: stroke fill;
+  text-shadow: 2px 2px 0 #000;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- área principal: cheats | editor | saída ---- */
+.area { display: grid; grid-template-columns: 210px minmax(0, 1.1fr) minmax(0, 1fr); min-height: 0; }
+.painel { display: grid; grid-template-rows: auto minmax(0, 1fr); min-height: 0; background: var(--painel); }
+.editor-painel { border-right: 1px solid var(--borda); }
+.painel-topo, .abas {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  min-height: 40px;
+  padding: 0 12px;
+  background: var(--painel-2);
+  border-bottom: 1px solid var(--borda);
+}
+.arquivo {
+  padding: 9px 14px 8px;
+  background: var(--painel);
+  border: 1px solid var(--borda);
+  border-bottom: 0;
+  border-top: 2px solid var(--ouro);
+  border-radius: 6px 6px 0 0;
+  margin-bottom: -1px;
+  font: 13px var(--mono);
+}
+.salvo { margin: 0 0 10px auto; font-size: 12px; color: var(--suave); }
+
+.titulo-painel { margin: 0; font-family: var(--gta); font-size: 26px; font-weight: 400; text-transform: uppercase; color: var(--ouro);
+  -webkit-text-stroke: 2px #000; paint-order: stroke fill; text-shadow: 2px 2px 0 #000; }
+
+/* cheats */
+.cheats { background: var(--painel-2); border-right: 1px solid var(--borda); padding: 14px 10px; overflow-y: auto; }
+.cheats .titulo-painel { padding: 0 8px; }
+.cheats-dica { margin: 2px 8px 12px; font-size: 12px; color: var(--suave); }
+.cheats ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.cheat {
+  width: 100%;
+  display: grid;
+  text-align: left;
+  gap: 1px;
+  padding: 7px 8px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.cheat:hover { background: rgba(255, 255, 255, 0.04); border-color: var(--borda); }
+.cheat-nome { font: 700 12.5px var(--mono); overflow-wrap: anywhere; }
+.cheat-papel { font-size: 12px; color: var(--suave); }
+
+/* editor: o textarea transparente fica exatamente por cima do pre colorido */
+.editor { display: grid; grid-template-columns: auto minmax(0, 1fr); min-height: 0; background: var(--painel); }
+.numeros, .realce, #fonte { margin: 0; font: 14px/var(--linha) var(--mono); tab-size: 4; }
+.numeros {
+  min-width: 48px;
+  padding: 14px 10px 68px;
+  text-align: right;
+  color: var(--suave);
+  opacity: 0.7;
+  background: var(--painel-2);
+  overflow: hidden;
+  user-select: none;
+}
+.numeros span, .realce .linha { display: block; height: var(--linha); }
+.numeros .erro { color: var(--vermelho); opacity: 1; font-weight: 700; }
+.numeros .aviso { color: var(--aviso); opacity: 1; font-weight: 700; }
+.codigo { position: relative; min-height: 0; overflow: hidden; }
+.realce, #fonte { position: absolute; inset: 0; white-space: pre; }
+/* o pre rola um pouco mais que o textarea, para cobrir a largura da barra de rolagem */
+.realce { padding: 14px 56px 68px 16px; overflow: hidden; color: var(--texto); pointer-events: none; }
+#fonte {
+  width: 100%;
+  height: 100%;
+  padding: 14px 16px 28px;
+  background: transparent;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  caret-color: var(--ouro);
+  border: 0;
+  outline: none;
+  resize: none;
+  overflow: auto;
+}
+#fonte::selection { background: rgba(226, 165, 41, 0.3); }
+#fonte:focus-visible { box-shadow: inset 0 0 0 2px rgba(226, 165, 41, 0.5); }
+.realce .linha.erro { background: rgba(224, 71, 75, 0.14); box-shadow: inset 3px 0 var(--vermelho); }
+.realce .linha.aviso { background: rgba(232, 194, 90, 0.1); box-shadow: inset 3px 0 var(--aviso); }
+.c-ctrl { color: var(--c-ctrl); font-weight: 700; }
+.c-decl { color: var(--c-decl); font-weight: 700; }
+.c-lit, .c-num { color: var(--c-lit); }
+.c-string { color: var(--c-string); }
+.c-coment { color: var(--c-coment); font-style: italic; }
+.c-op { color: var(--c-op); }
+.cheat-nome.c-ctrl, .cheat-nome.c-decl { font-weight: 700; }
+
+/* ---- saída ---- */
+[role="tab"] {
+  padding: 10px 12px 9px;
+  background: none;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--suave);
+  white-space: nowrap;
+  cursor: pointer;
+}
+[role="tab"][aria-selected="true"] { color: var(--texto); border-bottom-color: var(--ouro); }
+[role="tab"]:hover { color: var(--texto); }
+.abas { overflow-x: auto; }
+.aba { overflow: auto; padding: 16px 18px 28px; min-height: 0; }
+.aba[hidden] { display: none; }
+
+.console { background: var(--console); font: 14px/1.6 var(--mono); }
+.prompt { color: var(--suave); }
+.prompt::before { content: "$ "; color: var(--grove); }
+.saida { margin: 6px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; }
+.saida.velha { opacity: 0.45; }
+.falha { color: var(--vermelho); }
+.nota { margin: 10px 0 0; color: var(--suave); font: 13px/1.5 var(--sans); }
+.nota kbd { font: 12px var(--mono); padding: 1px 5px; border: 1px solid var(--borda); border-radius: 4px; }
+.diagnosticos { list-style: none; margin: 6px 0 0; padding: 0; }
+.diag {
+  display: block;
+  width: 100%;
+  padding: 2px 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+.diag:hover .diag-msg { text-decoration: underline; }
+.diag-onde { color: var(--suave); }
+.diag-tipo { font-weight: 700; }
+.diag.erro .diag-tipo { color: var(--vermelho); }
+.diag.aviso .diag-tipo { color: var(--aviso); }
+
+/* a frase de fim de missão, no centro, como no jogo */
+.missao { margin: 26px 0 8px; text-align: center; animation: entra 0.35s ease-out; }
+.missao-titulo { display: block; font-size: 46px; line-height: 1; color: var(--ouro); -webkit-text-stroke: 3px #000; text-shadow: 3px 3px 0 #000; }
+.missao-sub { display: block; margin-top: 6px; font-size: 22px; line-height: 1.15; color: #fff; text-transform: none; }
+.missao.wasted .missao-titulo, .missao.falhou .missao-titulo { color: var(--vermelho); }
+.missao.busted .missao-titulo { color: var(--policia); }
+.missao.fixa { animation: none; }
+@keyframes entra { from { opacity: 0; transform: scale(1.18); } }
+
+.carregando { margin-top: 18px; }
+.carregando-titulo { font-size: 26px; color: #fff; }
+.barra { width: min(360px, 100%); height: 12px; margin: 10px 0 6px; background: #1c211d; border: 2px solid #000; box-shadow: 2px 2px 0 #000; }
+.barra-cheia { height: 100%; background: var(--ouro); transition: width 0.4s; }
+.carregando-passo { color: var(--suave); font: 13px var(--sans); }
+
+pre.codigo { margin: 0; font: 13.5px/1.6 var(--mono); white-space: pre; tab-size: 4; }
+.codigo .num { color: var(--suave); opacity: 0.7; }
+.codigo .rotulo { color: var(--ouro); font-weight: 700; }
+.vazio { margin: 0; color: var(--suave); }
+table { border-collapse: collapse; font: 13px/1.5 var(--mono); }
+th { text-align: left; padding: 0 18px 6px 0; border-bottom: 1px solid var(--borda); font: 700 11.5px var(--sans); letter-spacing: 0.06em; color: var(--suave); }
+td { padding: 3px 18px 3px 0; border-bottom: 1px solid var(--borda); white-space: pre; }
+.alternar { display: inline-flex; margin-bottom: 12px; border: 1px solid var(--borda); border-radius: 6px; overflow: hidden; }
+.alternar button { padding: 6px 12px; background: var(--painel-2); border: 0; font-size: 12.5px; color: var(--suave); cursor: pointer; }
+.alternar button[aria-pressed="true"] { background: var(--grove); color: #051a0b; font-weight: 700; }
+.aba .nota { margin: 0 0 12px; }
+.aba .nota code { font: 12.5px var(--mono); color: var(--texto); }
+
+/* ---- barra de status ---- */
+.barra-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 18px;
+  padding: 6px 20px;
+  background: var(--console);
+  border-top: 1px solid var(--borda);
+  font-size: 12px;
+  color: var(--suave);
+}
+.etapas { display: flex; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.etapa { padding: 1px 9px; border: 1px solid var(--borda); border-radius: 999px; }
+.etapa::before { content: "● "; color: #3a443d; }
+.etapa[data-estado="ok"] { color: var(--texto); }
+.etapa[data-estado="ok"]::before { color: var(--grove); }
+.etapa[data-estado="erro"] { color: var(--vermelho); border-color: var(--vermelho); }
+.etapa[data-estado="erro"]::before { color: var(--vermelho); }
+.etapa[data-estado="rodando"]::before { color: var(--ouro); }
+.barra-status a { margin-left: auto; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 48px;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 32px);
+  padding: 10px 16px;
+  background: #000;
+  border: 2px solid var(--ouro);
+  border-radius: 6px;
+  box-shadow: 3px 3px 0 #000;
+  overflow-wrap: anywhere;
+}
+.sem-js { padding: 16px; }
+
+@media (max-width: 900px) {
+  body { display: block; height: auto; }
+  .topo { flex-wrap: wrap; padding: 10px 16px; }
+  .logo { font-size: 34px; }
+  .acoes { order: 3; width: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .acoes select { grid-column: 1 / -1; }
+  .acoes .botao { padding: 6px 4px; letter-spacing: 0.03em; }
+  [role="tab"] { padding: 10px 7px 9px; font-size: 11.5px; letter-spacing: 0.02em; }
+  .abas { padding: 0 4px; }
+  .executar { order: 4; width: 100%; justify-content: center; }
+  .area { grid-template-columns: minmax(0, 1fr); }
+  .cheats { border-right: 0; border-bottom: 1px solid var(--borda); padding: 8px 12px; display: flex; align-items: center; gap: 10px; overflow-x: auto; }
+  .cheats .titulo-painel { padding: 0; font-size: 20px; }
+  .cheats-dica { display: none; }
+  .cheats ul { display: flex; gap: 6px; }
+  .cheat { white-space: nowrap; border-color: var(--borda); padding: 5px 9px; }
+  .cheat-papel { display: none; }
+  .editor-painel { height: 52vh; min-height: 280px; border-right: 0; border-bottom: 1px solid var(--borda); }
+  .saida-painel { min-height: 46vh; }
+  .missao-titulo { font-size: 38px; }
+  .barra-status { padding: 8px 16px; }
+  .barra-status a { margin-left: 0; }
+}
+@media (max-width: 400px) {
+  .acoes .botao { font-size: 11px; letter-spacing: 0; }
+  [role="tab"] { padding: 10px 5px 9px; }
+}
+@media (max-width: 480px) {
+  .executar kbd, #dica-teclado { display: none; }
+  .dinheiro { font-size: 24px; }
+  .estrela { width: 18px; height: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .missao, .estrelas.piscando .estrela.acesa { animation: none; }
+  .barra-cheia { transition: none; }
+}

@@ -13,6 +13,7 @@ EVENTOS = {
     "passed": "MISSION PASSED! Respect +",
     "lex_error": "WASTED",
     "parse_error": "All you had to do was follow the damn train, CJ!",
+    "semantic_error": "BUSTED",
     "runtime_error": "Ah shit, here we go again.",
 }
 
