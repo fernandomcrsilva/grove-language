@@ -31,6 +31,11 @@ class Var(Expr):
 
 
 @dataclass
+class Input(Expr):
+    """CJPHONEHOME: lê um inteiro da entrada. Sem campos: o valor vem de fora."""
+
+
+@dataclass
 class Unary(Expr):
     op: str        # "!" ou "-"
     operand: Node

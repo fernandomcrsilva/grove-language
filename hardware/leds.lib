@@ -1,4 +1,4 @@
-* Modelos SPICE dos LEDs de 5 mm do HUD de procurado (docs/esp32.md, seção 7).
+* Modelos SPICE dos LEDs de 5 mm do HUD de procurado (docs/mega2560.md, seção 7).
 *
 * Não são de uma peça específica: cada modelo é um diodo ajustado a dois pontos
 * típicos de datasheet de LED genérico, a tensão direta a 1 mA e a 20 mA.

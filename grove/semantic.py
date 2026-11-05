@@ -195,6 +195,9 @@ class Checker:
             return BOOLEANO
         return INTEIRO if isinstance(node.value, int) else STRING
 
+    def tipo_Input(self, node):
+        return INTEIRO  # CJPHONEHOME sempre devolve um inteiro
+
     def tipo_Var(self, node):
         sim = self.lookup(node, node.name)
         if sim is None:

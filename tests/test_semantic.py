@@ -121,6 +121,17 @@ def cli(*args):
     return codigo, out.getvalue(), err.getvalue()
 
 
+class LeituraSemanticaTest(unittest.TestCase):
+    def test_cjphonehome_e_inteiro(self):
+        a = analisar("HESOYAM n = CJPHONEHOME; HELLOLADIES n + 1;")
+        self.assertEqual([(s.nome, s.tipo) for s in a.simbolos], [("n", INTEIRO)])
+
+    def test_cjphonehome_nao_serve_de_condicao(self):
+        with self.assertRaises(SemanticError) as e:
+            analisar("KANGAROO (CJPHONEHOME) { }")
+        self.assertIn("exige booleano, recebeu inteiro", str(e.exception))
+
+
 class CliSemanticaTest(unittest.TestCase):
     def test_erro_semantico_lista_todos_e_sai_com_1(self):
         codigo, out, err = cli(str(EXEMPLOS / "erro_semantico.cj"))

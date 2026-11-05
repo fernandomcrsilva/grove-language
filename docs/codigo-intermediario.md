@@ -16,6 +16,7 @@ Cada instrução é uma quádrupla `Quad(op, arg1, arg2, result)`. Os argumentos
 | `t = a op b` | `+ - * / % == != < > <= >=` | operação binária |
 | `t = !a` · `t = -a` | `!` · `neg` | operação unária |
 | `print a` | `print` | `HELLOLADIES` |
+| `x = read` | `read` | `CJPHONEHOME` |
 | `goto L` | `goto` | desvio incondicional |
 | `if a goto L` · `ifFalse a goto L` | `if` · `iffalse` | desvio se verdadeiro · se falso |
 | `L:` | `label` | rótulo |
@@ -30,6 +31,7 @@ Um método `gen_<Nó>` por instrução e `expr` para expressões. `expr` devolve
 |---|---|
 | `HESOYAM x = e;` · `x = e;` | código de `e`, com a última instrução já escrevendo em `x` |
 | `HELLOLADIES e;` | código de `e`; `print v` |
+| `CJPHONEHOME` | `t = read` |
 | `TURNUPTHEHEAT (c) { A } TURNDOWNTHEHEAT { B }` | `c`; `ifFalse c goto Lsenão`; `A`; `goto Lfim`; `Lsenão:`; `B`; `Lfim:` |
 | sem `TURNDOWNTHEHEAT` | `c`; `ifFalse c goto Lfim`; `A`; `Lfim:` |
 | `BRINGITON` | um `If` no `orelse`, que reaproveita o `Lfim` do primeiro |
@@ -108,6 +110,8 @@ Saída de `python -m grove examples/procurado.cj --ir`. `!policia_ligada || estr
 | simplificação algébrica | `t3 = x + 0` · `t4 = x * 0` | `t3 = x` · `t4 = 0` |
 | desvio com condição constante | `ifFalse FULLCLIP goto L4` · `ifFalse GHOSTTOWN goto L1` | (some) · `goto L1` |
 | instruções mortas | o que vem depois de um `goto` até o próximo rótulo, `goto` para o rótulo logo abaixo, rótulo que ninguém usa, temporário que ninguém lê | (some) |
+
+Duas instruções nunca somem, mesmo que ninguém leia o resultado: uma divisão que pode estourar e um `read`. A primeira porque o erro faz parte do programa; a segunda porque ler **consome uma linha da entrada** — apagá-la mudaria o que as leituras seguintes recebem. É o `_tem_efeito` do otimizador.
 
 **Bloco básico** é um trecho sem rótulos no meio. A propagação só vale dentro dele: num rótulo, o que se sabia é esquecido, porque o código pode chegar ali por outro caminho, como a volta de um laço. Por isso o fatorial não muda: `n` e `r` mudam dentro do laço.
 

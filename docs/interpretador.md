@@ -2,7 +2,7 @@
 
 `grove/interpreter.py` percorre a AST e executa cada nó diretamente (*tree-walking*). Um método por tipo de nó: `exec_<Nó>` para instruções, `eval_<Nó>` para expressões.
 
-Pela CLI, todo programa passa antes pela análise semântica ([semantica.md](semantica.md)), que acha os erros de tipo, de declaração e de `break` sem executar. Por isso, rodando com `python -m grove`, o único erro de execução que sobra é divisão por zero. As checagens abaixo continuam no interpretador para quem chama `run()` direto. Os outros back-ends ficam em [codigo-intermediario.md](codigo-intermediario.md) (TAC) e [geracao-de-codigo.md](geracao-de-codigo.md) (Python, ESP32).
+Pela CLI, todo programa passa antes pela análise semântica ([semantica.md](semantica.md)), que acha os erros de tipo, de declaração e de `break` sem executar. Por isso, rodando com `python -m grove`, o único erro de execução que sobra é divisão por zero. As checagens abaixo continuam no interpretador para quem chama `run()` direto. Os outros back-ends ficam em [codigo-intermediario.md](codigo-intermediario.md) (TAC) e [geracao-de-codigo.md](geracao-de-codigo.md) (Python, Arduino).
 
 ## Tipos de valor
 

@@ -1,10 +1,10 @@
 # Geração de código
 
-`grove/codegen_py.py` traduz a AST anotada pela análise semântica ([semantica.md](semantica.md)) para **Python** legível, ou para **MicroPython** no ESP32, com o LED do nível de procurado.
+`grove/codegen_py.py` traduz a AST anotada pela análise semântica ([semantica.md](semantica.md)) para **Python** legível; `grove/codegen_ino.py` traduz a mesma AST para o **C++ do Arduino**, com o LED do nível de procurado no Mega 2560.
 
 ```
 AST anotada ──codegen_py──▶ Python         python -m grove arquivo.cj --python
-                         └▶ MicroPython    python -m grove arquivo.cj --esp32 [--pino N]
+                         └▶ Arduino (C++)  python -m grove arquivo.cj --mega [--pino N]
 ```
 
 ## Por que a partir da AST e não da TAC
@@ -21,6 +21,7 @@ Python não tem `goto`. Partir da TAC ([codigo-intermediario.md](codigo-intermed
 | `GOODBYECRUELWORLD;` | `break` |
 | `HELLOLADIES e;` | `print(e)` |
 | `HELLOLADIES e;` com `e` booleano | `print("FULLCLIP" if e else "GHOSTTOWN")` |
+| `CJPHONEHOME` | `int(input())` |
 | `/` | `//` (divisão inteira, como no interpretador) |
 | `&&` `\|\|` `!` | `and` `or` `not` |
 | `FULLCLIP` `GHOSTTOWN` | `True` `False` |
@@ -67,9 +68,9 @@ Roda direto: `python -m grove examples/fizzbuzz.cj --python | python3`.
 
 **Diferença:** divisão por zero vira o `ZeroDivisionError` do Python, não a mensagem `divisão por zero` do interpretador.
 
-## ESP32 / MicroPython
+## Arduino / Mega 2560
 
-Com `--esp32`, a saída é MicroPython. Se o programa tem uma variável **inteira** chamada `estrelas`, entra um prelúdio com `machine.Pin` e `machine.Timer`, e cada valor novo de `estrelas` muda o pisca-pisca do LED, como o nível de procurado no jogo:
+Com `--mega`, a saída é um sketch `.ino`. O corpo do programa vai todo dentro do `setup()`, porque um programa Grove roda uma vez; o `loop()` fica com o pisca-pisca. Se o programa tem uma variável **inteira** chamada `estrelas`, entra um prelúdio e cada valor novo dela muda o ritmo do LED, como o nível de procurado no jogo:
 
 | `estrelas` | LED |
 |---|---|
@@ -77,52 +78,98 @@ Com `--esp32`, a saída é MicroPython. Se o programa tem uma variável **inteir
 | 1 | troca a cada 600 ms |
 | 2 | 300 ms |
 | 3 | 200 ms |
-| … | `600 // estrelas` ms, no mínimo 50 |
+| … | `600 / estrelas` ms, no mínimo 50 |
 | 6 | 100 ms |
 
-Depois de cada valor novo o programa espera 1,5 s, para dar tempo de ver o nível mudar. Sem essa pausa, `procurado.cj` chegaria a 6 estrelas em microssegundos. O programa não desliga o timer no fim, então o LED deve seguir piscando no último nível até a placa ser reiniciada.
+Depois de cada valor novo o programa espera 1,5 s, para dar tempo de ver o nível mudar. Sem essa pausa, `procurado.cj` chegaria a 6 estrelas em microssegundos. Quando o programa acaba, o `loop()` continua chamando `_tique()`, então o LED segue piscando no último nível até a placa ser reiniciada.
 
-A linguagem não muda: `examples/procurado.cj` roda na placa como está. `HELLOLADIES` sai pela serial. Sem variável `estrelas`, a CLI avisa e a saída é igual à do `--python`.
+`CJPHONEHOME` vira `_linha()`, que espera uma linha inteira na serial, byte a byte num buffer fixo, e devolve o número. Duas consequências no prelúdio:
 
-Trecho de `python -m grove examples/procurado.cj --esp32`:
+- **Some a pausa de 1,5 s por nível.** Ela existia para dar tempo de ver cada estrela quando o próprio programa inventava os níveis. Com alguém mandando de fora, quem dá o ritmo é a entrada.
+- **O pisca-pisca não para durante a espera.** O laço que aguarda a serial chama `_tique()` a cada volta, então o LED e o giroflex continuam no ritmo do último nível enquanto a próxima linha não chega.
 
-```python
-from machine import Pin, Timer
-import time
+Um `.cj` que lê é o que liga o compilador ao GTA de verdade: ver [gta.md](gta.md).
 
-_led = Pin(2, Pin.OUT)
-_timer = Timer(0)
+A linguagem não muda: `examples/procurado.cj` roda na placa como está. `HELLOLADIES` sai pela serial, a 115200. Sem variável `estrelas`, a CLI avisa e sai um sketch sem prelúdio nenhum.
 
+### O que o C não dá de graça
 
-def _procurado(n):
-    # 0 estrelas: LED apagado; cada estrela a mais, pisca mais rápido
-    _timer.deinit()
-    _led.value(0)
-    if n > 0:
-        _timer.init(period=max(50, 600 // n), mode=Timer.PERIODIC,
-                    callback=lambda t: _led.value(not _led.value()))
-    time.sleep_ms(1500)  # tempo para ver cada nível
+Três detalhes em que o alvo C++ não é uma tradução palavra por palavra do Python:
 
+| Na Grove | No C | Por quê |
+|---|---|---|
+| inteiro | `long`, e todo literal leva `L` | o `int` do AVR tem 16 bits; `long` tem 32, como no alvo Python |
+| `a / b`, `a % b` | `_div(a, b)`, `_mod(a, b)` | o `/` do C corta para o zero e o interpretador arredonda para baixo: `-7 / 2` é -4 na Grove e -3 no C |
+| divisão por zero | `_parar("divisão por zero")` | no AVR dividir por zero é silêncio; o prelúdio avisa na serial e encerra |
 
-estrelas = 0
-_procurado(estrelas)
-policia_ligada = True
-while True:
-    if not policia_ligada or estrelas >= 6:
-        break
-    estrelas = estrelas + 1
-    _procurado(estrelas)
-    print(estrelas)
-print("fim: ")
+`_parar`, `_div` e `_mod` só entram no sketch se o programa dividir. Strings viram `String` do Arduino, para `+` e `==` funcionarem; um literal que é operando de `+` ou `==` sai como `String("…")`, senão o C somaria ponteiros.
+
+Trecho de `python -m grove examples/procurado.cj --mega`:
+
+```cpp
+
+const int _LED = 13;  // LED da placa: pisca mais rápido a cada estrela
+
+long _ledp = 0;  // ms entre as piscadas; 0 = parado
+bool _aceso = false;
+unsigned long _epoca = 0, _tled = 0;  // o ritmo recomeça a cada nível novo
+
+void _tique() {  // chamado sem parar: faz piscar quem tiver período
+  unsigned long _t = millis() - _epoca;
+  if (_ledp && _t / _ledp != _tled) {
+    _tled = _t / _ledp;
+    _aceso = !_aceso;
+    digitalWrite(_LED, _aceso);
+  }
+}
+
+void _inicializar() {
+  pinMode(_LED, OUTPUT);
+}
+
+void _procurado(long n) {
+  _ledp = n > 0 ? max(50L, 600L / n) : 0;
+  _epoca = millis();
+  _aceso = false;
+  _tled = 0;
+  digitalWrite(_LED, LOW);
+  while (millis() - _epoca < 1500) {  // fica 1500 ms em cada nível, para dar para ver
+    _tique();
+    delay(1);
+  }
+}
+
+void setup() {
+  Serial.begin(115200);
+  _inicializar();
+  long estrelas = 0L;
+  _procurado(estrelas);
+  bool policia_ligada = true;
+  while (true) {
+    if (!policia_ligada || estrelas >= 6L) {
+      break;
+    }
+    estrelas = estrelas + 1L;
+    _procurado(estrelas);
+    Serial.println(estrelas);
+  }
+  Serial.println("fim: ");
+}
+
+void loop() {
+  _tique();  // o programa acabou, mas o último nível continua piscando
+  delay(1);
+}
 ```
 
-Montagem, lista de compras, gravação na placa, simulação no Wokwi e problemas comuns: [esp32.md](esp32.md).
+Montagem, lista de compras, `arduino-cli`, simulação no Wokwi e problemas comuns: [mega2560.md](mega2560.md).
 
-**HUD de procurado (`--hud`).** Com `--esp32 --hud`, o prelúdio também acende uma luz por estrela (GPIOs 32, 33, 25, 26, 27 e 14) e liga um giroflex vermelho e azul (GPIOs 18 e 19) a partir de 4 estrelas, num segundo timer que acelera a cada estrela. O LED da placa continua piscando. A linguagem não muda: é a mesma variável `estrelas`. Montagem e pinos em [esp32.md](esp32.md#7-upgrade-o-hud-de-procurado).
+**HUD de procurado (`--hud`).** Com `--mega --hud`, o prelúdio também acende uma luz por estrela (pinos 52, 53, 50, 51, 49 e 48) e liga um giroflex vermelho e azul (pinos 33 e 32) a partir de 4 estrelas, que acelera a cada estrela. O LED da placa continua piscando. A linguagem não muda: é a mesma variável `estrelas`. Montagem e pinos em [mega2560.md](mega2560.md#7-upgrade-o-hud-de-procurado).
 
 ### Como foi testado
 
-O ESP32 de verdade não foi testado: a validação na placa fica com o grupo. Nos testes automáticos (`tests/test_codegen.py`):
+Em 05/11/2026 o sketch do `--mega --hud` foi gravado num Mega 2560 de verdade (clone com CH340) e a serial devolveu `1 2 3 4 5 6 fim:`, igual ao interpretador — o compilador chega à placa. Conferir os LEDs um a um ainda é olho humano. Nos testes automáticos (`tests/test_codegen.py`), o sketch é **compilado com o `g++`** contra um Arduino de mentira (`tests/arduino_falso.h`: relógio virtual, `digitalWrite` que vira log) e rodado no PC:
 
-- **`machine` falso no CPython:** confere o pino, a sequência de períodos `[600, 300, 200, 150, 120, 100]` de `procurado.cj`, as pausas e a saída serial.
-- **Porta unix do MicroPython**, quando está instalada (`apt install micropython`): roda o Python gerado de todos os exemplos e trechos e compara a saída com a do interpretador.
+- **Mesma saída do interpretador** em todos os exemplos e trechos, e nos casos que separam os dois alvos: negativos em `/` e `%`, divisão por zero, soma e comparação de strings.
+- **O hardware:** a sequência de períodos `[600, 300, 200, 150, 120, 100]` de `procurado.cj`, uma luz por estrela na ordem certa, o giroflex só a partir de 4 estrelas e com vermelho e azul sempre opostos.
+- **Compila limpo:** `-Wall -Werror`, então parênteses faltando ou um `--3` saem como erro de teste.

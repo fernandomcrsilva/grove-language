@@ -66,6 +66,8 @@ Três tipos, sem conversão implícita. O tipo de uma variável é fixado na dec
 
 Condição de `TURNUPTHEHEAT`, `BRINGITON` e `KANGAROO` tem que ser booleana.
 
+`CJPHONEHOME` é uma expressão de tipo **inteiro**, sem operandos: o valor vem da entrada. Por isso `HESOYAM n = CJPHONEHOME;` declara um inteiro, e `KANGAROO (CJPHONEHOME)` é erro — condição exige booleano.
+
 ## Erros
 
 Todos com linha e coluna. A CLI imprime um por linha, mais o total, e sai com código 1 sem executar nada.

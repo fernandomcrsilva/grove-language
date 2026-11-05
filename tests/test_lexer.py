@@ -16,6 +16,11 @@ HELLOLADIES r;
 
 
 class LexerTest(unittest.TestCase):
+    def test_cjphonehome_e_palavra_reservada(self):
+        self.assertEqual(self.types("HESOYAM n = CJPHONEHOME;"),
+                         [T.VAR, T.IDENT, T.ASSIGN, T.INPUT, T.SEMI, T.EOF])
+        self.assertEqual(self.types("CJPHONEHOMEX"), [T.IDENT, T.EOF])  # prefixo não conta
+
     def types(self, src):
         return [t.type for t in tokenize(src)]
 
