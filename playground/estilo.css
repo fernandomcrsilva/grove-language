@@ -277,6 +277,12 @@ select { text-transform: none; letter-spacing: 0; font-weight: 400; font-size: 1
 .saida.velha { opacity: 0.45; }
 .falha { color: var(--vermelho); }
 .nota { margin: 10px 0 0; color: var(--suave); font: 13px/1.5 var(--sans); }
+.entrada { padding: 10px 18px 14px; border-top: 1px solid var(--borda); background: var(--console); }
+.entrada[hidden] { display: none; }
+.entrada label { display: block; margin-bottom: 6px; color: var(--suave); font: 13px/1.5 var(--sans); }
+.entrada code { font: 12px var(--mono); color: var(--c-ctrl); }
+.entrada textarea { display: block; width: 100%; resize: vertical; padding: 6px 8px; border: 1px solid var(--borda);
+  border-radius: 4px; background: var(--painel); color: var(--texto); font: 14px/1.5 var(--mono); }
 .nota kbd { font: 12px var(--mono); padding: 1px 5px; border: 1px solid var(--borda); border-radius: 4px; }
 .diagnosticos { list-style: none; margin: 6px 0 0; padding: 0; }
 .diag {

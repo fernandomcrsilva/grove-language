@@ -68,8 +68,15 @@ class _SaidaDemais(Exception):
     pass
 
 
-def executar():
+def executar(entrada=""):
     saida = []
+    linhas = iter(entrada.splitlines())
+
+    def ler():  # o CJPHONEHOME lê do campo de entrada da página, uma linha por vez
+        try:
+            return next(linhas)
+        except StopIteration:
+            raise EOFError from None
 
     def out(linha):
         if len(saida) >= LIMITE:
@@ -78,7 +85,7 @@ def executar():
 
     erro = None
     try:
-        run(_programa, out=out)
+        run(_programa, out=out, entrada=ler)
     except RuntimeError_ as e:
         erro = str(e)
     except _SaidaDemais:
@@ -117,6 +124,6 @@ onmessage = async ({ data }) => {
   const compilado = JSON.parse(pyodide.globals.get("compilar")(data.src));
   postMessage({ tipo: "compilado", id: data.id, ...compilado });
   if (data.executar && compilado.erros.length === 0) {
-    postMessage({ tipo: "executado", id: data.id, ...JSON.parse(pyodide.globals.get("executar")()) });
+    postMessage({ tipo: "executado", id: data.id, ...JSON.parse(pyodide.globals.get("executar")(data.entrada ?? "")) });
   }
 };

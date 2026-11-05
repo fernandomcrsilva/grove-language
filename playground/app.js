@@ -111,6 +111,7 @@ const receber = {
 };
 
 function enviar(executar, automatica = false) {
+  $("#entrada-bloco").hidden = !/\bCJPHONEHOME\b/.test(editor.valor());
   if (!pronto) {
     if (executar) avisar("O Python ainda está carregando.");
     return;
@@ -125,7 +126,7 @@ function enviar(executar, automatica = false) {
     abrirAba($("#tab-console"));
     mostrar();
   }
-  worker.postMessage({ id, src: editor.valor(), executar });
+  worker.postMessage({ id, src: editor.valor(), executar, entrada: $("#entrada").value });
 }
 
 function interromper(fim) {
@@ -200,6 +201,9 @@ function htmlConsole() {
   const falha = execucao.erro ? `${linhas ? "\n" : ""}<span class="falha">erro: ${esc(execucao.erro)}</span>` : "";
   const nada = !linhas && !falha ? `<span class="nota">(o programa não imprimiu nada)</span>` : "";
   h += `<pre class="saida${mudou ? " velha" : ""}">${linhas}${falha}${nada}</pre>`;
+  if (execucao.erro?.startsWith("CJPHONEHOME")) {
+    h += `<p class="nota">Escreva os números no campo de entrada, logo abaixo, um por linha.</p>`;
+  }
   if (mudou) return h + `<p class="nota">O código mudou desde a última execução.</p>`;
   return h + missao(execucao.fim);
 }
