@@ -4,14 +4,18 @@
 //   npx wrangler@4.151.3 deploy
 // O que vai para o site está em .assetsignore.
 {
-  "name": "grove-online",
+  // o Worker que já está no ar é "groveonline", sem hífen: outro nome aqui cria um
+  // Worker novo e deixa grove.heybrain.uk apontando para o antigo
+  "name": "groveonline",
   "compatibility_date": "2026-10-01",
   "assets": {
     "directory": ".",
     "html_handling": "auto-trailing-slash"
   },
-  "workers_dev": true
-  // domínio próprio: o site no ar está em grove.heybrain.uk; para publicar lá pelo wrangler, tire as barras
-  // da linha abaixo (o domínio precisa estar nesta conta da Cloudflare)
-  // , "routes": [{ "pattern": "grove.heybrain.uk", "custom_domain": true }]
+  // a URL groveonline.heybrain.workers.dev está desligada (04/11/2026): o site
+  // atende só no domínio próprio. true aqui a religa no próximo deploy.
+  "workers_dev": false,
+  // logs no painel: ligado em 04/11/2026; sem esta linha o deploy desliga
+  "observability": { "enabled": true },
+  "routes": [{ "pattern": "grove.heybrain.uk", "custom_domain": true }]
 }

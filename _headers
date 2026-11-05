@@ -5,3 +5,27 @@
   X-Frame-Options: SAMEORIGIN
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+
+# ------------------------------------------------------------
+#  Cache. O default do Workers Assets é `public, max-age=0, must-revalidate`
+#  para TUDO: toda revisita paga uma revalidação condicional por arquivo antes
+#  de a página pintar. Os nomes aqui NÃO têm hash de conteúdo (não há build),
+#  então um ano seria armadilha — trocar o app.js deixaria parte da turma na
+#  versão velha. Uma hora corta a revalidação da sessão e limita o estrago.
+#
+#  Fora de propósito, no default: o index.html (ponto de entrada, precisa
+#  revalidar) e os grove/*.py + examples/*.cj, que o worker.js busca a cada
+#  carregamento e que mudam a cada aula.
+# ------------------------------------------------------------
+/playground/app.js
+  Cache-Control: public, max-age=3600
+/playground/editor.js
+  Cache-Control: public, max-age=3600
+/playground/worker.js
+  Cache-Control: public, max-age=3600
+/playground/estilo.css
+  Cache-Control: public, max-age=3600
+
+# A fonte do tema (PassionOne) não muda; uma semana, como os mascotes do perry.
+/playground/fontes/*
+  Cache-Control: public, max-age=604800
