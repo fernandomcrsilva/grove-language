@@ -13,7 +13,7 @@ Gabriel Lacerda, Gabriel Mendonça e Fernando Mendonça
 
 4
 00:00:12,000 --> 00:00:16,000
-9 palavras reservadas, todas cheats do jogo
+10 palavras reservadas, todas cheats do jogo
 
 5
 00:00:16,000 --> 00:00:21,000
@@ -138,7 +138,7 @@ O mesmo procurado.cj, sem mudar uma linha
 
 35
 00:04:22,000 --> 00:04:28,000
-78 testes automáticos · Python puro, sem dependências
+97 testes automáticos · Python puro, sem dependências
 
 36
 00:04:28,000 --> 00:04:36,000
