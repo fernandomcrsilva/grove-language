@@ -4,7 +4,7 @@ Gramática em docs/gramatica.md. Cada método corresponde a uma regra.
 Num erro, o parser anota a mensagem, pula até um ponto seguro e continua
 (recuperação em modo pânico): no fim, ParseError traz todos os erros.
 """
-from .ast import Assign, Binary, Block, Break, If, Literal, Print, Program, Unary, Var, VarDecl, While
+from .ast import Assign, Binary, Block, Break, If, Input, Literal, Print, Program, Unary, Var, VarDecl, While
 from .sugestao import cheat_parecido, mensagem_cheat
 from .tokens import Token, TokenType as T
 
@@ -188,6 +188,8 @@ class Parser:
             return at(Literal(True), tok)
         if tok.type is T.FALSE:
             return at(Literal(False), tok)
+        if tok.type is T.INPUT:
+            return at(Input(), tok)
         if tok.type is T.IDENT:
             return at(Var(tok.lexeme), tok)
         if tok.type is T.LPAREN:

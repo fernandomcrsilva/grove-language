@@ -22,6 +22,7 @@ HELLOLADIES r;
 | `KANGAROO (cond) { … }` | while | pulo gigante |
 | `GOODBYECRUELWORLD;` | break | CJ morre na hora |
 | `HELLOLADIES expr;` | print | sex appeal no máximo |
+| `CJPHONEHOME` | lê um inteiro da entrada | CJ liga para casa |
 | `FULLCLIP` | true | munição infinita |
 | `GHOSTTOWN` | false | ruas vazias, sem carros e pedestres |
 
@@ -33,7 +34,7 @@ O resto é sintaxe estilo C: `{ }` delimita bloco, `;` termina instrução, `( )
 texto ─léxico─▶ tokens ─sintático─▶ AST ─semântico─▶ AST anotada + tabela de símbolos
                                                         ├─▶ interpretador  (padrão: executa)
                                                         ├─▶ TAC            (--ir)
-                                                        └─▶ Python         (--python · --esp32)
+                                                        └─▶ Python         (--python · --mega)
 ```
 
 | Etapa | Documento |
@@ -43,8 +44,9 @@ texto ─léxico─▶ tokens ─sintático─▶ AST ─semântico─▶ AST an
 | semântico: tabela de símbolos, tipos, erros | [docs/semantica.md](docs/semantica.md) |
 | interpretador | [docs/interpretador.md](docs/interpretador.md) |
 | código de três endereços e otimização | [docs/codigo-intermediario.md](docs/codigo-intermediario.md) |
-| Python e MicroPython (ESP32) | [docs/geracao-de-codigo.md](docs/geracao-de-codigo.md) |
-| ESP32 na bancada: compras, montagem, gravação, Wokwi, o upgrade do HUD, simulação elétrica (ngspice e EasyEDA) | [docs/esp32.md](docs/esp32.md) |
+| Python e C++ do Arduino | [docs/geracao-de-codigo.md](docs/geracao-de-codigo.md) |
+| O GTA acendendo os LEDs: o cheat `CJPHONEHOME`, o script CLEO, a ponte | [docs/gta.md](docs/gta.md) |
+| Mega 2560 na bancada: compras, montagem, `arduino-cli`, Wokwi, o upgrade do HUD, simulação elétrica (ngspice e EasyEDA) | [docs/mega2560.md](docs/mega2560.md) |
 | vídeo tutorial (mudo): roteiro cena a cena e legendas | [docs/roteiro-video.md](docs/roteiro-video.md) · [docs/legendas-video.srt](docs/legendas-video.srt) |
 
 ## Rodar
@@ -60,8 +62,8 @@ python -m grove examples/fatorial.cj --ir         # só o código de três ender
 python -m grove examples/otimizacao.cj --otimizar # a TAC otimizada: 13 → 4 instruções
 python -m grove examples/fatorial.cj --python     # o programa traduzido para Python
 python -m grove examples/fatorial.cj --python | python3   # … e rodando
-python -m grove examples/procurado.cj --esp32 > main.py   # MicroPython: estrelas piscam o LED
-python -m grove examples/procurado.cj --esp32 --hud > main.py   # … e acendem 6 luzes + o giroflex
+python -m grove examples/procurado.cj --mega > hud/hud.ino   # Arduino: estrelas piscam o LED
+python -m grove examples/procurado.cj --mega --hud > hud/hud.ino   # … e acendem 6 luzes + o giroflex
 python -m unittest                                # testes
 ```
 
@@ -76,7 +78,7 @@ Um compilador online da Grove, no estilo do Programiz e do OnlineGDB, com o tema
 - **Console** com a saída e os erros no formato `arquivo:linha:coluna`; um clique num erro leva até a linha. Cada execução termina como no jogo: "Mission passed!", "Wasted", "Busted" ou "Mission failed!".
 - **HUD**: uma estrela de procurado por erro encontrado, e $250.000 a cada missão cumprida.
 - **Falas do jogo**: cada execução toca o clipe do resultado (CJ no erro de execução, "BUSTED" no semântico…), se os áudios estiverem em `assets/`; o alto-falante no canto liga e desliga.
-- **Por dentro do compilador**: abas com tokens, AST, tabela de símbolos, TAC, Python e MicroPython para o ESP32.
+- **Por dentro do compilador**: abas com tokens, AST, tabela de símbolos, TAC, Python e o C++ do Arduino.
 - **Arquivo**: Exemplos, Abrir e Baixar `.cj`, e Compartilhar, que copia um link com o código. Um laço infinito é interrompido em 5 s, ou antes, com **Parar**.
 
 O código do app está em `playground/`: `index.html` (a página), `estilo.css` (o tema), `app.js` (a lógica), `editor.js` (o editor com realce) e `worker.js` (o Python, fora da página). A fonte dos títulos é a Passion One, sob a licença SIL OFL (`playground/fontes/OFL.txt`); o visual se inspira no HUD do jogo, sem logos nem imagens da Rockstar.
@@ -125,7 +127,9 @@ grove/sugestao.py  "você quis dizer…?": o cheat ou a variável mais parecida
 grove/interpreter.py  executa a AST (tree-walking)
 grove/ir.py        código de três endereços (AST → TAC) + executor de TAC
 grove/otimizador.py   otimização da TAC: constantes, cópias, desvios, código morto
-grove/codegen_py.py   gera Python / MicroPython para o ESP32 (AST → .py)
+grove/codegen_py.py   gera Python (AST → .py)
+grove/codegen_ino.py  gera o C++ do Arduino para o Mega 2560 (AST → .ino)
+gta/               script CLEO do jogo e a ponte que manda o nível pela USB
 grove/sounds.py    toca assets/<evento>.wav ao compilar ou dar erro
 grove/__main__.py  linha de comando
 playground/        Grove Online, o app: compilador online no navegador (Pyodide)

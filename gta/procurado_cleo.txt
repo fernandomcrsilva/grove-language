@@ -1,0 +1,32 @@
+{$CLEO .cs}
+// ---------------------------------------------------------------------------
+// procurado.cs — manda o nível de procurado do GTA San Andreas para a Grove.
+//
+// A cada 200 ms lê o nível do jogador (0 a 6) e grava SÓ o número em
+// cleo\procurado.txt. Quem lê esse arquivo é gta/ponte.py, que repassa o
+// número pela USB para o Mega 2560.
+//
+// COMO USAR
+//   1. Precisa do GTA San Andreas clássico com o CLEO 4.4 instalado. Ele
+//      reconhece a 1.0 US, a 1.0 EU, a 1.01 EU e a 3.0 da Steam — não precisa
+//      de downgrade. Fora da lista: a 1.01 US, a Definitive Edition e qualquer
+//      executável modificado, que o CLEO não identifica e por isso não carrega.
+//   2. Abra este arquivo no Sanny Builder (sannybuilder.com), modo SA.
+//   3. Compile (F6) e salve como procurado.cs.
+//   4. Copie procurado.cs para a pasta cleo\ do jogo.
+//   5. Entre no jogo. O arquivo cleo\procurado.txt passa a existir e a mudar.
+//
+// Se o Sanny reclamar da linha do 0AD9, confira a grafia no sascm.ini da sua
+// versão: há variações entre "in_file", "to_file" e "format" conforme o build.
+// ---------------------------------------------------------------------------
+
+:procurado_laco
+wait 200
+01C0: 0@ = player $PLAYER_CHAR wanted_level        // 0@ = nível, de 0 a 6
+if
+    0A9A: 1@ = openfile "cleo\procurado.txt" mode "w"
+then
+    0AD9: write_formatted_text "%d" in_file 1@ 0@  // grava só o número
+    0A9B: closefile 1@
+end
+jump @procurado_laco

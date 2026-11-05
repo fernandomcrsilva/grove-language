@@ -6,3 +6,7 @@ assets/*.wav
 assets/*.mp3
 playground/pyodide/
 .wrangler/
+
+# pasta de sketch do arduino-cli (gerada; ver docs/mega2560.md)
+/hud/
+/procurado/

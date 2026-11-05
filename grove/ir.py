@@ -8,7 +8,7 @@ porque a TAC não tem escopo de bloco.
 import operator
 from dataclasses import dataclass
 
-from .ast import Binary, If, Literal, Node, Program, Unary, Var
+from .ast import Binary, If, Input, Literal, Node, Program, Unary, Var
 from .interpreter import RuntimeError_, formatar
 from .semantic import Analise
 
@@ -23,7 +23,7 @@ class Const:
 
 @dataclass
 class Quad:
-    op: str               # "=", "+", …, "!", "neg", "print", "goto", "if", "iffalse", "label"
+    op: str               # "=", "+", …, "!", "neg", "read", "print", "goto", "if", "iffalse", "label"
     arg1: object = None   # nome (variável ou temporário) ou Const
     arg2: object = None
     result: str | None = None  # destino; nos desvios e em "label", o rótulo
@@ -47,6 +47,8 @@ class Quad:
                 return f"{r} = !{a}"
             case "neg":
                 return f"{r} = -{a}"
+            case "read":
+                return f"{r} = read"
         return f"{r} = {a} {self.op} {b}"
 
 
@@ -133,6 +135,10 @@ class Generator:
                 return valor
             self.emit("=", valor, result=dest)
             return dest
+        if isinstance(node, Input):
+            dest = dest or self.temp()
+            self.emit("read", result=dest)  # efeito colateral: consome uma linha da entrada
+            return dest
         if isinstance(node, Unary):
             a = self.expr(node.operand)
             dest = dest or self.temp()
@@ -202,7 +208,7 @@ OPERACOES = {
 }
 
 
-def execute(code: list[Quad], out=print):
+def execute(code: list[Quad], out=print, entrada=input):
     """Executa a TAC: confere a tradução contra o interpretador nos testes."""
     alvos = {q.result: i for i, q in enumerate(code) if q.op == "label"}
     memoria: dict[str, object] = {}
@@ -230,5 +236,14 @@ def execute(code: list[Quad], out=print):
                 memoria[q.result] = not valor(q.arg1)
             case "neg":
                 memoria[q.result] = -valor(q.arg1)
+            case "read":
+                try:
+                    linha = entrada()
+                except EOFError:
+                    raise RuntimeError_("CJPHONEHOME: a entrada acabou") from None
+                try:
+                    memoria[q.result] = int(linha)
+                except ValueError:
+                    raise RuntimeError_(f"CJPHONEHOME esperava um número inteiro, recebeu {linha!r}") from None
             case op:
                 memoria[q.result] = OPERACOES[op](valor(q.arg1), valor(q.arg2))

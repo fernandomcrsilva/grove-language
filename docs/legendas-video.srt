@@ -122,11 +122,11 @@ Por dentro: tokens, AST, símbolos, TAC e Python. E um link compartilha o códig
 
 31
 00:03:52,000 --> 00:03:58,000
-E numa placa ESP32
+E num Arduino Mega 2560
 
 32
 00:03:58,000 --> 00:04:05,000
---esp32 gera MicroPython para a placa
+--mega gera o C++ que a placa compila
 
 33
 00:04:05,000 --> 00:04:14,000

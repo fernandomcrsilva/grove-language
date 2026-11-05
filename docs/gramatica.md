@@ -34,7 +34,7 @@ termo        = fator { ( "+" | "-" ) fator } ;
 fator        = unario { ( "*" | "/" | "%" ) unario } ;
 unario       = ( "!" | "-" ) unario | primario ;
 primario     = NUMBER | STRING | "FULLCLIP" | "GHOSTTOWN" | IDENT
-             | "(" expressao ")" ;
+             | "CJPHONEHOME" | "(" expressao ")" ;
 ```
 
 ## Precedência (da mais alta para a mais baixa)
@@ -73,6 +73,7 @@ Definidos em `grove/ast.py` como `dataclass`es:
 | `Unary` | `op: str, operand` | `unario` |
 | `Literal` | `value: int \| str \| bool` | `primario` |
 | `Var` | `name` | `primario` |
+| `Input` | (sem campos) | `primario` |
 
 ## Erros sintáticos
 
