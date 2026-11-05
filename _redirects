@@ -1,0 +1,4 @@
+# A raiz vai para o playground. Servido pelo Workers Assets, como o _headers ao lado:
+# antes isto era uma regra de zona na Cloudflare (invisível no código) e, antes dela,
+# um <meta http-equiv="refresh"> no index.html da raiz.
+/ /playground/ 301

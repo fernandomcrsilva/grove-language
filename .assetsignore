@@ -1,6 +1,7 @@
 # O que vai para o site na Cloudflare (wrangler.jsonc publica a raiz do repositório).
 # Mesma sintaxe do .gitignore: ignora tudo e traz de volta só o que o site usa.
 /*
+!/_redirects
 !/index.html
 !/_headers
 !/playground/
