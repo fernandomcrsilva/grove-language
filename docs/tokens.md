@@ -13,6 +13,7 @@ Saída da análise léxica: cada token tem **tipo**, **lexema**, **linha** e **c
 | `KANGAROO` | `WHILE` | laço | pulo gigante | pula de novo, de novo, de novo |
 | `GOODBYECRUELWORLD` | `BREAK` | sai do laço | CJ morre na hora | adeus, laço |
 | `HELLOLADIES` | `PRINT` | imprime | sex appeal no máximo | todo programa começa com "Hello, World" |
+| `CJPHONEHOME` | `INPUT` | lê um inteiro da entrada | CJ liga para casa | é o programa pedindo notícia de fora |
 | `FULLCLIP` | `TRUE` | verdadeiro | munição infinita | pente cheio |
 | `GHOSTTOWN` | `FALSE` | falso | ruas vazias, sem carros e pedestres | cidade vazia, nada |
 

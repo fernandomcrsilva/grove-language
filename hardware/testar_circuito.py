@@ -2,16 +2,16 @@
 
     python hardware/testar_circuito.py [programa.cj] [--figura arquivo.png]
 
-1. Ponto de operação: a corrente de cada LED com 3,3 V no pino e no pior caso
-   (pino a 3,0 V, resistor 5% acima, LED que pede mais tensão), para ver se
+1. Ponto de operação: a corrente de cada LED com 5 V no pino e no pior caso
+   (pino a 4,5 V, resistor 5% acima, LED que pede mais tensão), para ver se
    acende e se fica dentro do que o pino e o LED aguentam.
-2. Programa e circuito juntos: roda o MicroPython gerado com --esp32 --hud numa
-   placa de mentira com relógio virtual (os timers disparam no tempo certo),
-   transforma o que cada pino fez em fontes PWL e simula o circuito no tempo.
-   Confere, em cada nível de procurado, quantos LEDs amarelos conduzem e o
-   ritmo do giroflex, medidos na corrente dos LEDs.
+2. Programa e circuito juntos: compila o sketch gerado com --mega --hud contra
+   o Arduino de mentira (tests/arduino_falso.h, relógio virtual), transforma o
+   que cada pino fez em fontes PWL e simula o circuito no tempo. Confere, em
+   cada nível de procurado, quantos LEDs amarelos conduzem e o ritmo do
+   giroflex, medidos na corrente dos LEDs.
 
-Precisa do ngspice (apt install ngspice). A figura usa matplotlib, se houver.
+Precisa do ngspice (apt install ngspice) e do g++. A figura usa matplotlib, se houver.
 Sai com código 1 se alguma conferência falhar.
 """
 
@@ -22,25 +22,26 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import types
 
 AQUI = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(AQUI))
 
-from grove import check, emit_python, parse, tokenize  # noqa: E402
-from grove.codegen_py import GIROFLEX_A_PARTIR_DE, PINO_AZUL, PINO_VERMELHO, PINOS_ESTRELAS  # noqa: E402
+from grove import check, emit_ino, parse, tokenize  # noqa: E402
+from grove.codegen_ino import (GIROFLEX_A_PARTIR_DE, MOSTRA_MS, PINO_AZUL,  # noqa: E402
+                               PINO_VERMELHO, PINOS_ESTRELAS)
 
-VPINO = 3.3
-VPINO_MIN = 3.0  # pino em nível alto com carga, com folga
+ARDUINO_FALSO = os.path.join(os.path.dirname(AQUI), "tests", "arduino_falso.h")
+VPINO = 5.0
+VPINO_MIN = 4.5  # pino em nível alto com carga, com folga
 VISIVEL = 1e-3  # corrente mínima para enxergar bem o LED numa sala
 ACESO = VISIVEL  # abaixo disso o LED conta como apagado
-LIMITE_PINO = 20e-3  # força padrão do pino da ESP32 e corrente nominal do LED de 5 mm
+LIMITE_PINO = 20e-3  # corrente recomendada do pino do ATmega2560 e nominal do LED de 5 mm
 SUBIDA = 1e-6  # tempo de subida das bordas nas fontes PWL
 
 # pino -> (nome, resistor, modelo)
 LEDS = {p: (f"estrela {i + 1}", 220, "LED_AMARELO") for i, p in enumerate(PINOS_ESTRELAS)}
 LEDS[PINO_VERMELHO] = ("giroflex vermelho", 220, "LED_VERMELHO")
-LEDS[PINO_AZUL] = ("giroflex azul", 100, "LED_AZUL")
+LEDS[PINO_AZUL] = ("giroflex azul", 220, "LED_AZUL")  # nos 3,3 V do ESP32 este era de 100 Ω
 
 
 # --- ngspice -------------------------------------------------------------------
@@ -102,89 +103,56 @@ def ponto_de_operacao() -> tuple[list[tuple], bool]:
     return tabela, ok
 
 
-# --- 2. placa de mentira com relógio virtual -------------------------------------
+# --- 2. o sketch rodando contra o Arduino de mentira ------------------------------
 
 class Placa:
     def __init__(self):
         self.agora = 0  # ms
-        self.timers = []
         self.eventos = {}  # pino -> {ms: valor}
         self.janelas = []  # (início, duração, estrelas)
         self.serial = []
 
-    def registrar(self, pino, valor):
-        self.eventos.setdefault(pino, {})[self.agora] = valor
 
-    def avancar(self, ms):
-        fim = self.agora + ms
-        while True:
-            ativos = [t for t in self.timers if t.ativo and t.proximo <= fim]
-            if not ativos:
-                break
-            t = min(ativos, key=lambda t: (t.proximo, t.id))
-            self.agora = t.proximo
-            t.proximo += t.periodo
-            t.callback(t)
-        self.agora = fim
+def janelas(placa: Placa) -> list[tuple[int, int, int]]:
+    """Cada _procurado escreve as seis estrelas de uma vez: é o começo de um nível.
 
-    def modulos(self):
-        placa = self
-
-        class Pin:
-            OUT = 1
-
-            def __init__(self, numero, modo=None):
-                self.numero, self.v = numero, 0
-                placa.registrar(numero, 0)
-
-            def value(self, v=None):
-                if v is None:
-                    return self.v
-                self.v = 1 if v else 0
-                placa.registrar(self.numero, self.v)
-
-        class Timer:
-            PERIODIC = 1
-
-            def __init__(self, id):
-                self.id, self.ativo = id, False
-                placa.timers.append(self)
-
-            def init(self, period, mode, callback):
-                self.periodo, self.proximo, self.callback, self.ativo = period, placa.agora + period, callback, True
-
-            def deinit(self):
-                self.ativo = False
-
-        def sleep_ms(ms):
-            quem = sys._getframe(1)
-            if quem.f_code.co_name == "_procurado":
-                placa.janelas.append((placa.agora, ms, quem.f_locals["n"]))
-            placa.avancar(ms)
-
-        machine = types.ModuleType("machine")
-        machine.Pin, machine.Timer = Pin, Timer
-        tempo = types.ModuleType("time")
-        tempo.sleep_ms = sleep_ms
-        return {"machine": machine, "time": tempo}
+    O número de estrelas vem de quantas acenderam, então um valor acima de 6
+    aparece aqui como 6 — que é o que o circuito mostra mesmo.
+    """
+    por_ms = {}
+    for pino in PINOS_ESTRELAS:
+        for ms, valor in placa.eventos.get(pino, {}).items():
+            por_ms.setdefault(ms, []).append(valor)
+    inicios = sorted(ms for ms, valores in por_ms.items() if len(valores) == len(PINOS_ESTRELAS))
+    return [(ms, MOSTRA_MS, sum(por_ms[ms])) for ms in inicios]
 
 
 def rodar_na_placa(codigo: str, depois: int) -> Placa:
+    """Compila o sketch com tests/arduino_falso.h e roda no PC, guardando o rastro dos pinos."""
+    gpp = shutil.which("g++")
+    if not gpp:
+        sys.exit("precisa do g++ para rodar o sketch (pacman -S gcc, apt install g++)")
+    with tempfile.TemporaryDirectory() as pasta:
+        sketch, exe = os.path.join(pasta, "sketch.ino"), os.path.join(pasta, "sketch")
+        with open(sketch, "w", encoding="utf-8") as f:
+            f.write(codigo)
+        subprocess.run([gpp, "-x", "c++", "-std=c++17", "-include", ARDUINO_FALSO, sketch, "-o", exe], check=True)
+        ambiente = dict(os.environ, ARDUINO_FALSO_DEPOIS=str(depois))  # o loop() segue piscando depois do fim
+        saida = subprocess.run([exe], capture_output=True, text=True, check=True, env=ambiente).stdout
+
     placa = Placa()
-    antigos = {nome: sys.modules.get(nome) for nome in ("machine", "time")}
-    sys.modules.update(placa.modulos())
-    try:
-        def serial(*args):
-            placa.serial.append((placa.agora, " ".join(map(str, args))))
-        exec(compile(codigo, "main.py", "exec"), {"__name__": "__main__", "print": serial})
-        placa.janelas.append((placa.agora, depois, None))  # o programa acabou; os timers seguem
-        placa.avancar(depois)
-    finally:
-        for nome, modulo in antigos.items():
-            if modulo is None:
-                sys.modules.pop(nome, None)
-            else:
-                sys.modules[nome] = modulo
+    for linha in saida.splitlines():
+        marca, resto = linha.split(" ", 1)
+        if marca == "F":
+            placa.agora = int(resto)
+        elif marca == "O":
+            ms, texto = resto.split(" ", 1)
+            placa.serial.append((int(ms), texto))
+        else:
+            ms, pino, valor = map(int, resto.split())
+            placa.eventos.setdefault(pino, {})[ms] = valor
+    placa.janelas = janelas(placa)
+    placa.janelas.append((placa.agora - depois, depois, None))  # o programa acabou; o loop() segue
     return placa
 
 
@@ -354,7 +322,7 @@ def main(argv=None):
 
     with open(args.arquivo, encoding="utf-8") as f:
         programa = parse(tokenize(f.read()))
-    codigo = emit_python(programa, check(programa), origem=args.arquivo, esp32=True, hud=True)
+    codigo = emit_ino(programa, check(programa), origem=args.arquivo, hud=True)
     placa = rodar_na_placa(codigo, args.depois)
     vetores = simular_no_tempo(placa)
     print(f"\n== 2. {os.path.basename(args.arquivo)} no circuito: {br(placa.agora / 1000, 'g')} s simulados ==\n")

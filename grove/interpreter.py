@@ -61,8 +61,9 @@ def _int(a, b, op):
 
 
 class Interpreter:
-    def __init__(self, out=print):
+    def __init__(self, out=print, entrada=input):
         self.out = out
+        self.entrada = entrada  # CJPHONEHOME: de onde vem a linha
         self.env = Environment()
         self.loops = 0
 
@@ -119,6 +120,16 @@ class Interpreter:
     def eval_Literal(self, node):
         return node.value
 
+    def eval_Input(self, node):
+        try:
+            linha = self.entrada()
+        except EOFError:
+            raise RuntimeError_("CJPHONEHOME: a entrada acabou") from None
+        try:
+            return int(linha)
+        except ValueError:
+            raise RuntimeError_(f"CJPHONEHOME esperava um número inteiro, recebeu {linha!r}") from None
+
     def eval_Var(self, node):
         return self.env.get(node.name)
 
@@ -158,5 +169,5 @@ class Interpreter:
         return {"<": a < b, ">": a > b, "<=": a <= b, ">=": a >= b}[op]
 
 
-def run(program: Program, out=print):
-    Interpreter(out).exec(program)
+def run(program: Program, out=print, entrada=input):
+    Interpreter(out, entrada).exec(program)

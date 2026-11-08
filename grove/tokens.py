@@ -15,6 +15,7 @@ class TokenType(Enum):
     WHILE = auto()    # KANGAROO
     BREAK = auto()    # GOODBYECRUELWORLD
     PRINT = auto()    # HELLOLADIES
+    INPUT = auto()    # CJPHONEHOME
     TRUE = auto()     # FULLCLIP
     FALSE = auto()    # GHOSTTOWN
     # pontuação
@@ -55,6 +56,7 @@ WORDS = {
     "KANGAROO": TokenType.WHILE,
     "GOODBYECRUELWORLD": TokenType.BREAK,
     "HELLOLADIES": TokenType.PRINT,
+    "CJPHONEHOME": TokenType.INPUT,
     "FULLCLIP": TokenType.TRUE,
     "GHOSTTOWN": TokenType.FALSE,
 }

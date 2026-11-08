@@ -5,14 +5,14 @@ const CDN = "https://cdn.jsdelivr.net/npm/pyodide@314.0.7/";
 const local = new URLSearchParams(self.location.search).get("pyodide");
 const alvo = local && new URL(local.endsWith("/") ? local : local + "/", self.location.href);
 const PYODIDE = alvo && alvo.origin === self.location.origin ? alvo.href : CDN;
-const MODULOS = ["__init__", "ast", "tokens", "lexer", "parser", "semantic", "sugestao", "interpreter", "ir", "otimizador", "codegen_py"];
+const MODULOS = ["__init__", "ast", "tokens", "lexer", "parser", "semantic", "sugestao", "interpreter", "ir", "otimizador", "codegen_py", "codegen_ino"];
 
 const GLUE = `
 import json
 import re
 
-from grove import (LexError, ParseError, RuntimeError_, SemanticError, check, dump, emit_ir, emit_python,
-                   format_ir, format_symbols, otimizar, parse, resumo, run, tokenize)
+from grove import (LexError, ParseError, RuntimeError_, SemanticError, check, dump, emit_ino, emit_ir,
+                   emit_python, format_ir, format_symbols, otimizar, parse, resumo, run, tokenize)
 
 LIMITE = 5000  # linhas de saída
 _programa = None
@@ -51,8 +51,8 @@ def compilar(src):
         r["ir_otimizado"] = format_ir(otimizado)
         r["ir_resumo"] = resumo(codigo, otimizado, conta)
         r["python"] = emit_python(programa, analise)
-        r["esp32"] = emit_python(programa, analise, esp32=True)
-        r["hud"] = emit_python(programa, analise, esp32=True, hud=True)
+        r["mega"] = emit_ino(programa, analise)
+        r["hud"] = emit_ino(programa, analise, hud=True)
         r["etapas"]["semantico"] = "ok"
         _programa = programa
     except LexError as e:
@@ -68,8 +68,15 @@ class _SaidaDemais(Exception):
     pass
 
 
-def executar():
+def executar(entrada=""):
     saida = []
+    linhas = iter(entrada.splitlines())
+
+    def ler():  # o CJPHONEHOME lê do campo de entrada da página, uma linha por vez
+        try:
+            return next(linhas)
+        except StopIteration:
+            raise EOFError from None
 
     def out(linha):
         if len(saida) >= LIMITE:
@@ -78,7 +85,7 @@ def executar():
 
     erro = None
     try:
-        run(_programa, out=out)
+        run(_programa, out=out, entrada=ler)
     except RuntimeError_ as e:
         erro = str(e)
     except _SaidaDemais:
@@ -117,6 +124,6 @@ onmessage = async ({ data }) => {
   const compilado = JSON.parse(pyodide.globals.get("compilar")(data.src));
   postMessage({ tipo: "compilado", id: data.id, ...compilado });
   if (data.executar && compilado.erros.length === 0) {
-    postMessage({ tipo: "executado", id: data.id, ...JSON.parse(pyodide.globals.get("executar")()) });
+    postMessage({ tipo: "executado", id: data.id, ...JSON.parse(pyodide.globals.get("executar")(data.entrada ?? "")) });
   }
 };

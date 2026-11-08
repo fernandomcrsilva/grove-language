@@ -17,12 +17,12 @@ Você vai ajudar a editar um vídeo tutorial mudo de cerca de 4 min 36 s sobre a
 - Os tempos são uma sugestão: se uma tela precisa de mais tempo para ser lida, estique a cena, não corte a legenda.
 
 **Fatos do projeto:**
-- Grove é uma linguagem de programação em que as 9 palavras reservadas são cheats de GTA San Andreas. O resto da sintaxe é de C (`{ }`, `;`, `( )`, `! && ||`). Extensão `.cj`, de Carl Johnson, o protagonista.
-- `HESOYAM` declara variável · `TURNUPTHEHEAT` é if · `BRINGITON` é else if · `TURNDOWNTHEHEAT` é else · `KANGAROO` é while · `GOODBYECRUELWORLD` é break · `HELLOLADIES` imprime · `FULLCLIP` é verdadeiro · `GHOSTTOWN` é falso.
+- Grove é uma linguagem de programação em que as 10 palavras reservadas são cheats de GTA San Andreas. O resto da sintaxe é de C (`{ }`, `;`, `( )`, `! && ||`). Extensão `.cj`, de Carl Johnson, o protagonista.
+- `HESOYAM` declara variável · `TURNUPTHEHEAT` é if · `BRINGITON` é else if · `TURNDOWNTHEHEAT` é else · `KANGAROO` é while · `GOODBYECRUELWORLD` é break · `HELLOLADIES` imprime · `CJPHONEHOME` lê um número · `FULLCLIP` é verdadeiro · `GHOSTTOWN` é falso.
 - O compilador é Python puro, sem dependências (Python 3.10+). Etapas: análise léxica → sintática (descida recursiva) → semântica (tabela de símbolos e tipos) → código de três endereços (TAC) → Python. Três formas de executar: interpretador, TAC e Python gerado.
 - Grove Online, o app: um compilador online no estilo do Programiz, com o tema de GTA San Andreas. Editor com realce, painel de cheats, console, abas Tokens, AST, Símbolos, TAC e Python. No canto, como o HUD do jogo: uma estrela de procurado por erro e $250.000 por missão cumprida. Cada execução termina com "Mission passed!", "Wasted", "Busted" ou "Mission failed!".
-- ESP32: o compilador gera MicroPython; a variável `estrelas` faz um LED vermelho piscar mais rápido quanto maior o nível de procurado (0 a 6 estrelas).
-- 78 testes automatizados; interpretador, TAC, TAC otimizada e Python deram a mesma saída em 15.000 programas aleatórios.
+- Mega 2560: o compilador gera o C++ do Arduino; a variável `estrelas` faz um LED vermelho piscar mais rápido quanto maior o nível de procurado (0 a 6 estrelas).
+- 97 testes automatizados; interpretador, TAC, TAC otimizada e Python deram a mesma saída em 15.000 programas aleatórios.
 - O compilador mostra todos os erros sintáticos de uma vez e sugere o cheat certo quando um é digitado errado ("você quis dizer HESOYAM?"), e otimiza o código de três endereços (o exemplo otimizacao.cj vai de 13 para 4 instruções).
 - Grupo: Gabriel Lacerda, Gabriel Mendonça e Fernando Mendonça. Repositório: github.com/fernandomcrsilva/grove-language
 
@@ -55,7 +55,7 @@ HELLOLADIES r;
 ```
 
 **Legendas:**
-- `0:12–0:16` 9 palavras reservadas, todas cheats do jogo
+- `0:12–0:16` 10 palavras reservadas, todas cheats do jogo
 - `0:16–0:21` HESOYAM declara variável (no jogo, dá vida e $250.000)
 - `0:21–0:26` KANGAROO é o laço (no jogo, o pulo gigante)
 - `0:26–0:30` HELLOLADIES imprime na tela
@@ -206,19 +206,20 @@ python -m grove examples/fatorial.cj --python | python3
 - `3:26–3:36` Cada erro acende uma estrela de procurado; um clique leva até a linha
 - `3:36–3:52` Por dentro: tokens, AST, símbolos, TAC e Python. E um link compartilha o código
 
-## Cena 9 — ESP32 · 3:52–4:22
+## Cena 9 — Mega 2560 · 3:52–4:22
 
-**Na tela:** `examples/procurado.cj`; o terminal gerando e gravando o programa; depois **filmagem da placa** com o LED piscando cada vez mais rápido e o monitor serial mostrando 1, 2, 3, 4, 5, 6. Sem a placa, a mesma cena gravada no Wokwi (ver [esp32.md](esp32.md#2-enquanto-a-placa-não-chega-wokwi)).
+**Na tela:** `examples/procurado.cj`; o terminal gerando, compilando e gravando o programa; depois **filmagem da placa** com o LED piscando cada vez mais rápido e o monitor serial mostrando 1, 2, 3, 4, 5, 6. Sem a placa, a mesma cena gravada no Wokwi (ver [mega2560.md](mega2560.md#2-enquanto-a-placa-não-chega-wokwi)).
 
 ```bash
-python -m grove examples/procurado.cj --esp32 > main.py
-mpremote cp main.py :main.py
-mpremote reset
+mkdir -p hud
+python -m grove examples/procurado.cj --mega > hud/hud.ino
+arduino-cli compile --fqbn arduino:avr:mega:cpu=atmega2560 hud
+arduino-cli upload --fqbn arduino:avr:mega:cpu=atmega2560 -p /dev/ttyUSB0 hud
 ```
 
 **Legendas:**
-- `3:52–3:58` E numa placa ESP32
-- `3:58–4:05` --esp32 gera MicroPython para a placa
+- `3:52–3:58` E num Arduino Mega 2560
+- `3:58–4:05` --mega gera o C++ que a placa compila
 - `4:05–4:14` A variável estrelas comanda o LED: mais estrelas, pisca mais rápido
 - `4:14–4:22` O mesmo procurado.cj, sem mudar uma linha
 
@@ -227,13 +228,13 @@ mpremote reset
 **Na tela:** `python -m unittest` rodando por 3 s; depois a cartela em fundo Pinho.
 
 ```
-Ran 78 tests in 0.327s
+Ran 84 tests in 5.2s
 
 OK
 ```
 
 **Cartela:**
-- `4:22–4:28` 78 testes automáticos · Python puro, sem dependências
+- `4:22–4:28` 97 testes automáticos · Python puro, sem dependências
 - `4:28–4:36` github.com/fernandomcrsilva/grove-language · MISSION PASSED
 
 ---

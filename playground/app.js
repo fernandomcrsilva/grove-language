@@ -111,6 +111,7 @@ const receber = {
 };
 
 function enviar(executar, automatica = false) {
+  $("#entrada-bloco").hidden = !/\bCJPHONEHOME\b/.test(editor.valor());
   if (!pronto) {
     if (executar) avisar("O Python ainda está carregando.");
     return;
@@ -125,7 +126,7 @@ function enviar(executar, automatica = false) {
     abrirAba($("#tab-console"));
     mostrar();
   }
-  worker.postMessage({ id, src: editor.valor(), executar });
+  worker.postMessage({ id, src: editor.valor(), executar, entrada: $("#entrada").value });
 }
 
 function interromper(fim) {
@@ -200,6 +201,9 @@ function htmlConsole() {
   const falha = execucao.erro ? `${linhas ? "\n" : ""}<span class="falha">erro: ${esc(execucao.erro)}</span>` : "";
   const nada = !linhas && !falha ? `<span class="nota">(o programa não imprimiu nada)</span>` : "";
   h += `<pre class="saida${mudou ? " velha" : ""}">${linhas}${falha}${nada}</pre>`;
+  if (execucao.erro?.startsWith("CJPHONEHOME")) {
+    h += `<p class="nota">Escreva os números no campo de entrada, logo abaixo, um por linha.</p>`;
+  }
   if (mudou) return h + `<p class="nota">O código mudou desde a última execução.</p>`;
   return h + missao(execucao.fim);
 }
@@ -275,11 +279,11 @@ function tacComOtimizacao(d) {
 }
 
 function python(d) {
-  const botoes = [["python", "Python"], ["esp32", "MicroPython · ESP32"], ["hud", "ESP32 · HUD"]]
+  const botoes = [["python", "Python"], ["mega", "Arduino · Mega 2560"], ["hud", "Mega 2560 · HUD"]]
     .map(([v, n]) => `<button type="button" data-alvo="${v}" aria-pressed="${alvoPython === v}">${n}</button>`).join("");
   const nota = {
-    esp32: `A variável inteira <code>estrelas</code> pisca o LED no GPIO 2: quanto mais estrelas, mais rápido. Na CLI: <code>python -m grove arquivo.cj --esp32</code>.`,
-    hud: `O circuito completo: uma luz por estrela (GPIOs 32, 33, 25, 26, 27 e 14) e o giroflex vermelho e azul (GPIOs 18 e 19) a partir de 4 estrelas. Na CLI: <code>python -m grove arquivo.cj --esp32 --hud</code>.`,
+    mega: `A variável inteira <code>estrelas</code> pisca o LED da placa, no pino 13: quanto mais estrelas, mais rápido. Na CLI: <code>python -m grove arquivo.cj --mega</code>.`,
+    hud: `O circuito completo: uma luz por estrela (pinos 52, 53, 50, 51, 49 e 48) e o giroflex vermelho e azul (pinos 33 e 32) a partir de 4 estrelas. Na CLI: <code>python -m grove arquivo.cj --mega --hud</code>.`,
     python: `O mesmo programa, traduzido da AST. Na CLI: <code>python -m grove arquivo.cj --python | python3</code>.`,
   }[alvoPython];
   return `<div class="alternar" role="group" aria-label="Alvo">${botoes}</div><p class="nota">${nota}</p>

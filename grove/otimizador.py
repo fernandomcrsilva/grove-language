@@ -29,8 +29,14 @@ ROTULOS = {
 }
 
 
-def _pode_dar_erro(q: Quad) -> bool:
-    """Divisão ou resto por algo que não é uma constante diferente de zero."""
+def _tem_efeito(q: Quad) -> bool:
+    """Instrução que não pode ser apagada nem calculada em tempo de compilação.
+
+    Divisão ou resto que pode estourar, e a leitura do CJPHONEHOME, que consome
+    uma linha da entrada mesmo quando ninguém usa o valor.
+    """
+    if q.op == "read":
+        return True
     return q.op in ("/", "%") and not (isinstance(q.arg2, Const) and q.arg2.value != 0)
 
 
@@ -38,7 +44,7 @@ def _calcular(code, conta):
     novo = []
     for q in code:
         a, b = q.arg1, q.arg2
-        if q.op in OPERACOES and isinstance(a, Const) and isinstance(b, Const) and not _pode_dar_erro(q):
+        if q.op in OPERACOES and isinstance(a, Const) and isinstance(b, Const) and not _tem_efeito(q):
             q = Quad("=", Const(OPERACOES[q.op](a.value, b.value)), result=q.result)
             conta["calculadas"] += 1
         elif q.op in ("!", "neg") and isinstance(a, Const):
@@ -140,7 +146,7 @@ def _remover_mortas(code, temporarios, conta):
     # temporários escritos e nunca lidos (ou escritos de novo antes de qualquer leitura)
     novo = []
     for i, q in enumerate(code):
-        if q.op not in SEM_DESTINO and q.result in temporarios and not _pode_dar_erro(q) and not _lido_depois(code, i):
+        if q.op not in SEM_DESTINO and q.result in temporarios and not _tem_efeito(q) and not _lido_depois(code, i):
             conta["mortas"] += 1
             continue
         novo.append(q)

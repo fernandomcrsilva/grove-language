@@ -3,6 +3,7 @@ from pathlib import Path
 
 from grove.interpreter import RuntimeError_, run
 from grove.ir import emit_ir, execute, format_ir
+from grove.otimizador import otimizar
 from grove.lexer import tokenize
 from grove.parser import parse
 from grove.semantic import check
@@ -43,15 +44,27 @@ def compilar(src):
     return prog, check(prog)
 
 
-def saida_interpretador(prog):
+def linhas(entrada):
+    """Uma função no lugar do input(): entrega uma linha por vez e depois acaba."""
+    it = iter(entrada)
+
+    def ler():
+        try:
+            return next(it)
+        except StopIteration:
+            raise EOFError from None
+    return ler
+
+
+def saida_interpretador(prog, entrada=()):
     saida = []
-    run(prog, out=saida.append)
+    run(prog, out=saida.append, entrada=linhas(entrada))
     return saida
 
 
-def saida_tac(prog, analise):
+def saida_tac(prog, analise, entrada=()):
     saida = []
-    execute(emit_ir(prog, analise), out=saida.append)
+    execute(emit_ir(prog, analise), out=saida.append, entrada=linhas(entrada))
     return saida
 
 
@@ -60,6 +73,31 @@ def programas():
     for nome in VALIDOS:
         yield nome, (EXEMPLOS / f"{nome}.cj").read_text()
     yield from TRECHOS.items()
+
+
+class LeituraTest(unittest.TestCase):
+    """CJPHONEHOME: a única expressão da linguagem com efeito colateral."""
+
+    def test_vira_uma_instrucao_read(self):
+        self.assertEqual(format_ir(emit_ir(*compilar("HESOYAM n = CJPHONEHOME; HELLOLADIES n;"))).splitlines(),
+                         ["  1      n = read", "  2      print n"])
+
+    def test_interpretador_e_tac_leem_igual(self):
+        src = "HESOYAM a = CJPHONEHOME; HESOYAM b = CJPHONEHOME; HELLOLADIES a * b;"
+        prog, analise = compilar(src)
+        self.assertEqual(saida_interpretador(prog, ["6", "7"]), ["42"])
+        self.assertEqual(saida_tac(prog, analise, ["6", "7"]), ["42"])
+
+    def test_otimizador_nao_apaga_leitura_sem_uso(self):
+        prog, analise = compilar("HESOYAM lixo = CJPHONEHOME; HELLOLADIES 1 + 1;")
+        otimizado, conta = otimizar(emit_ir(prog, analise), analise)
+        self.assertIn("read", format_ir(otimizado))  # some a soma, fica a leitura
+        self.assertEqual(saida_interpretador(prog, ["9"]), ["2"])
+
+    def test_entrada_que_nao_e_numero_da_erro(self):
+        prog, _ = compilar("HELLOLADIES CJPHONEHOME;")
+        with self.assertRaises(RuntimeError_):
+            saida_interpretador(prog, ["seis"])
 
 
 class IrTest(unittest.TestCase):
