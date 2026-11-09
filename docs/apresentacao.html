@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Grove — apresentação</title>
+<title>Grove · apresentação</title>
 <meta name="description" content="Grove: linguagem de programação cujas palavras-chave são os cheats de GTA San Andreas. Apresentação do projeto de Compiladores.">
 <script>document.documentElement.classList.add('js');</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -315,7 +315,7 @@ li span{color:var(--suave); font-size:.94em}
 <pre><span class="c">$</span> python -m grove examples/fatorial.cj
 <span class="g">120</span></pre>
       </div>
-      <p class="nota" style="margin-top:var(--gap)">Cada execução termina como no jogo: <em>Mission passed!</em> no sucesso, <span style="color:var(--vermelho)">Wasted</span> no erro léxico, <span style="color:var(--policia)">Busted</span> no semântico — com o clipe de áudio do jogo, quando os <code>.wav</code> estão na pasta.</p>
+      <p class="nota" style="margin-top:var(--gap)">Cada execução termina como no jogo: <em>Mission passed!</em> no sucesso, <span style="color:var(--vermelho)">Wasted</span> no erro léxico, <span style="color:var(--policia)">Busted</span> no semântico, com o clipe de áudio do jogo quando os <code>.wav</code> estão na pasta.</p>
     </div>
   </div>
 </section>
@@ -389,7 +389,7 @@ LINHA:COL  TIPO     LEXEMA
 <span class="r">erro: linha 2, coluna 13: caractere inesperado '$'</span></pre>
     </div>
     <ul data-anim="direita" style="--i:3">
-      <li><span class="pino">◆</span><span><b>Cinco classes</b>Cheat, pontuação e operador, número, string e identificador — duas tabelas resolvem as duas primeiras.</span></li>
+      <li><span class="pino">◆</span><span><b>Cinco classes</b>Cheat, pontuação e operador, número, string e identificador. Duas tabelas resolvem as duas primeiras.</span></li>
       <li><span class="pino">◆</span><span><b>Linha e coluna em cada token</b>É o que faz o erro apontar o lugar exato, aqui e nas etapas seguintes.</span></li>
       <li><span class="pino">◆</span><span><b>Operador de dois caracteres primeiro</b>Senão <code>!=</code> viraria <code>!</code> seguido de <code>=</code>.</span></li>
     </ul>
@@ -448,7 +448,7 @@ fora de laço</span>
       <li><span class="pino">◆</span><span><b>Tabela de símbolos</b>Pilha de escopos, um por bloco. Cada símbolo guarda tipo, escopo, posição, nome único e se foi lido.</span></li>
       <li><span class="pino">◆</span><span><b>Tipos sem conversão implícita</b><code>1 + "a"</code> é erro; a condição do <code>if</code> e do <code>while</code> tem de ser booleana.</span></li>
       <li><span class="pino">◆</span><span><b>Três tipos, nenhum float</b>Inteiro, string e booleano. Com float, o Python (double de 64 bits) e o AVR do Mega (sem FPU) parariam de dar a mesma saída.</span></li>
-      <li><span class="pino ouro">◆</span><span><b>Todos os erros de uma vez</b>Percorre o programa inteiro antes de reclamar — não para no primeiro.</span></li>
+      <li><span class="pino ouro">◆</span><span><b>Todos os erros de uma vez</b>Percorre o programa inteiro antes de reclamar. Não para no primeiro.</span></li>
       <li><span class="pino ouro">◆</span><span><b>Anota a AST</b>Cada expressão ganha tipo e cada variável ganha seu símbolo. É dessa AST que saem a TAC, o Python e o C++.</span></li>
     </ul>
   </div>
@@ -479,7 +479,7 @@ fora de laço</span>
       <li><span class="pino">◆</span><span><b>Uma quádrupla por instrução</b><code>Quad(op, arg1, arg2, result)</code>: no máximo um operador, temporários <code>t1…tn</code> e rótulos <code>L1…Ln</code>.</span></li>
       <li><span class="pino">◆</span><span><b>Sem escopo e sem aninhamento</b>As variáveis usam o nome único da tabela de símbolos, porque a TAC é linear.</span></li>
       <li><span class="pino">◆</span><span><b>Curto-circuito explícito</b><code>&amp;&amp;</code> e <code>||</code> viram desvios; <code>break</code> vira um <code>goto</code> para o fim do laço.</span></li>
-      <li><span class="pino">◆</span><span><b>Executável</b>A TAC roda num executor próprio — é o que garante que ela faz o mesmo que o interpretador.</span></li>
+      <li><span class="pino">◆</span><span><b>Executável</b>A TAC roda num executor próprio, o que garante que ela faz o mesmo que o interpretador.</span></li>
     </ul>
   </div>
 </section>
@@ -632,7 +632,7 @@ r = <span class="n">1</span>
 <section id="s14" class="slide" aria-label="Encerramento">
   <p class="marca" data-anim style="--i:0">mission passed</p>
   <h2 data-anim="cortina" style="--i:1; color:var(--dinheiro)">Respeito +<span data-conta="250000">250.000</span></h2>
-  <p class="sub" data-anim style="--i:2">Escreva um programa com os cheats e rode no navegador — não precisa instalar nada.</p>
+  <p class="sub" data-anim style="--i:2">Escreva um programa com os cheats e rode no navegador. Não precisa instalar nada.</p>
   <div class="duas" style="margin-top:var(--gap)">
     <div class="painel" data-anim="esquerda" style="--i:3">
       <p class="marca" style="margin-bottom:.4rem">o app</p>
@@ -643,7 +643,7 @@ r = <span class="n">1</span>
       <p class="cheat" style="font-size:clamp(.85rem,1.6vw,1.1rem); word-break:break-all">github.com/fernandomcrsilva/grove-language</p>
     </div>
   </div>
-  <p class="nota" data-anim style="--i:5; margin-top:var(--gap)">Gabriel Lacerda · Gabriel Mendonça · Fernando Mendonça — perguntas?</p>
+  <p class="nota" data-anim style="--i:5; margin-top:var(--gap)">Gabriel Lacerda · Gabriel Mendonça · Fernando Mendonça</p>
 </section>
 
 </main>
