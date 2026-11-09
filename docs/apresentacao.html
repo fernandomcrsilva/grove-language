@@ -416,7 +416,6 @@ encontrado ')'</span>
     <ul data-anim="direita" style="--i:3">
       <li><span class="pino">◆</span><span><b>Descida recursiva, LL(1)</b>Um método por regra da gramática. Cada regra decide olhando só o próximo token.</span></li>
       <li><span class="pino">◆</span><span><b>Precedência na cadeia de regras</b><code>ou → e → igualdade → comparação → termo → fator → unário → primário</code>. Tudo associativo à esquerda.</span></li>
-      <li><span class="pino">◆</span><span><b>Nada de <code>else</code> ambíguo</b>Bloco é sempre <code>{ }</code>, então não existe <code>else</code> ambíguo. <span class="cheat">BRINGITON</span> vira um <code>if</code> aninhado.</span></li>
       <li><span class="pino ouro">◆</span><span><b>Recuperação e sugestão</b>O parser continua depois do erro e sugere o cheat mais parecido.</span></li>
     </ul>
   </div>
@@ -445,11 +444,9 @@ fora de laço</span>
 <span class="r">4 erros semânticos</span></pre>
     </div>
     <ul data-anim="direita" style="--i:3">
-      <li><span class="pino">◆</span><span><b>Tabela de símbolos</b>Uma pilha de escopos, um por bloco. Cada variável guarda tipo, posição e se foi lida.</span></li>
-      <li><span class="pino">◆</span><span><b>Tipos sem conversão implícita</b><code>1 + "a"</code> é erro; a condição do <code>if</code> e do <code>while</code> tem de ser booleana.</span></li>
-      <li><span class="pino">◆</span><span><b>Três tipos, nenhum float</b>Inteiro, string e booleano. Com float, o Python e a placa parariam de dar a mesma resposta.</span></li>
+      <li><span class="pino">◆</span><span><b>Tabela de símbolos e AST anotada</b>Uma pilha de escopos, um por bloco. Cada expressão ganha um tipo, e é dessa árvore que saem a TAC, o Python e o C++.</span></li>
+      <li><span class="pino">◆</span><span><b>Três tipos, sem conversão</b>Inteiro, string e booleano. <code>1 + "a"</code> é erro. Sem float, para o Python e a placa darem a mesma resposta.</span></li>
       <li><span class="pino ouro">◆</span><span><b>Todos os erros de uma vez</b>Percorre o programa inteiro antes de reclamar. Não para no primeiro.</span></li>
-      <li><span class="pino ouro">◆</span><span><b>Anota a AST</b>Cada expressão ganha um tipo. É dessa árvore que saem a TAC, o Python e o C++.</span></li>
     </ul>
   </div>
 </section>
@@ -476,8 +473,7 @@ fora de laço</span>
 13 L3:</pre>
     </div>
     <ul data-anim="direita" style="--i:3">
-      <li><span class="pino">◆</span><span><b>Uma quádrupla por instrução</b><code>Quad(op, arg1, arg2, result)</code>: uma operação por linha, com temporários <code>t1…tn</code> e rótulos <code>L1…Ln</code>.</span></li>
-      <li><span class="pino">◆</span><span><b>Sem escopo e sem aninhamento</b>A TAC é uma lista, sem blocos. Cada variável usa o nome único da tabela.</span></li>
+      <li><span class="pino">◆</span><span><b>Uma quádrupla por instrução</b><code>Quad(op, arg1, arg2, result)</code>: uma operação por linha, numa lista sem blocos, com temporários <code>t1…tn</code> e rótulos <code>L1…Ln</code>.</span></li>
       <li><span class="pino">◆</span><span><b>Curto-circuito explícito</b><code>&amp;&amp;</code> e <code>||</code> viram desvios; <code>break</code> vira um <code>goto</code> para o fim do laço.</span></li>
       <li><span class="pino">◆</span><span><b>Executável</b>A TAC também roda. É assim que provamos que ela faz o mesmo que o interpretador.</span></li>
     </ul>
@@ -507,8 +503,7 @@ fora de laço</span>
     </div>
     <ul data-anim="direita" style="--i:6">
       <li><span class="pino">◆</span><span><b>Dobra de constantes</b><code>60 * 60</code> é resolvido na compilação: duas contas saem do programa.</span></li>
-      <li><span class="pino">◆</span><span><b>Propagação de cópias e constantes</b>Três valores seguem adiante sem passar por temporário.</span></li>
-      <li><span class="pino">◆</span><span><b>Simplificação algébrica</b><code>dobro + 0</code> é só <code>dobro</code>.</span></li>
+      <li><span class="pino">◆</span><span><b>Propagação e simplificação</b>Três valores seguem adiante sem temporário, e <code>dobro + 0</code> é só <code>dobro</code>.</span></li>
       <li><span class="pino">◆</span><span><b>Desvios e código morto</b>Dois desvios já têm resposta conhecida. Oito instruções que ninguém alcança saem fora.</span></li>
     </ul>
   </div>
@@ -558,7 +553,6 @@ r = <span class="n">1</span>
   <div class="duas larga-esq">
     <ul data-anim="esquerda" style="--i:2">
       <li><span class="pino azul">◆</span><span><b>O compilador em Python roda no navegador</b>O Pyodide carrega o pacote <code>grove</code> na página. Nada é instalado, nenhum servidor compila.</span></li>
-      <li><span class="pino azul">◆</span><span><b>Editor com realce dos cheats</b>Numeração, recuo automático, linha de erro marcada, código salvo no navegador.</span></li>
       <li><span class="pino azul">◆</span><span><b>Por dentro do compilador</b>Abas de tokens, AST, símbolos, TAC, Python e C++.</span></li>
       <li><span class="pino ouro">◆</span><span><b>HUD do jogo como feedback</b>Uma estrela de procurado por erro, $250.000 por missão cumprida.</span></li>
     </ul>
