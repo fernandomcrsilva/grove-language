@@ -78,5 +78,24 @@ Todo erro sai com código 1; sucesso com 0 e "MISSION PASSED".
 ## Se algo der errado
 
 - Som não toca: ignora, a fala não depende dele.
-- Terminal travou: `python -m unittest` roda os 24 testes em menos de 1 s e prova que tudo funciona.
+- Terminal travou: `python -m unittest discover -s tests` roda os 100 testes em uns 4 s e prova que tudo funciona.
 - Perguntaram algo da fase 2: "está planejado, ainda não implementado".
+
+## Perguntas prováveis
+
+**"Por que não tem float?"** Porque o projeto tem quatro executores que precisam dar a mesma
+saída: o interpretador, a TAC, a TAC otimizada e o Python gerado — mais o C++ do Arduino, que os
+testes compilam e rodam. Com inteiro isso é exato: `7 / 2` dá 3 em todos, e o `_div` do gerador
+arredonda para baixo como o Python. Com ponto flutuante não existe esse "igual": o Python usa
+double de 64 bits, o AVR do Mega 2560 usa float de 32 e não tem unidade de ponto flutuante — é
+emulado em software. `0.1 + 0.2` sairia diferente nas duas pontas, e o teste de 15.000 programas
+aleatórios teria que trocar igualdade por tolerância, deixando de provar o que prova. Somando a
+isso que nada no tema pede casa decimal (nível de procurado é 0 a 6), o segundo tipo numérico só
+acrescentaria regra de promoção, que não é o que a disciplina quer ver demonstrado.
+
+**"Dá para acrescentar depois?"** Dá, e o caminho mais barato é float só no interpretador e no
+Python, com erro claro no Arduino. Mas aí a frase "a mesma saída em quatro executores" sai do
+pitch.
+
+**"E string, tem o quê?"** Concatenação com `+`, comparação com `==` e `!=`. Não tem índice, nem
+tamanho, nem fatia: o escopo é o pipeline do compilador, não a biblioteca padrão.

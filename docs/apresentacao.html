@@ -466,6 +466,7 @@ fora de laço</span>
     <ul data-anim="direita" style="--i:3">
       <li><span class="pino">◆</span><span><b>Tabela de símbolos</b>Pilha de escopos, um por bloco. Cada símbolo guarda tipo, escopo, posição, nome único e se foi lido.</span></li>
       <li><span class="pino">◆</span><span><b>Tipos sem conversão implícita</b><code>1 + "a"</code> é erro; a condição do <code>if</code> e do <code>while</code> tem de ser booleana.</span></li>
+      <li><span class="pino">◆</span><span><b>Três tipos, nenhum float</b>Inteiro, string e booleano. Com float, o Python (double de 64 bits) e o AVR do Mega (sem FPU) parariam de dar a mesma saída.</span></li>
       <li><span class="pino ouro">◆</span><span><b>Todos os erros de uma vez</b>Percorre o programa inteiro antes de reclamar — não para no primeiro.</span></li>
       <li><span class="pino ouro">◆</span><span><b>Anota a AST</b>Cada expressão ganha tipo e cada variável ganha seu símbolo. É dessa AST que saem a TAC, o Python e o C++.</span></li>
     </ul>
