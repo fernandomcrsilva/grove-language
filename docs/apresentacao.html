@@ -264,7 +264,7 @@ li span{color:var(--suave); font-size:.94em}
     <span data-anim="palavra" style="--i:1">G</span><span data-anim="palavra" style="--i:2">R</span><span data-anim="palavra" style="--i:3">O</span><span data-anim="palavra" style="--i:4">V</span><span data-anim="palavra" style="--i:5">E</span>
   </h1>
   <p class="sub" data-anim style="--i:6" >A linguagem de programação em que as palavras-chave são os <strong>cheats de GTA San Andreas</strong>.</p>
-  <p class="nota" data-anim style="--i:7">Arquivos <code>.cj</code>, de Carl Johnson. Python 3.10+, sem nenhuma dependência.</p>
+  <p class="nota" data-anim style="--i:7">Arquivos <code>.cj</code>, de Carl Johnson. Só precisa de Python 3.10, sem instalar mais nada.</p>
   <div class="hud" data-anim="zoom" style="--i:8; margin-top:var(--gap)" aria-label="Seis estrelas de procurado">
     <svg viewBox="0 0 24 24"><path class="estrela on" style="--i:0" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/></svg>
     <svg viewBox="0 0 24 24"><path class="estrela on" style="--i:1" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/></svg>
@@ -292,7 +292,7 @@ li span{color:var(--suave); font-size:.94em}
     <div data-anim="esquerda" style="--i:6"><span class="cheat">FULLCLIP</span><span class="sig">true</span></div>
     <div data-anim="direita" style="--i:6"><span class="cheat">GHOSTTOWN</span><span class="sig">false</span></div>
   </div>
-  <p class="nota" data-anim style="--i:7">O resto é sintaxe estilo C: <code>{ }</code> delimita bloco, <code>;</code> termina instrução, <code>( )</code> agrupa, <code>! &amp;&amp; ||</code> são os lógicos. Três tipos: inteiro, string e booleano, sem conversão implícita.</p>
+  <p class="nota" data-anim style="--i:7">O resto é igual ao C: <code>{ }</code> <code>;</code> <code>( )</code> <code>! &amp;&amp; ||</code>. Três tipos: inteiro, string e booleano, sem conversão automática.</p>
 </section>
 
 <!-- 3 — um programa -->
@@ -315,7 +315,7 @@ li span{color:var(--suave); font-size:.94em}
 <pre><span class="c">$</span> python -m grove examples/fatorial.cj
 <span class="g">120</span></pre>
       </div>
-      <p class="nota" style="margin-top:var(--gap)">Cada execução termina como no jogo: <em>Mission passed!</em> no sucesso, <span style="color:var(--vermelho)">Wasted</span> no erro léxico, <span style="color:var(--policia)">Busted</span> no semântico, com o clipe de áudio do jogo quando os <code>.wav</code> estão na pasta.</p>
+      <p class="nota" style="margin-top:var(--gap)">Acaba como no jogo: <em>Mission passed!</em> no sucesso, <span style="color:var(--vermelho)">Wasted</span> no léxico, <span style="color:var(--policia)">Busted</span> no semântico, com a fala do jogo se os <code>.wav</code> estiverem na pasta.</p>
     </div>
   </div>
 </section>
@@ -368,7 +368,7 @@ li span{color:var(--suave); font-size:.94em}
     <text x="923" y="294" text-anchor="middle" data-anim="direita" style="--i:12">Arduino C++</text>
     <text class="rot" x="923" y="310" text-anchor="middle" data-anim="direita" style="--i:12">--mega</text>
   </svg>
-  <p class="nota" data-anim style="--i:13; margin-top:var(--gap)">As flags param o compilador em qualquer etapa: <code>--tokens</code>, <code>--ast</code>, <code>--simbolos</code>, <code>--ir</code>. E combinam entre si.</p>
+  <p class="nota" data-anim style="--i:13; margin-top:var(--gap)">Cada flag para o compilador numa etapa: <code>--tokens</code>, <code>--ast</code>, <code>--simbolos</code>, <code>--ir</code>. Dá para combinar.</p>
 </section>
 
 <!-- 5 — léxico -->
@@ -389,8 +389,8 @@ LINHA:COL  TIPO     LEXEMA
 <span class="r">erro: linha 2, coluna 13: caractere inesperado '$'</span></pre>
     </div>
     <ul data-anim="direita" style="--i:3">
-      <li><span class="pino">◆</span><span><b>Cinco classes</b>Cheat, pontuação e operador, número, string e identificador. Duas tabelas resolvem as duas primeiras.</span></li>
-      <li><span class="pino">◆</span><span><b>Linha e coluna em cada token</b>É o que faz o erro apontar o lugar exato, aqui e nas etapas seguintes.</span></li>
+      <li><span class="pino">◆</span><span><b>Cinco classes</b>Cheat, pontuação e operador, número, string e identificador. Duas tabelas dão conta das primeiras.</span></li>
+      <li><span class="pino">◆</span><span><b>Linha e coluna em cada token</b>É o que faz o erro apontar o lugar certo, aqui e nas etapas seguintes.</span></li>
       <li><span class="pino">◆</span><span><b>Operador de dois caracteres primeiro</b>Senão <code>!=</code> viraria <code>!</code> seguido de <code>=</code>.</span></li>
     </ul>
   </div>
@@ -414,10 +414,10 @@ encontrado ')'</span>
 <span class="r">4 erros sintáticos</span></pre>
     </div>
     <ul data-anim="direita" style="--i:3">
-      <li><span class="pino">◆</span><span><b>Descida recursiva, LL(1)</b>Um método por regra da gramática; cada regra decide olhando só o próximo token.</span></li>
-      <li><span class="pino">◆</span><span><b>Precedência na cadeia de regras</b><code>ou → e → igualdade → comparação → termo → fator → unário → primário</code>, tudo associativo à esquerda.</span></li>
-      <li><span class="pino">◆</span><span><b>Nada de <code>else</code> ambíguo</b>Bloco é sempre <code>{ }</code>, então o pendente não existe. <span class="cheat">BRINGITON</span> é açúcar: vira um <code>if</code> aninhado.</span></li>
-      <li><span class="pino ouro">◆</span><span><b>Recuperação e sugestão</b>O parser segue depois do erro e a distância de edição acha o cheat ou a variável mais parecida.</span></li>
+      <li><span class="pino">◆</span><span><b>Descida recursiva, LL(1)</b>Um método por regra da gramática. Cada regra decide olhando só o próximo token.</span></li>
+      <li><span class="pino">◆</span><span><b>Precedência na cadeia de regras</b><code>ou → e → igualdade → comparação → termo → fator → unário → primário</code>. Tudo associativo à esquerda.</span></li>
+      <li><span class="pino">◆</span><span><b>Nada de <code>else</code> ambíguo</b>Bloco é sempre <code>{ }</code>, então não existe <code>else</code> ambíguo. <span class="cheat">BRINGITON</span> vira um <code>if</code> aninhado.</span></li>
+      <li><span class="pino ouro">◆</span><span><b>Recuperação e sugestão</b>O parser continua depois do erro e sugere o cheat mais parecido.</span></li>
     </ul>
   </div>
 </section>
@@ -445,11 +445,11 @@ fora de laço</span>
 <span class="r">4 erros semânticos</span></pre>
     </div>
     <ul data-anim="direita" style="--i:3">
-      <li><span class="pino">◆</span><span><b>Tabela de símbolos</b>Pilha de escopos, um por bloco. Cada símbolo guarda tipo, escopo, posição, nome único e se foi lido.</span></li>
+      <li><span class="pino">◆</span><span><b>Tabela de símbolos</b>Uma pilha de escopos, um por bloco. Cada variável guarda tipo, posição e se foi lida.</span></li>
       <li><span class="pino">◆</span><span><b>Tipos sem conversão implícita</b><code>1 + "a"</code> é erro; a condição do <code>if</code> e do <code>while</code> tem de ser booleana.</span></li>
-      <li><span class="pino">◆</span><span><b>Três tipos, nenhum float</b>Inteiro, string e booleano. Com float, o Python (double de 64 bits) e o AVR do Mega (sem FPU) parariam de dar a mesma saída.</span></li>
+      <li><span class="pino">◆</span><span><b>Três tipos, nenhum float</b>Inteiro, string e booleano. Com float, o Python e a placa parariam de dar a mesma resposta.</span></li>
       <li><span class="pino ouro">◆</span><span><b>Todos os erros de uma vez</b>Percorre o programa inteiro antes de reclamar. Não para no primeiro.</span></li>
-      <li><span class="pino ouro">◆</span><span><b>Anota a AST</b>Cada expressão ganha tipo e cada variável ganha seu símbolo. É dessa AST que saem a TAC, o Python e o C++.</span></li>
+      <li><span class="pino ouro">◆</span><span><b>Anota a AST</b>Cada expressão ganha um tipo. É dessa árvore que saem a TAC, o Python e o C++.</span></li>
     </ul>
   </div>
 </section>
@@ -476,10 +476,10 @@ fora de laço</span>
 13 L3:</pre>
     </div>
     <ul data-anim="direita" style="--i:3">
-      <li><span class="pino">◆</span><span><b>Uma quádrupla por instrução</b><code>Quad(op, arg1, arg2, result)</code>: no máximo um operador, temporários <code>t1…tn</code> e rótulos <code>L1…Ln</code>.</span></li>
-      <li><span class="pino">◆</span><span><b>Sem escopo e sem aninhamento</b>As variáveis usam o nome único da tabela de símbolos, porque a TAC é linear.</span></li>
+      <li><span class="pino">◆</span><span><b>Uma quádrupla por instrução</b><code>Quad(op, arg1, arg2, result)</code>: uma operação por linha, com temporários <code>t1…tn</code> e rótulos <code>L1…Ln</code>.</span></li>
+      <li><span class="pino">◆</span><span><b>Sem escopo e sem aninhamento</b>A TAC é uma lista, sem blocos. Cada variável usa o nome único da tabela.</span></li>
       <li><span class="pino">◆</span><span><b>Curto-circuito explícito</b><code>&amp;&amp;</code> e <code>||</code> viram desvios; <code>break</code> vira um <code>goto</code> para o fim do laço.</span></li>
-      <li><span class="pino">◆</span><span><b>Executável</b>A TAC roda num executor próprio, o que garante que ela faz o mesmo que o interpretador.</span></li>
+      <li><span class="pino">◆</span><span><b>Executável</b>A TAC também roda. É assim que provamos que ela faz o mesmo que o interpretador.</span></li>
     </ul>
   </div>
 </section>
@@ -509,7 +509,7 @@ fora de laço</span>
       <li><span class="pino">◆</span><span><b>Dobra de constantes</b><code>60 * 60</code> é resolvido na compilação: duas contas saem do programa.</span></li>
       <li><span class="pino">◆</span><span><b>Propagação de cópias e constantes</b>Três valores seguem adiante sem passar por temporário.</span></li>
       <li><span class="pino">◆</span><span><b>Simplificação algébrica</b><code>dobro + 0</code> é só <code>dobro</code>.</span></li>
-      <li><span class="pino">◆</span><span><b>Desvios e código morto</b>Dois desvios resolvidos de um lado; oito instruções inalcançáveis removidas do outro.</span></li>
+      <li><span class="pino">◆</span><span><b>Desvios e código morto</b>Dois desvios já têm resposta conhecida. Oito instruções que ninguém alcança saem fora.</span></li>
     </ul>
   </div>
 </section>
@@ -529,7 +529,7 @@ r = <span class="n">1</span>
     n = n - <span class="n">1</span>
 <span class="k">print</span>(r)</pre>
       </div>
-      <p class="nota" style="margin-top:.7rem">Sai da AST, não da TAC: Python não tem <code>goto</code>, e o <code>if</code>/<code>while</code> da árvore vira <code>if</code>/<code>while</code> direto. Dá para canalizar: <code>--python | python3</code>.</p>
+      <p class="nota" style="margin-top:.7rem">Sai da AST, não da TAC: o Python não tem <code>goto</code>. Dá para rodar na hora: <code>--python | python3</code>.</p>
     </div>
     <div data-anim="direita" style="--i:3">
       <h3>Arduino C++ · <code>--mega</code></h3>
@@ -546,7 +546,7 @@ r = <span class="n">1</span>
   }
 }</pre>
       </div>
-      <p class="nota" style="margin-top:.7rem">Mesma AST, outro alvo: o C++ do Mega 2560, com <code>CJPHONEHOME</code> lendo a serial e o nível de procurado acendendo o HUD.</p>
+      <p class="nota" style="margin-top:.7rem">Mesma árvore, outro alvo: o C++ do Mega 2560, com a serial no lugar do teclado.</p>
     </div>
   </div>
 </section>
@@ -557,10 +557,10 @@ r = <span class="n">1</span>
   <h2 data-anim="cortina" style="--i:1">Grove Online</h2>
   <div class="duas larga-esq">
     <ul data-anim="esquerda" style="--i:2">
-      <li><span class="pino azul">◆</span><span><b>O compilador em Python roda no navegador</b>Pyodide carrega o próprio pacote <code>grove</code>: nada é instalado e nenhum servidor compila nada.</span></li>
-      <li><span class="pino azul">◆</span><span><b>Editor com realce dos cheats</b>Numeração, recuo automático, linha de erro marcada e o código salvo no navegador.</span></li>
-      <li><span class="pino azul">◆</span><span><b>Por dentro do compilador</b>Abas com tokens, AST, tabela de símbolos, TAC, Python e o C++ do Arduino.</span></li>
-      <li><span class="pino ouro">◆</span><span><b>HUD do jogo como feedback</b>Uma estrela de procurado por erro encontrado, $250.000 a cada missão cumprida.</span></li>
+      <li><span class="pino azul">◆</span><span><b>O compilador em Python roda no navegador</b>O Pyodide carrega o pacote <code>grove</code> na página. Nada é instalado, nenhum servidor compila.</span></li>
+      <li><span class="pino azul">◆</span><span><b>Editor com realce dos cheats</b>Numeração, recuo automático, linha de erro marcada, código salvo no navegador.</span></li>
+      <li><span class="pino azul">◆</span><span><b>Por dentro do compilador</b>Abas de tokens, AST, símbolos, TAC, Python e C++.</span></li>
+      <li><span class="pino ouro">◆</span><span><b>HUD do jogo como feedback</b>Uma estrela de procurado por erro, $250.000 por missão cumprida.</span></li>
     </ul>
     <div data-anim="direita" style="--i:3">
       <div class="painel">
@@ -607,7 +607,7 @@ r = <span class="n">1</span>
     <text class="rot" x="856" y="132" text-anchor="middle" data-anim="direita" style="--i:6">CJPHONEHOME LÊ A LINHA</text>
   </svg>
   <div class="duas" style="margin-top:var(--gap)">
-    <p class="nota" data-anim style="--i:7"><span class="cheat">CJPHONEHOME</span> é a primeira expressão da Grove que <em>lê</em>: ela espera a próxima linha da entrada. No PC é o teclado; na placa, a serial. O mesmo programa serve aos dois.</p>
+    <p class="nota" data-anim style="--i:7"><span class="cheat">CJPHONEHOME</span> <em>lê</em> a próxima linha da entrada: o teclado no PC, a serial na placa. O mesmo programa serve aos dois.</p>
     <p class="sub" data-anim="zoom" style="--i:8"><strong><span data-conta="0.3" data-casas="1">0,3</span> s</strong> entre a estrela aparecer na tela e o LED acender.</p>
   </div>
 </section>
@@ -625,7 +625,7 @@ r = <span class="n">1</span>
   <div class="faixa" data-anim style="--i:6; margin-top:var(--gap)">
     <div><span>LEXER · PARSER · SEMANTIC · IR · OTIMIZADOR · CODEGEN PY · CODEGEN INO · PLAYGROUND · HUD · PONTE GTA ·</span><span>LEXER · PARSER · SEMANTIC · IR · OTIMIZADOR · CODEGEN PY · CODEGEN INO · PLAYGROUND · HUD · PONTE GTA ·</span></div>
   </div>
-  <p class="nota" data-anim style="--i:7; margin-top:var(--gap)">Dez programas de exemplo, incluindo cinco que só existem para errar: um erro léxico, um sintático, um de digitação com os cheats parecidos, quatro erros semânticos de uma vez e um de execução. Documentação por etapa em <code>docs/</code>.</p>
+  <p class="nota" data-anim style="--i:7; margin-top:var(--gap)">Dez exemplos, cinco só para dar erro. Mais dezenove mínimos, um por erro do compilador. Documentação por etapa em <code>docs/</code>.</p>
 </section>
 
 <!-- 14 — encerramento -->
