@@ -43,6 +43,7 @@ texto ─léxico─▶ tokens ─sintático─▶ AST ─semântico─▶ AST an
 | sintático, recuperação de erros, "você quis dizer…?" | [docs/gramatica.md](docs/gramatica.md) |
 | semântico: tabela de símbolos, tipos, erros | [docs/semantica.md](docs/semantica.md) |
 | interpretador | [docs/interpretador.md](docs/interpretador.md) |
+| catálogo de erros: um exemplo mínimo de cada um | [docs/erros.md](docs/erros.md) |
 | código de três endereços e otimização | [docs/codigo-intermediario.md](docs/codigo-intermediario.md) |
 | Python e C++ do Arduino | [docs/geracao-de-codigo.md](docs/geracao-de-codigo.md) |
 | O GTA acendendo os LEDs: o cheat `CJPHONEHOME`, o script CLEO, a ponte | [docs/gta.md](docs/gta.md) |
