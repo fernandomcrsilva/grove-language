@@ -2,8 +2,6 @@ __pycache__/
 *.pyc
 .idea/
 .vscode/
-assets/*.wav
-assets/*.mp3
 playground/pyodide/
 .wrangler/
 

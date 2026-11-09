@@ -16,6 +16,3 @@
 /grove/sounds.py
 __pycache__/
 *.pyc
-# os áudios do jogo são da Rockstar: tire estas linhas só se o grupo decidir publicá-los
-/assets/*.wav
-/assets/*.mp3
