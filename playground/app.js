@@ -291,8 +291,8 @@ function python(d) {
 }
 
 // ---- falas do jogo ----
-// Os áudios são da Rockstar e não vão para o repositório: cada um coloca os seus em assets/
-// (ver assets/README.md). Sem o arquivo, o app fica em silêncio e avisa uma vez.
+// As falas ficam em assets/, versionadas e publicadas junto com o site (ver assets/README.md).
+// Enquanto um arquivo não existir, o app fica em silêncio e avisa uma vez.
 function tocar(fim) {
   const evento = SOM[fim];
   if (!somLigado || !evento || sons[evento] === null) return;
