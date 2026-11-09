@@ -10,3 +10,12 @@ playground/pyodide/
 # pasta de sketch do arduino-cli (gerada; ver docs/mega2560.md)
 /hud/
 /procurado/
+
+# config local do editor (dev server do preview), como .idea/ e .vscode/
+/.claude/
+
+# PDFs de planejamento de 21/09/2026, da fase do ESP32: ficam só na máquina.
+# O que valia deles virou docs/mega2560.md e docs/gta.md; a placa mudou.
+/docs/como-funciona.pdf
+/docs/custos-leds.pdf
+/docs/procurado-leds.pdf
