@@ -49,7 +49,7 @@ texto ─léxico─▶ tokens ─sintático─▶ AST ─semântico─▶ AST an
 | Python e C++ do Arduino | [docs/geracao-de-codigo.md](docs/geracao-de-codigo.md) |
 | O GTA acendendo os LEDs: o cheat `CJPHONEHOME`, o script CLEO, a ponte | [docs/gta.md](docs/gta.md) |
 | Mega 2560 na bancada: compras, montagem, `arduino-cli`, Wokwi, o upgrade do HUD, simulação elétrica (ngspice e EasyEDA) | [docs/mega2560.md](docs/mega2560.md) |
-| vídeo tutorial (mudo): roteiro cena a cena e legendas | [docs/roteiro-video.md](docs/roteiro-video.md) · [docs/legendas-video.srt](docs/legendas-video.srt) |
+| vídeo tutorial (mudo): o vídeo, o roteiro cena a cena e as legendas | [docs/video-tutorial.mp4](docs/video-tutorial.mp4) · [docs/roteiro-video.md](docs/roteiro-video.md) · [docs/legendas-video.srt](docs/legendas-video.srt) |
 
 ## Rodar
 
