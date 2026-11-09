@@ -451,6 +451,11 @@ $("#exemplo").addEventListener("change", async (e) => {
   e.target.value = "";
   try {
     abrirTexto(await exemplo(n), `${n}.cj`);
+    // o exemplo que lê com CJPHONEHOME chega com níveis de procurado no campo de entrada,
+    // senão ele roda sozinho e morre na primeira leitura
+    if (/\bCJPHONEHOME\b/.test(editor.valor()) && !$("#entrada").value.trim()) {
+      $("#entrada").value = "0\n2\n4\n6\n";
+    }
   } catch (erro) {
     return avisar(`Não deu para abrir examples/${n}.cj: ${erro.message}`);
   }
