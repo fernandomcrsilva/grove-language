@@ -120,34 +120,11 @@ li span{color:var(--suave); font-size:.94em}
 }
 .cheats .sig{font-size:.9em; color:var(--suave); text-align:right; white-space:nowrap}
 
-/* números grandes */
-.numeros{display:grid; gap:var(--gap); grid-template-columns:repeat(2,1fr)}
-@media (min-width:56rem){.numeros{grid-template-columns:repeat(4,1fr)}}
-.numeros b{
-  display:block; font-family:var(--gta); font-size:clamp(3rem,8vw,6.5rem); line-height:.9; color:var(--ouro);
-  font-variant-numeric:tabular-nums;
-}
-.numeros span{display:block; color:var(--suave); font-size:clamp(.8rem,1.1vw,1rem); margin-top:.3rem}
-
-/* barra comparativa */
-.barras{display:grid; gap:.7rem; margin-top:var(--gap)}
-.barra{display:grid; grid-template-columns:6.2rem 1fr auto; gap:.8rem; align-items:center; font-family:var(--mono); font-size:clamp(.78rem,1vw,.95rem)}
-.trilho{height:.95rem; border-radius:99px; background:rgba(35,48,41,.8); overflow:hidden}
-.trilho i{display:block; height:100%; border-radius:99px; transform-origin:left center}
-.trilho i.antes{background:linear-gradient(90deg,var(--vermelho),#8e2b2e)}
-.trilho i.depois{background:linear-gradient(90deg,var(--grove),var(--dinheiro))}
-
 /* HUD de estrelas */
 .hud{display:flex; gap:.45rem; align-items:center}
 .hud svg{width:clamp(1.5rem,3.6vw,2.6rem); height:auto}
 .estrela{fill:none; stroke:var(--suave); stroke-width:1.4; opacity:.45}
 .estrela.on{fill:var(--ouro); stroke:var(--ouro); opacity:1}
-.grana{font-family:var(--gta); font-size:clamp(1.3rem,3.2vw,2.4rem); color:var(--dinheiro)}
-
-/* divisores de seção */
-.divisor{align-content:center; justify-items:start}
-.divisor h2{font-size:clamp(2.2rem,7.6vw,5.6rem); color:var(--texto)}
-.divisor .conta{font-family:var(--gta); font-size:clamp(3rem,10vw,8rem); color:rgba(226,165,41,.18); line-height:.8; margin:0 0 .2em}
 
 /* diagramas svg */
 .fig{width:100%; height:auto; overflow:visible}
@@ -181,13 +158,10 @@ li span{color:var(--suave); font-size:.94em}
 @keyframes palavra{from{opacity:0; transform:translateY(.45em) rotate(2deg); filter:blur(7px)}
   to{opacity:1; transform:none; filter:none}}
 @keyframes cortina{from{opacity:1; clip-path:inset(0 100% 0 0)}to{opacity:1; clip-path:inset(0)}}
-@keyframes cresce{from{opacity:1; transform:scaleX(0)}to{opacity:1; transform:scaleX(1)}}
 @keyframes traco{from{stroke-dashoffset:1}to{stroke-dashoffset:0}}
 /* só opacidade: uma animação de transform sobrescreveria o atributo transform do SVG */
 @keyframes pulsa{0%,100%{opacity:1}50%{opacity:.55}}
-@keyframes giroflex{0%,100%{fill:var(--policia)}50%{fill:var(--vermelho)}}
 @keyframes piscaCursor{0%,100%{opacity:1}50%{opacity:0}}
-@keyframes marquee{to{transform:translateX(-50%)}}
 
 .js .slide:not(.is-visible) [data-anim]{opacity:0}
 .js .slide.is-visible [data-anim]{
@@ -200,27 +174,20 @@ li span{color:var(--suave); font-size:.94em}
 .js .slide.is-visible [data-anim="gira"]{animation-name:gira; animation-duration:.9s}
 .js .slide.is-visible [data-anim="palavra"]{animation-name:palavra; animation-duration:.85s}
 .js .slide.is-visible [data-anim="cortina"]{animation-name:cortina; animation-duration:1s}
-.js .slide.is-visible [data-anim="cresce"]{animation-name:cresce; animation-duration:1.05s}
-.js .slide:not(.is-visible) [data-anim="cresce"]{opacity:1; transform:scaleX(0)}
 .js .slide:not(.is-visible) [data-anim="cortina"]{opacity:1; clip-path:inset(0 100% 0 0)}
 .js [data-anim="traco"]{stroke-dasharray:1; stroke-dashoffset:1; opacity:1}
 .js .slide.is-visible [data-anim="traco"]{
   animation:traco 1.05s cubic-bezier(.4,.1,.2,1) both; animation-delay:calc(var(--i,0) * 85ms);
 }
 .js .slide.is-visible .estrela.on{animation:pulsa 1.9s ease-in-out infinite; animation-delay:calc(var(--i,0) * 160ms)}
-.js .slide.is-visible .luz{animation:giroflex 1s steps(1) infinite}
 .cursor{display:inline-block; width:.6ch; background:var(--grove); color:transparent}
 .js .slide.is-visible .cursor{animation:piscaCursor 1s steps(1) infinite}
-.faixa{overflow:hidden; mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
-.faixa div{display:flex; width:max-content; gap:2.4rem; font-family:var(--mono); color:var(--suave);
-  font-size:clamp(.7rem,.95vw,.88rem); letter-spacing:.18em; white-space:nowrap}
-.js .faixa div{animation:marquee 28s linear infinite}
 
 /* imprimir / salvar em PDF: uma página 16:9 por slide, tudo revelado */
 @media print{
   @page{size:13.333in 7.5in; margin:0}
   html,body{height:auto; background:var(--fundo); print-color-adjust:exact; -webkit-print-color-adjust:exact}
-  .fundo,.vinheta,#progresso,#passo,#ajuda,.faixa{display:none}
+  .fundo,.vinheta,#progresso,#passo,#ajuda{display:none}
   .slide{
     height:7.5in; max-width:none; overflow:hidden; break-after:page; page-break-after:always;
     print-color-adjust:exact; -webkit-print-color-adjust:exact;
@@ -230,7 +197,6 @@ li span{color:var(--suave); font-size:.94em}
   .duas{grid-template-columns:1fr 1fr; align-items:start}
   .duas.larga-esq{grid-template-columns:1.25fr .9fr}
   .cheats{grid-template-columns:1fr 1fr}
-  .numeros{grid-template-columns:repeat(4,1fr)}
   .js .slide [data-anim],.js .slide.is-visible [data-anim]{
     animation:none !important; opacity:1 !important; transform:none !important;
     clip-path:none !important; stroke-dashoffset:0 !important; filter:none !important;
@@ -239,12 +205,12 @@ li span{color:var(--suave); font-size:.94em}
 
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
-  .fundo::before,.faixa div{animation:none}
+  .fundo::before{animation:none}
   .js .slide [data-anim],.js .slide.is-visible [data-anim]{
     animation:none !important; opacity:1 !important; transform:none !important;
     clip-path:none !important; stroke-dashoffset:0 !important; filter:none !important;
   }
-  .js .slide.is-visible .estrela.on,.js .slide.is-visible .luz,.js .slide.is-visible .cursor{animation:none}
+  .js .slide.is-visible .estrela.on,.js .slide.is-visible .cursor{animation:none}
 }
 </style>
 </head>
@@ -252,7 +218,7 @@ li span{color:var(--suave); font-size:.94em}
 <div class="fundo" aria-hidden="true"></div>
 <div class="vinheta" aria-hidden="true"></div>
 <div id="progresso" aria-hidden="true"></div>
-<div id="passo" aria-hidden="true">01 / 18</div>
+<div id="passo" aria-hidden="true">01 / 12</div>
 <div id="ajuda" aria-hidden="true">← → navega</div>
 
 <main>
@@ -264,7 +230,6 @@ li span{color:var(--suave); font-size:.94em}
     <span data-anim="palavra" style="--i:1">G</span><span data-anim="palavra" style="--i:2">R</span><span data-anim="palavra" style="--i:3">O</span><span data-anim="palavra" style="--i:4">V</span><span data-anim="palavra" style="--i:5">E</span>
   </h1>
   <p class="sub" data-anim style="--i:6" >A linguagem de programação em que as palavras-chave são os <strong>cheats de GTA San Andreas</strong>.</p>
-  <p class="nota" data-anim style="--i:7">Arquivos <code>.cj</code>, de Carl Johnson. Só precisa de Python 3.10, sem instalar mais nada.</p>
   <div class="hud" data-anim="zoom" style="--i:8; margin-top:var(--gap)" aria-label="Seis estrelas de procurado">
     <svg viewBox="0 0 24 24"><path class="estrela on" style="--i:0" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/></svg>
     <svg viewBox="0 0 24 24"><path class="estrela on" style="--i:1" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/></svg>
@@ -292,7 +257,7 @@ li span{color:var(--suave); font-size:.94em}
     <div data-anim="esquerda" style="--i:6"><span class="cheat">FULLCLIP</span><span class="sig">true</span></div>
     <div data-anim="direita" style="--i:6"><span class="cheat">GHOSTTOWN</span><span class="sig">false</span></div>
   </div>
-  <p class="nota" data-anim style="--i:7">O resto é igual ao C: <code>{ }</code> <code>;</code> <code>( )</code> <code>! &amp;&amp; ||</code>. Três tipos: inteiro, string e booleano, sem conversão automática.</p>
+  <p class="nota" data-anim style="--i:7">Cada cheat vira uma palavra da linguagem. O resto é igual ao C: chaves, ponto e vírgula e parênteses. Três tipos: inteiro, string e booleano.</p>
 </section>
 
 <!-- 3 — um programa -->
@@ -315,7 +280,7 @@ li span{color:var(--suave); font-size:.94em}
 <pre><span class="c">$</span> python -m grove examples/fatorial.cj
 <span class="g">120</span></pre>
       </div>
-      <p class="nota" style="margin-top:var(--gap)">Acaba como no jogo: <em>Mission passed!</em> no sucesso, <span style="color:var(--vermelho)">Wasted</span> no léxico, <span style="color:var(--policia)">Busted</span> no semântico, com a fala do jogo se os <code>.wav</code> estiverem na pasta.</p>
+      <p class="nota" style="margin-top:var(--gap)">Declara duas variáveis, repete a multiplicação com <span class="cheat">KANGAROO</span> e imprime o resultado com <span class="cheat">HELLOLADIES</span>. Acaba como no jogo: <em>Mission passed!</em> ou <span style="color:var(--vermelho)">Wasted</span>.</p>
     </div>
   </div>
 </section>
@@ -368,7 +333,7 @@ li span{color:var(--suave); font-size:.94em}
     <text x="923" y="294" text-anchor="middle" data-anim="direita" style="--i:12">Arduino C++</text>
     <text class="rot" x="923" y="310" text-anchor="middle" data-anim="direita" style="--i:12">--mega</text>
   </svg>
-  <p class="nota" data-anim style="--i:13; margin-top:var(--gap)">Cada flag para o compilador numa etapa: <code>--tokens</code>, <code>--ast</code>, <code>--simbolos</code>, <code>--ir</code>. Dá para combinar.</p>
+  <p class="nota" data-anim style="--i:13; margin-top:var(--gap)">Três etapas conferem o programa. Se ele passa, a mesma árvore pode ser executada ou traduzida para três formatos.</p>
 </section>
 
 <!-- 5 — léxico -->
@@ -389,8 +354,8 @@ LINHA:COL  TIPO     LEXEMA
 <span class="r">erro: linha 2, coluna 13: caractere inesperado '$'</span></pre>
     </div>
     <ul data-anim="direita" style="--i:3">
-      <li><span class="pino">◆</span><span><b>Cinco classes</b>Cheat, pontuação e operador, número, string e identificador. Duas tabelas dão conta das primeiras.</span></li>
-      <li><span class="pino">◆</span><span><b>Linha e coluna em cada token</b>É o que faz o erro apontar o lugar certo, aqui e nas etapas seguintes.</span></li>
+      <li><span class="pino azul">◆</span><span><b>O que faz</b>Separa o texto em pedaços: cheats, números, textos, nomes e símbolos.</span></li>
+      <li><span class="pino">◆</span><span><b>Linha e coluna em cada token</b>O erro aponta o lugar certo em todas as etapas.</span></li>
       <li><span class="pino">◆</span><span><b>Operador de dois caracteres primeiro</b>Senão <code>!=</code> viraria <code>!</code> seguido de <code>=</code>.</span></li>
     </ul>
   </div>
@@ -405,18 +370,14 @@ LINHA:COL  TIPO     LEXEMA
 <pre><span class="c">$</span> python -m grove examples/erro_digitacao.cj
 <span class="r">erro: linha 2, coluna 1: 'HESOYM' não é um cheat
 da Grove; <span class="g">você quis dizer HESOYAM?</span></span>
-<span class="r">erro: linha 4, coluna 1: 'TURNUPTHEHEET' não é um
-cheat da Grove; <span class="g">você quis dizer TURNUPTHEHEAT?</span></span>
-<span class="r">erro: linha 5, coluna 5: 'HELLOLADYS' não é um cheat
-da Grove; <span class="g">você quis dizer HELLOLADIES?</span></span>
 <span class="r">erro: linha 7, coluna 19: esperado expressão,
 encontrado ')'</span>
-<span class="r">4 erros sintáticos</span></pre>
+<span class="r">…</span></pre>
     </div>
     <ul data-anim="direita" style="--i:3">
-      <li><span class="pino">◆</span><span><b>Descida recursiva, LL(1)</b>Um método por regra da gramática. Cada regra decide olhando só o próximo token.</span></li>
-      <li><span class="pino">◆</span><span><b>Precedência na cadeia de regras</b><code>ou → e → igualdade → comparação → termo → fator → unário → primário</code>. Tudo associativo à esquerda.</span></li>
-      <li><span class="pino ouro">◆</span><span><b>Recuperação e sugestão</b>O parser continua depois do erro e sugere o cheat mais parecido.</span></li>
+      <li><span class="pino azul">◆</span><span><b>O que faz</b>Confere se os pedaços estão na ordem certa e monta a árvore do programa.</span></li>
+      <li><span class="pino">◆</span><span><b>Descida recursiva, LL(1)</b>Um método por regra, olhando só o próximo token.</span></li>
+      <li><span class="pino ouro">◆</span><span><b>Recuperação e sugestão</b>Continua depois do erro e sugere o cheat mais parecido.</span></li>
     </ul>
   </div>
 </section>
@@ -435,26 +396,22 @@ r     inteiro   0       3:9        r      sim
 <span class="c">$</span> python -m grove examples/erro_semantico.cj
 <span class="r">erro: linha 4, coluna 1: 'grana' é inteiro,
 não pode receber string</span>
-<span class="r">erro: linha 5, coluna 1: condição do TURNUPTHEHEAT
-exige booleano, recebeu inteiro</span>
 <span class="r">erro: linha 6, coluna 17: variável 'respeito'
 não declarada</span>
-<span class="r">erro: linha 8, coluna 1: GOODBYECRUELWORLD
-fora de laço</span>
-<span class="r">4 erros semânticos</span></pre>
+<span class="r">…</span></pre>
     </div>
     <ul data-anim="direita" style="--i:3">
-      <li><span class="pino">◆</span><span><b>Tabela de símbolos e AST anotada</b>Uma pilha de escopos, um por bloco. Cada expressão ganha um tipo, e é dessa árvore que saem a TAC, o Python e o C++.</span></li>
-      <li><span class="pino">◆</span><span><b>Três tipos, sem conversão</b>Inteiro, string e booleano. <code>1 + "a"</code> é erro. Sem float, para o Python e a placa darem a mesma resposta.</span></li>
-      <li><span class="pino ouro">◆</span><span><b>Todos os erros de uma vez</b>Percorre o programa inteiro antes de reclamar. Não para no primeiro.</span></li>
+      <li><span class="pino azul">◆</span><span><b>O que faz</b>Confere o sentido: variável declarada, tipo certo, <code>break</code> dentro de laço.</span></li>
+      <li><span class="pino">◆</span><span><b>Tabela de símbolos e AST anotada</b>Um escopo por bloco; cada expressão ganha um tipo.</span></li>
+      <li><span class="pino ouro">◆</span><span><b>Todos os erros de uma vez</b>Não para no primeiro.</span></li>
     </ul>
   </div>
 </section>
 
-<!-- 8 — TAC -->
-<section id="s8" class="slide" aria-label="Código intermediário">
+<!-- 8 — TAC e otimização -->
+<section id="s8" class="slide" aria-label="Código intermediário e otimização">
   <p class="marca" data-anim style="--i:0"><b>07</b> · etapa 4</p>
-  <h2 data-anim="cortina" style="--i:1">Código de três endereços</h2>
+  <h2 data-anim="cortina" style="--i:1">TAC: treze instruções viram quatro</h2>
   <div class="duas">
     <div class="painel" data-anim="esquerda" style="--i:2">
 <pre><span class="c">$</span> python -m grove examples/otimizacao.cj --ir
@@ -472,46 +429,25 @@ fora de laço</span>
 12   goto L2
 13 L3:</pre>
     </div>
-    <ul data-anim="direita" style="--i:3">
-      <li><span class="pino">◆</span><span><b>Uma quádrupla por instrução</b><code>Quad(op, arg1, arg2, result)</code>: uma operação por linha, numa lista sem blocos, com temporários <code>t1…tn</code> e rótulos <code>L1…Ln</code>.</span></li>
-      <li><span class="pino">◆</span><span><b>Curto-circuito explícito</b><code>&amp;&amp;</code> e <code>||</code> viram desvios; <code>break</code> vira um <code>goto</code> para o fim do laço.</span></li>
-      <li><span class="pino">◆</span><span><b>Executável</b>A TAC também roda. É assim que provamos que ela faz o mesmo que o interpretador.</span></li>
-    </ul>
-  </div>
-</section>
-
-<!-- 9 — otimização -->
-<section id="s9" class="slide" aria-label="Otimização">
-  <p class="marca" data-anim style="--i:0"><b>08</b> · etapa 4b</p>
-  <h2 data-anim="cortina" style="--i:1">Treze instruções viram quatro</h2>
-  <div class="duas">
-    <div data-anim="esquerda" style="--i:2">
-      <div class="numeros" style="grid-template-columns:repeat(2,1fr)">
-        <div><b data-conta="13" data-de="13">13</b><span>instruções antes</span></div>
-        <div><b data-conta="4" data-de="13" style="color:var(--grove)">4</b><span>depois</span></div>
-      </div>
-      <div class="barras">
-        <div class="barra"><span>antes</span><span class="trilho"><i class="antes" data-anim="cresce" style="--i:3"></i></span><span>13</span></div>
-        <div class="barra"><span>depois</span><span class="trilho"><i class="depois" data-anim="cresce" style="--i:4; width:30.7%"></i></span><span>4</span></div>
-      </div>
-      <div class="painel" data-anim style="--i:5; margin-top:var(--gap)">
-<pre> 1   segundos = <span class="n">3600</span>
+    <div data-anim="direita" style="--i:3">
+      <div class="painel">
+<pre><span class="c"># otimizado</span>
+ 1   segundos = <span class="n">3600</span>
  2   dobro = <span class="n">7200</span>
  3   print <span class="n">7200</span>
  4   print <span class="s">"uma vez"</span></pre>
       </div>
+      <ul style="margin-top:var(--gap)">
+        <li><span class="pino azul">◆</span><span><b>O que faz</b>Reescreve o programa em passos simples, uma conta por linha.</span></li>
+        <li><span class="pino">◆</span><span><b>Otimização</b>Contas feitas antes de rodar e código que nunca executa removido.</span></li>
+      </ul>
     </div>
-    <ul data-anim="direita" style="--i:6">
-      <li><span class="pino">◆</span><span><b>Dobra de constantes</b><code>60 * 60</code> é resolvido na compilação: duas contas saem do programa.</span></li>
-      <li><span class="pino">◆</span><span><b>Propagação e simplificação</b>Três valores seguem adiante sem temporário, e <code>dobro + 0</code> é só <code>dobro</code>.</span></li>
-      <li><span class="pino">◆</span><span><b>Desvios e código morto</b>Dois desvios já têm resposta conhecida. Oito instruções que ninguém alcança saem fora.</span></li>
-    </ul>
   </div>
 </section>
 
-<!-- 10 — geração de código -->
-<section id="s10" class="slide" aria-label="Geração de código">
-  <p class="marca" data-anim style="--i:0"><b>09</b> · etapa 5</p>
+<!-- 9 — geração de código -->
+<section id="s9" class="slide" aria-label="Geração de código">
+  <p class="marca" data-anim style="--i:0"><b>08</b> · etapa 5</p>
   <h2 data-anim="cortina" style="--i:1">Duas linguagens de saída</h2>
   <div class="duas">
     <div data-anim="esquerda" style="--i:2">
@@ -524,7 +460,7 @@ r = <span class="n">1</span>
     n = n - <span class="n">1</span>
 <span class="k">print</span>(r)</pre>
       </div>
-      <p class="nota" style="margin-top:.7rem">Sai da AST, não da TAC: o Python não tem <code>goto</code>. Dá para rodar na hora: <code>--python | python3</code>.</p>
+      <p class="nota" style="margin-top:.7rem">A árvore vira um programa Python que roda direto. Sai da AST, não da TAC, porque o Python não tem <code>goto</code>.</p>
     </div>
     <div data-anim="direita" style="--i:3">
       <h3>Arduino C++ · <code>--mega</code></h3>
@@ -541,40 +477,25 @@ r = <span class="n">1</span>
   }
 }</pre>
       </div>
-      <p class="nota" style="margin-top:.7rem">Mesma árvore, outro alvo: o C++ do Mega 2560, com a serial no lugar do teclado.</p>
+      <p class="nota" style="margin-top:.7rem">A mesma árvore vira C++ para o Arduino Mega 2560. <span class="cheat">CJPHONEHOME</span> lê da serial em vez do teclado.</p>
     </div>
   </div>
 </section>
 
-<!-- 11 — grove online -->
-<section id="s11" class="slide" aria-label="Grove Online">
-  <p class="marca" data-anim style="--i:0"><b>10</b> · no navegador</p>
+<!-- 10 — grove online -->
+<section id="s10" class="slide" aria-label="Grove Online">
+  <p class="marca" data-anim style="--i:0"><b>09</b> · no navegador</p>
   <h2 data-anim="cortina" style="--i:1">Grove Online</h2>
-  <div class="duas larga-esq">
-    <ul data-anim="esquerda" style="--i:2">
-      <li><span class="pino azul">◆</span><span><b>O compilador em Python roda no navegador</b>O Pyodide carrega o pacote <code>grove</code> na página. Nada é instalado, nenhum servidor compila.</span></li>
-      <li><span class="pino azul">◆</span><span><b>Por dentro do compilador</b>Abas de tokens, AST, símbolos, TAC, Python e C++.</span></li>
-      <li><span class="pino ouro">◆</span><span><b>HUD do jogo como feedback</b>Uma estrela de procurado por erro, $250.000 por missão cumprida.</span></li>
-    </ul>
-    <div data-anim="direita" style="--i:3">
-      <div class="painel">
-        <p class="marca" style="margin-bottom:.6rem">no ar em</p>
-        <p class="cheat" style="font-size:clamp(1rem,2.3vw,1.5rem); word-break:break-all">grove.heybrain.uk</p>
-        <div class="hud" style="margin-top:1rem">
-          <svg viewBox="0 0 24 24"><path class="estrela on" style="--i:0" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/></svg>
-          <svg viewBox="0 0 24 24"><path class="estrela on" style="--i:1" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/></svg>
-          <svg viewBox="0 0 24 24"><path class="estrela" d="M12 2.4l2.9 6.2 6.8.8-5 4.7 1.3 6.7L12 17.7 5.9 20.8l1.3-6.7-5-4.7 6.8-.8z"/></svg>
-        </div>
-        <p class="grana" style="margin:.5rem 0 0">$250.000</p>
-        <p class="nota" style="margin-top:.8rem">Ctrl+Enter executa. Laço infinito para em 5 s. Compartilhar copia um link com o código dentro.</p>
-      </div>
-    </div>
-  </div>
+  <ul data-anim style="--i:2">
+    <li><span class="pino azul">◆</span><span><b>O compilador roda no navegador</b>O Pyodide carrega o pacote <code>grove</code> na página. Sem instalar nada, sem servidor.</span></li>
+    <li><span class="pino azul">◆</span><span><b>Por dentro do compilador</b>Abas de tokens, AST, símbolos, TAC, Python e C++.</span></li>
+    <li><span class="pino ouro">◆</span><span><b>HUD do jogo como feedback</b>Uma estrela de procurado por erro, $250.000 por missão cumprida. No ar em <span class="cheat">grove.heybrain.uk</span>.</span></li>
+  </ul>
 </section>
 
-<!-- 12 — a ponte com o GTA -->
-<section id="s12" class="slide" aria-label="O GTA acendendo os LEDs">
-  <p class="marca" data-anim style="--i:0"><b>11</b> · a volta completa</p>
+<!-- 11 — a ponte com o GTA -->
+<section id="s11" class="slide" aria-label="O GTA acendendo os LEDs">
+  <p class="marca" data-anim style="--i:0"><b>10</b> · a volta completa</p>
   <h2 data-anim="cortina" style="--i:1">O jogo acendendo os LEDs</h2>
   <svg class="fig" viewBox="0 0 1000 220" role="img" aria-label="Do script CLEO dentro do GTA, pela ponte em Python, até o Mega 2560">
     <rect class="caixa ouro" x="2" y="60" width="236" height="90" data-anim="esquerda" style="--i:2"/>
@@ -606,38 +527,23 @@ r = <span class="n">1</span>
   </div>
 </section>
 
-<!-- 13 — números -->
-<section id="s13" class="slide" aria-label="Números do projeto">
-  <p class="marca" data-anim style="--i:0"><b>12</b> · o que está pronto</p>
-  <h2 data-anim="cortina" style="--i:1">O projeto em números</h2>
-  <div class="numeros">
-    <div data-anim="zoom" style="--i:2"><b data-conta="100">100</b><span>testes passando</span></div>
-    <div data-anim="zoom" style="--i:3"><b data-conta="2041">2041</b><span>linhas de Python</span></div>
-    <div data-anim="zoom" style="--i:4"><b data-conta="0">0</b><span>dependências</span></div>
-    <div data-anim="zoom" style="--i:5"><b data-conta="4">4</b><span>saídas: executa, TAC, Python, C++</span></div>
-  </div>
-  <div class="faixa" data-anim style="--i:6; margin-top:var(--gap)">
-    <div><span>LEXER · PARSER · SEMANTIC · IR · OTIMIZADOR · CODEGEN PY · CODEGEN INO · PLAYGROUND · HUD · PONTE GTA ·</span><span>LEXER · PARSER · SEMANTIC · IR · OTIMIZADOR · CODEGEN PY · CODEGEN INO · PLAYGROUND · HUD · PONTE GTA ·</span></div>
-  </div>
-  <p class="nota" data-anim style="--i:7; margin-top:var(--gap)">Dez exemplos, cinco só para dar erro. Mais dezenove mínimos, um por erro do compilador. Documentação por etapa em <code>docs/</code>.</p>
-</section>
 
-<!-- 14 — encerramento -->
-<section id="s14" class="slide" aria-label="Encerramento">
-  <p class="marca" data-anim style="--i:0">mission passed</p>
-  <h2 data-anim="cortina" style="--i:1; color:var(--dinheiro)">Respeito +<span data-conta="250000">250.000</span></h2>
-  <p class="sub" data-anim style="--i:2">Escreva um programa com os cheats e rode no navegador. Não precisa instalar nada.</p>
+<!-- 12 — encerramento -->
+<section id="s12" class="slide" aria-label="Encerramento">
+  <p class="marca" data-anim style="--i:0">obrigado</p>
+  <h2 data-anim="cortina" style="--i:1; color:var(--dinheiro)">Mission passed!</h2>
+  <p class="sub" data-anim style="--i:2">Escreva um programa com os cheats e rode no navegador, sem instalar nada.</p>
   <div class="duas" style="margin-top:var(--gap)">
-    <div class="painel" data-anim="esquerda" style="--i:3">
+    <div class="painel" data-anim="esquerda" style="--i:6">
       <p class="marca" style="margin-bottom:.4rem">o app</p>
       <p class="cheat" style="font-size:clamp(1rem,2.1vw,1.4rem); word-break:break-all">grove.heybrain.uk</p>
     </div>
-    <div class="painel" data-anim="direita" style="--i:4">
+    <div class="painel" data-anim="direita" style="--i:7">
       <p class="marca" style="margin-bottom:.4rem">o código</p>
       <p class="cheat" style="font-size:clamp(.85rem,1.6vw,1.1rem); word-break:break-all">github.com/fernandomcrsilva/grove-language</p>
     </div>
   </div>
-  <p class="nota" data-anim style="--i:5; margin-top:var(--gap)">Gabriel Lacerda · Gabriel Mendonça · Fernando Mendonça</p>
+  <p class="nota" data-anim style="--i:8; margin-top:var(--gap)">Gabriel Lacerda · Gabriel Mendonça · Fernando Mendonça</p>
 </section>
 
 </main>
