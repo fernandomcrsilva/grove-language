@@ -45,6 +45,7 @@ texto ─léxico─▶ tokens ─sintático─▶ AST ─semântico─▶ AST an
 | interpretador | [docs/interpretador.md](docs/interpretador.md) |
 | catálogo de erros: um exemplo mínimo de cada um | [docs/erros.md](docs/erros.md) |
 | artigo: o projeto inteiro em texto corrido | [docs/artigo.md](docs/artigo.md) |
+| artigo no formato IEEE (LaTeX, compila no Overleaf com o template IEEE Conference) | [docs/artigo-ieee.tex](docs/artigo-ieee.tex) |
 | código de três endereços e otimização | [docs/codigo-intermediario.md](docs/codigo-intermediario.md) |
 | Python e C++ do Arduino | [docs/geracao-de-codigo.md](docs/geracao-de-codigo.md) |
 | O GTA acendendo os LEDs: o cheat `CJPHONEHOME`, o script CLEO, a ponte | [docs/gta.md](docs/gta.md) |
