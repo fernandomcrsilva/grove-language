@@ -12,9 +12,13 @@
     "directory": ".",
     "html_handling": "auto-trailing-slash"
   },
-  // a URL groveonline.heybrain.workers.dev está desligada (04/11/2026): o site
-  // atende só no domínio próprio. true aqui a religa no próximo deploy.
-  "workers_dev": false,
+  // a URL groveonline.heybrain.workers.dev voltou a ficar ligada (16/11/2026): é o
+  // segundo endereço do site, para a rede que bloqueia grove.heybrain.uk (a da
+  // faculdade). false aqui a desliga no próximo deploy.
+  "workers_dev": true,
+  // sem esta linha, as URLs de versão (<id>-groveonline.heybrain.workers.dev)
+  // ligariam junto com o workers.dev
+  "preview_urls": false,
   // logs no painel: ligado em 04/11/2026; sem esta linha o deploy desliga
   "observability": { "enabled": true },
   "routes": [{ "pattern": "grove.heybrain.uk", "custom_domain": true }]

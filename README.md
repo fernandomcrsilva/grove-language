@@ -88,6 +88,7 @@ O código do app está em `playground/`: `index.html` (a página), `estilo.css` 
 Onde abrir:
 
 - No ar: <https://grove.heybrain.uk/>, na Cloudflare (ver abaixo)
+- Se a rede bloquear esse endereço (a da faculdade bloqueia): <https://groveonline.heybrain.workers.dev/>, o mesmo site no endereço da própria Cloudflare
 - Local: `python -m http.server` na raiz do repositório e abrir <http://localhost:8000/playground/>
 - Sem internet (apresentação numa rede que bloqueia o CDN): baixe o Pyodide uma vez e abra com `?pyodide=pyodide/`
 
