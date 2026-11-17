@@ -1,0 +1,322 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazilian]{babel}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{url}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+% --- Listagens: Grove e saída de terminal ---------------------------------
+\lstdefinelanguage{Grove}{
+  morekeywords={HESOYAM,TURNUPTHEHEAT,BRINGITON,TURNDOWNTHEHEAT,KANGAROO,
+    GOODBYECRUELWORLD,HELLOLADIES,CJPHONEHOME,FULLCLIP,GHOSTTOWN},
+  sensitive=true,
+  morecomment=[l]{\#},
+  morestring=[b]"
+}
+\lstset{
+  basicstyle=\ttfamily\scriptsize,
+  keywordstyle=\bfseries\color{blue!60!black},
+  commentstyle=\itshape\color{gray},
+  stringstyle=\color{red!50!black},
+  columns=fullflexible,
+  keepspaces=true,
+  breaklines=true,
+  breakindent=1.5em,
+  frame=single,
+  framesep=3pt,
+  rulecolor=\color{gray!50},
+  xleftmargin=4pt,
+  xrightmargin=4pt,
+  aboveskip=6pt,
+  belowskip=6pt,
+  showstringspaces=false,
+  upquote=true,
+  extendedchars=true,
+  literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+           {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+           {ã}{{\~a}}1 {õ}{{\~o}}1 {Ã}{{\~A}}1 {Õ}{{\~O}}1
+           {â}{{\^a}}1 {ê}{{\^e}}1 {ô}{{\^o}}1 {à}{{\`a}}1
+           {ç}{{\c{c}}}1 {Ç}{{\c{C}}}1
+           {→}{{$\rightarrow$}}1 {·}{{$\cdot$}}1 {…}{{\ldots}}1
+}
+
+\begin{document}
+\renewcommand\IEEEkeywordsname{Palavras-chave}
+
+\title{Grove: uma linguagem de programação com os cheats de GTA San Andreas}
+
+\author{\IEEEauthorblockN{Gabriel Lacerda}
+\IEEEauthorblockA{\textit{Engenharia de Computação} \\
+\textit{IBMEC RJ}\\
+Rio de Janeiro, Brasil \\
+gabriellacerdadafontoura@gmail.com}
+\and
+\IEEEauthorblockN{Gabriel Mendonça}
+\IEEEauthorblockA{\textit{Engenharia de Computação} \\
+\textit{IBMEC RJ}\\
+Rio de Janeiro, Brasil}
+\and
+\IEEEauthorblockN{Fernando Mendonça}
+\IEEEauthorblockA{\textit{Engenharia de Computação} \\
+\textit{IBMEC RJ}\\
+Rio de Janeiro, Brasil}
+}
+
+\maketitle
+
+\begin{abstract}
+Este artigo descreve a Grove, uma linguagem de programação cujas dez palavras reservadas são cheats de GTA San Andreas, e o compilador construído para ela. O compilador é escrito em Python, sem nenhuma dependência externa, e percorre o caminho completo: análise léxica, análise sintática por descida recursiva, análise semântica com tabela de símbolos, geração de código de três endereços, otimização e dois geradores de código final: Python e C++ para Arduino. O mesmo programa pode ser executado por um interpretador que percorre a árvore, pela máquina que executa o código de três endereços ou pelo Python gerado, e os três concordaram em 15.000 programas gerados aleatoriamente. O compilador também roda no navegador, por Pyodide, e o código gerado para o Arduino foi gravado num Mega 2560 ligado ao jogo, acendendo LEDs conforme o nível de procurado do jogador.
+\end{abstract}
+
+\begin{IEEEkeywords}
+compiladores, análise léxica, análise sintática, análise semântica, código de três endereços, geração de código
+\end{IEEEkeywords}
+
+% ===========================================================================
+\section{Introdução}
+
+Uma disciplina de Compiladores pede que o aluno percorra o pipeline inteiro, da primeira letra do arquivo-fonte até o código que a máquina executa~\cite{aho}. O conteúdo é o mesmo qualquer que seja a linguagem inventada para o exercício, mas a escolha do vocabulário muda quem consegue acompanhar: palavras-chave arbitrárias obrigam quem lê a decorar antes de entender.
+
+A Grove troca esse vocabulário pelos cheats de GTA San Andreas. \texttt{HESOYAM}, que no jogo dá vida e \$250.000, declara uma variável. \texttt{KANGAROO}, o pulo gigante, é o laço. \texttt{HELLOLADIES} imprime. Quem jogou já digitou essas palavras dezenas de vezes, então a linguagem se lê quase sem apresentação, e um tema lúdico não diminui o trabalho: o pipeline é feito do mesmo jeito. Os arquivos têm extensão \texttt{.cj}, de Carl Johnson, o protagonista do jogo.
+
+O que foi construído:
+\begin{itemize}
+\item um compilador completo, em Python 3.10, com 2.041 linhas e \textbf{nenhuma dependência externa}, só a biblioteca padrão;
+\item três formas de executar o mesmo programa: interpretador sobre a árvore sintática, máquina de código de três endereços e o Python gerado;
+\item dois geradores de código: Python e C++ para Arduino;
+\item um ambiente web, o Grove Online, em que o compilador roda dentro do navegador;
+\item uma ponte com o jogo: o nível de procurado do GTA acende LEDs num Arduino Mega 2560.
+\end{itemize}
+
+As seções seguintes descrevem a linguagem (Seção~\ref{sec:linguagem}), cada etapa do compilador (Seção~\ref{sec:compilador}), o que foi feito fora do terminal (Seção~\ref{sec:fora}) e os resultados medidos (Seção~\ref{sec:resultados}).
+
+% ===========================================================================
+\section{A linguagem}\label{sec:linguagem}
+
+A Grove tem dez palavras reservadas, todas cheats da versão de PC do jogo (Tabela~\ref{tab:cheats}).
+
+\begin{table}[htbp]
+\caption{As palavras reservadas da Grove}
+\label{tab:cheats}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Escreve-se} & \textbf{Significa} & \textbf{O cheat no jogo} \\
+\midrule
+\texttt{HESOYAM x = 1;} & declara \texttt{x} & vida, colete e \$250.000 \\
+\texttt{TURNUPTHEHEAT (c)} & \texttt{if} & +2 estrelas de procurado \\
+\texttt{BRINGITON (c)} & \texttt{else if} & 6 estrelas de procurado \\
+\texttt{TURNDOWNTHEHEAT} & \texttt{else} & zera o nível de procurado \\
+\texttt{KANGAROO (c)} & \texttt{while} & pulo gigante \\
+\texttt{GOODBYECRUELWORLD;} & \texttt{break} & o personagem morre \\
+\texttt{HELLOLADIES expr;} & \texttt{print} & sex appeal no máximo \\
+\texttt{CJPHONEHOME} & lê inteiro & o personagem liga para casa \\
+\texttt{FULLCLIP} & \texttt{true} & munição infinita \\
+\texttt{GHOSTTOWN} & \texttt{false} & ruas vazias \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+O resto da sintaxe é a do C: \texttt{\{ \}} delimita bloco, \texttt{;} termina instrução, \texttt{( )} agrupa, e \texttt{!}, \texttt{\&\&} e \texttt{||} são os operadores lógicos. Blocos são sempre obrigatórios, o que elimina a ambiguidade clássica do \emph{else} pendente: não existe comando solto depois de um \texttt{if}.
+
+São três tipos, inteiro, string e booleano, sem nenhuma conversão implícita. \texttt{1 + \textquotedbl a\textquotedbl} é erro, e a condição de um \texttt{if} ou de um \texttt{while} tem de ser booleana. Não há ponto flutuante, e a ausência é deliberada: o projeto mantém quatro executores obrigados a produzir a mesma saída, o que com inteiros é exato (\texttt{7 / 2} é 3 em todos) e com ponto flutuante deixaria de ser, porque o Python usa \texttt{double} de 64 bits e o microcontrolador AVR do Mega 2560 usa \texttt{float} de 32 bits emulado em software. Também não há funções definidas pelo usuário nem estruturas de dados: o escopo do trabalho é o pipeline de compilação, não a biblioteca da linguagem.
+
+Um programa completo e sua execução:
+
+\begin{lstlisting}[language=Grove]
+# fatorial de 5 → 120
+HESOYAM n = 5;
+HESOYAM r = 1;
+KANGAROO (n > 1) {
+    r = r * n;
+    n = n - 1;
+}
+HELLOLADIES r;
+\end{lstlisting}
+
+\begin{lstlisting}
+$ python -m grove examples/fatorial.cj
+120
+\end{lstlisting}
+
+% ===========================================================================
+\section{O compilador}\label{sec:compilador}
+
+O caminho do texto até a execução tem cinco etapas, uma por arquivo em \texttt{grove/}. Cada uma pode ser inspecionada pela linha de comando, com uma flag que faz o compilador parar ali e imprimir o resultado da etapa em vez de executar o programa.
+
+\subsection{Análise léxica}
+
+O analisador léxico (\texttt{lexer.py}, 75 linhas) transforma o texto em uma lista de tokens de cinco classes: cheat, pontuação e operador, número, string e identificador. As duas primeiras saem de tabelas; as outras, de varreduras simples. Cada token guarda linha e coluna, e é essa informação que permite a todas as etapas seguintes apontar o lugar exato de um erro.
+
+Um detalhe de ordem importa: operadores de dois caracteres são tentados antes dos de um, senão \texttt{!=} seria lido como \texttt{!} seguido de \texttt{=}.
+
+\begin{lstlisting}
+$ python -m grove examples/fatorial.cj --tokens
+LINHA:COL   TIPO     LEXEMA
+2:1         VAR      HESOYAM
+2:9         IDENT    n
+2:11        ASSIGN   =
+2:13        NUMBER   5
+2:14        SEMI     ;
+\end{lstlisting}
+
+\subsection{Análise sintática}
+
+O analisador sintático (\texttt{parser.py}, 209 linhas) é uma descida recursiva direta, com um método por regra da gramática. A gramática é LL(1): cada regra decide qual alternativa seguir olhando apenas o próximo token, sem retrocesso.
+
+A precedência dos operadores não está em tabela nenhuma: está na cadeia de regras \emph{ou} $\rightarrow$ \emph{e} $\rightarrow$ \emph{igualdade} $\rightarrow$ \emph{comparação} $\rightarrow$ \emph{termo} $\rightarrow$ \emph{fator} $\rightarrow$ \emph{unário} $\rightarrow$ \emph{primário}, e a associatividade à esquerda sai de um único método genérico que todas usam.
+
+O parser \textbf{não para no primeiro erro}. Quando encontra um, anota a mensagem e entra em recuperação em modo pânico: avança até um ponto seguro (logo depois do próximo \texttt{;}, o início de outra instrução ou o \texttt{\}} que fecha o bloco) e continua analisando. Parar no início da próxima instrução, e não só depois de um \texttt{;}, evita erros em cascata: um ponto e vírgula esquecido gera um erro, não dois.
+
+Como os cheats são palavras compridas (\texttt{GOODBYECRUELWORLD} tem 17 letras), o erro mais provável de quem escreve Grove é digitar um cheat quase certo. O compilador trata esse caso: compara o identificador desconhecido com os cheats da linguagem por distância de edição de Damerau--Levenshtein~\cite{damerau}, que conta inserção, remoção, substituição e também a inversão de duas letras vizinhas, e sugere o mais próximo, com uma folga proporcional ao tamanho da palavra.
+
+\begin{lstlisting}
+$ python -m grove examples/erro_digitacao.cj
+erro: linha 2, coluna 1: 'HESOYM' não é um cheat da Grove; você quis dizer HESOYAM?
+erro: linha 4, coluna 1: 'TURNUPTHEHEET' não é um cheat da Grove; você quis dizer TURNUPTHEHEAT?
+erro: linha 5, coluna 5: 'HELLOLADYS' não é um cheat da Grove; você quis dizer HELLOLADIES?
+erro: linha 7, coluna 19: esperado expressão, encontrado ')'
+4 erros sintáticos
+\end{lstlisting}
+
+\subsection{Análise semântica}
+
+A análise semântica (\texttt{semantic.py}, 246 linhas) percorre a árvore antes de qualquer execução. A tabela de símbolos é uma pilha de escopos, um por bloco mais o global: declarar insere no topo, e ler ou atribuir procura do topo para baixo.
+
+Como as representações seguintes, o código de três endereços e o Python gerado, não têm escopo de bloco, cada símbolo também recebe um \textbf{nome único}. A primeira declaração de um nome fica com ele; as seguintes, de blocos internos ou irmãos, viram \texttt{x\_1}, \texttt{x\_2}, e assim por diante. Sem isso, um \texttt{x} declarado dentro de um bloco sobrescreveria o \texttt{x} de fora ao virar Python.
+
+\begin{lstlisting}
+$ python -m grove examples/fatorial.cj --simbolos
+NOME   TIPO      ESCOPO  LINHA:COL  ÚNICO  LIDA
+n      inteiro   0       2:9        n      sim
+r      inteiro   0       3:9        r      sim
+\end{lstlisting}
+
+Como o parser, a análise semântica junta todos os erros antes de reclamar, em ordem de posição:
+
+\begin{lstlisting}
+$ python -m grove examples/erro_semantico.cj
+erro: linha 4, coluna 1: 'grana' é inteiro, não pode receber string
+erro: linha 5, coluna 1: condição do TURNUPTHEHEAT exige booleano, recebeu inteiro
+erro: linha 6, coluna 17: variável 'respeito' não declarada
+erro: linha 8, coluna 1: GOODBYECRUELWORLD fora de laço
+4 erros semânticos
+\end{lstlisting}
+
+Além de conferir, esta etapa \textbf{anota} a árvore: cada expressão ganha seu tipo e cada variável, seu símbolo. É dessa árvore anotada que partem as duas etapas seguintes.
+
+\subsection{Código intermediário e otimização}
+
+A representação intermediária (\texttt{ir.py}, 249 linhas) é código de três endereços em quádruplas (operador, argumento~1, argumento~2, resultado): no máximo uma operação por instrução, com temporários $t_1 \ldots t_n$ e rótulos $L_1 \ldots L_n$. As estruturas de controle desaparecem, substituídas por desvios: \texttt{\&\&} e \texttt{||} viram desvios condicionais com curto-circuito explícito, e \texttt{GOODBYECRUELWORLD} vira um \texttt{goto} para o fim do laço.
+
+O código de três endereços não é só impresso: ele \textbf{executa}, numa máquina própria. É isso que permite comparar o resultado dele com o do interpretador em qualquer programa.
+
+O otimizador (\texttt{otimizador.py}, 193 linhas) aplica quatro transformações clássicas: dobra de constantes, propagação de cópias e constantes, simplificação algébrica e remoção de desvios resolvidos e de código morto. No exemplo escrito para exercitá-las, treze instruções viram quatro:
+
+\begin{lstlisting}
+$ python -m grove examples/otimizacao.cj --otimizar
+  1      segundos = 3600
+  2      dobro = 7200
+  3      print 7200
+  4      print "uma vez"
+# 13 → 4 instruções · 2 contas calculadas na compilação · 3 valores propagados · 1 simplificação algébrica · 2 desvios resolvidos · 8 instruções mortas removidas
+\end{lstlisting}
+
+\subsection{Geração de código}
+
+São dois alvos, e os dois partem da árvore anotada, não do código de três endereços. A razão é simples: nenhuma das duas linguagens de destino tem \texttt{goto} idiomático, e o \texttt{if}/\texttt{while} da árvore vira \texttt{if}/\texttt{while} direto, com estrutura legível.
+
+O gerador de Python (\texttt{codegen\_py.py}, 138 linhas) produz código que roda sem adaptação. A única sutileza é a divisão: \texttt{/} da Grove arredonda para baixo, então vira \texttt{//}.
+
+\begin{lstlisting}
+$ python -m grove examples/fatorial.cj --python
+# gerado pela Grove a partir de examples/fatorial.cj
+n = 5
+r = 1
+while n > 1:
+    r = r * n
+    n = n - 1
+print(r)
+
+$ python -m grove examples/fatorial.cj --python | python3
+120
+\end{lstlisting}
+
+O gerador de Arduino (\texttt{codegen\_ino.py}, 342 linhas) produz C++ para o Mega 2560 e precisa resolver três diferenças da plataforma. Primeiro, o \texttt{int} do AVR tem 16 bits, então todo inteiro da Grove vira \texttt{long}. Segundo, o \texttt{/} e o \texttt{\%} do C++ arredondam na direção do zero, e não para baixo como no Python, então o gerador emite funções \texttt{\_div} e \texttt{\_mod} próprias que corrigem o sinal. Terceiro, \texttt{CJPHONEHOME} precisa ler da serial, e a leitura não pode travar o resto: o sketch gerado chama uma rotina de tempo enquanto espera a linha chegar, para que os LEDs continuem piscando.
+
+% ===========================================================================
+\section{Fora do terminal}\label{sec:fora}
+
+\subsection{Grove Online}
+
+O mesmo compilador roda no navegador, em \url{https://grove.heybrain.uk}. Não há servidor compilando nada: o Pyodide~\cite{pyodide}, que é o CPython compilado para WebAssembly, carrega o pacote \texttt{grove} dentro da página. O editor tem realce dos cheats, numeração e marcação da linha com erro, e abas que mostram cada etapa do pipeline: tokens, árvore, tabela de símbolos, código de três endereços, Python e o C++ do Arduino.
+
+O retorno ao usuário usa o vocabulário do jogo: cada erro encontrado acende uma estrela de procurado no canto da tela, e cada execução bem-sucedida soma \$250.000.
+
+\subsection{Mega 2560 e a ponte com o jogo}
+
+A última etapa fecha o ciclo com o jogo que deu nome à linguagem. Um script CLEO dentro do GTA San Andreas lê o nível de procurado do jogador a cada 200\,ms e grava num arquivo. No computador, \texttt{gta/ponte.py} lê esse arquivo (ou, com a opção \texttt{-{}-memoria}, lê o valor direto da memória do processo do jogo, dispensando o CLEO) e envia o número pela porta serial a cada 100\,ms. Na placa roda um programa Grove compilado para C++~\cite{arduinocli}, que lê a linha com \texttt{CJPHONEHOME} e acende uma luz por estrela, mais um giroflex de polícia a partir de quatro estrelas.
+
+O mesmo arquivo \texttt{.cj} serve aos dois lados: no computador, \texttt{CJPHONEHOME} lê do teclado; na placa, da serial. Medido na bancada, o LED reage em até 0,3\,s depois de a estrela aparecer na tela do jogo: os 200\,ms do CLEO mais os 100\,ms da ponte.
+
+% ===========================================================================
+\section{Resultados}\label{sec:resultados}
+
+A Tabela~\ref{tab:resultados} resume as medidas do projeto.
+
+\begin{table}[htbp]
+\caption{Medidas do projeto}
+\label{tab:resultados}
+\centering
+\footnotesize
+\begin{tabular}{@{}lr@{}}
+\toprule
+\textbf{Medida} & \textbf{Valor} \\
+\midrule
+Linhas de Python & 2.041 \\
+Dependências externas & 0 \\
+Testes automatizados & 100 \\
+Programas aleatórios conferidos & 15.000 \\
+Saídas do compilador & 4 (executa, TAC, Python, C++) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Concordância entre os executores.} O teste diferencial (\texttt{tests/test\_aleatorio.py}) gera programas aleatórios bem tipados, com todos os operadores e com divisão por zero incluída, e compara quatro execuções: o interpretador, o código de três endereços, o código de três endereços otimizado e o Python gerado. Em 15.000 programas, as quatro saídas foram idênticas, incluindo as mensagens de erro de execução. A rodada completa leva menos de sete segundos.
+
+\textbf{O código gerado para a placa.} O sketch produzido pelo gerador de Arduino é compilado nos testes com \texttt{g++ -Wall -Werror} contra um Arduino simulado (\texttt{tests/arduino\_falso.h}, com relógio virtual e \texttt{digitalWrite} que apenas registra) e executado no computador, comparando a saída com a do interpretador. Os testes conferem também o comportamento de hardware: a sequência de períodos do pisca, uma luz por estrela na ordem correta e o giroflex ligando apenas a partir de quatro estrelas, sempre com vermelho e azul em oposição.
+
+\textbf{Na placa de verdade.} Em 5 de novembro de 2026 o sketch foi gravado num Mega 2560 e a serial devolveu a mesma sequência que o interpretador produz para o mesmo programa. A conferência dos LEDs um a um continua sendo feita a olho.
+
+\textbf{Erros.} O repositório~\cite{repo} traz dez programas de exemplo, cinco deles escritos para falhar, e mais dezenove exemplos mínimos, um para cada erro que o compilador sabe emitir, do caractere inesperado à entrada que acabou. Cada um é verificado por um teste que compara a mensagem com a documentada.
+
+% ===========================================================================
+\section{Conclusão}
+
+O trabalho cobriu o pipeline de compilação completo, da análise léxica à geração de código, e foi além do exercício em dois pontos que mudaram o rigor exigido. O primeiro foi manter quatro executores obrigados a concordar: isso transformou cada decisão de semântica (o arredondamento da divisão, o comportamento do curto-circuito, a ordem dos erros) em algo verificável automaticamente, e não em uma escolha de implementação isolada. O segundo foi gerar código para uma plataforma real: o microcontrolador não perdoa um \texttt{int} de 16 bits nem uma leitura bloqueante, e essas restrições apareceram como código, não como texto.
+
+Ficaram de fora, por escolha: ponto flutuante, que quebraria a concordância exata entre o Python e o AVR; funções definidas pelo usuário; e operações de string além de concatenação e comparação.
+
+Os caminhos naturais de continuação são o suporte a funções, que exigiria registros de ativação na representação intermediária e uma convenção de chamada nos dois geradores, e uma análise de fluxo de dados que permitisse otimizações além das locais, como eliminação de subexpressões comuns entre blocos.
+
+% ===========================================================================
+\begin{thebibliography}{00}
+\bibitem{aho} A. V. Aho, M. S. Lam, R. Sethi e J. D. Ullman, \emph{Compiladores: princípios, técnicas e ferramentas}, 2.\ ed. São Paulo: Pearson, 2008.
+\bibitem{damerau} F. J. Damerau, ``A technique for computer detection and correction of spelling errors,'' \emph{Communications of the ACM}, vol.~7, no.~3, pp.~171--176, 1964.
+\bibitem{pyodide} Pyodide Development Team, ``Pyodide: Python distribution for the browser and Node.js based on WebAssembly.'' [Online]. Disponível em: \url{https://pyodide.org}
+\bibitem{arduinocli} Arduino, ``arduino-cli: Arduino command line interface.'' [Online]. Disponível em: \url{https://arduino.github.io/arduino-cli}
+\bibitem{repo} Repositório do projeto Grove, com o código, os exemplos e a documentação por etapa. [Online]. Disponível em: \url{https://github.com/fernandomcrsilva/grove-language}
+\end{thebibliography}
+
+\end{document}
